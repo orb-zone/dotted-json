@@ -1,0 +1,13 @@
+{
+  "type": "villain",
+  "alignment": "evil",
+  "health": 100,
+  "mana": 50,
+  "minions": [],
+  "evilPlan": "Take over the world",
+  "stats": {
+    "strength": 5,
+    "intelligence": 5,
+    "agility": 5
+  }
+}

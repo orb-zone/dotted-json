@@ -1,0 +1,13 @@
+{
+  "type": "hero",
+  "alignment": "good",
+  "health": 100,
+  "mana": 50,
+  "abilities": [],
+  "backstory": "A hero with a noble cause",
+  "stats": {
+    "strength": 5,
+    "intelligence": 5,
+    "agility": 5
+  }
+}

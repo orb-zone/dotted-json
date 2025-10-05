@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "created": "2025-10-05",
+  "metadata": {
+    "source": "Character Template Library",
+    "license": "MIT"
+  },
+  "defaultStats": {
+    "health": 100,
+    "mana": 50,
+    "stamina": 100
+  },
+  "inventory": {
+    "maxSlots": 20,
+    "items": []
+  }
+}

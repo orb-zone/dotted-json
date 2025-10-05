@@ -1,0 +1,10 @@
+{
+  ".": "extends('base-hero')",
+  "powers": ["flight", "super strength", "invulnerability"],
+  "powerLevel": 5000,
+  "stats": {
+    "strength": 8,
+    "intelligence": 6,
+    "agility": 7
+  }
+}
