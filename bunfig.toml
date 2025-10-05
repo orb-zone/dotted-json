@@ -1,0 +1,5 @@
+# Bun configuration for dotted-json (jsön)
+
+[test]
+# Exclude draft implementation directory
+exclude = ["__DRAFT__/**/*"]

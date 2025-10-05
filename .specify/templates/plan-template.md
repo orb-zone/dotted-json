@@ -47,7 +47,40 @@
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+**Minimal Core, Optional Plugins**:
+- [ ] New dependencies are optional peer dependencies (not added to core)
+- [ ] Core bundle size remains under 15 kB minified
+- [ ] Plugin functionality isolated from core library behavior
+
+**Security Through Transparency**:
+- [ ] Schema sources are trusted (application code, not user input)
+- [ ] Resolvers validate inputs and sanitize outputs
+- [ ] Security warnings documented if applicable
+
+**Test-First Development**:
+- [ ] Tests written before implementation
+- [ ] Test coverage includes happy path, edge cases, errors
+- [ ] Performance regression tests for critical paths
+
+**Lazy Evaluation with Explicit Caching**:
+- [ ] Expressions only evaluate when paths accessed
+- [ ] Cache behavior documented clearly
+- [ ] Cache invalidation strategy explicit
+
+**Plugin Architecture with Clear Boundaries**:
+- [ ] Plugin uses documented extension points only
+- [ ] No monkey-patching of core methods
+- [ ] Plugin independently testable
+
+**Cycle Detection and Safeguards**:
+- [ ] Circular dependency detection implemented
+- [ ] Maximum evaluation depth enforced
+- [ ] Clear error messages with path chains
+
+**Framework-Agnostic Core**:
+- [ ] Core library has zero framework dependencies
+- [ ] Framework integrations as separate entry points
+- [ ] Server-side and CLI usage possible
 
 ## Project Structure
 
