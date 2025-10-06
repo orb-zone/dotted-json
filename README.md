@@ -618,6 +618,125 @@ Invalid variants are silently filtered out and fall back to base files.
 
 See [examples/file-loader-i18n.ts](examples/file-loader-i18n.ts) for a complete working example.
 
+## Translation CLI
+
+Generate translated variant files using local Ollama LLM (privacy-friendly, no external APIs).
+
+### Installation
+
+Install globally to get the `json-translate` command:
+
+```bash
+bun install -g @orbzone/dotted-json
+# or
+npm install -g @orbzone/dotted-json
+```
+
+Or use directly from the repo:
+
+```bash
+bun tools/translate/index.ts <file> --to <lang>
+```
+
+### Requirements
+
+- **Ollama** must be running: `ollama serve`
+- **Model** must be downloaded: `ollama pull llama3.3`
+
+### Usage
+
+```bash
+# Check Ollama status
+json-translate --check
+
+# Translate to Spanish
+json-translate strings.jsön --to es
+
+# Translate to Japanese with polite formality (keigo)
+json-translate strings.jsön --to ja --form polite
+
+# Translate to Spanish formal
+json-translate strings:es.jsön --to es --form formal
+
+# Use specific model
+json-translate strings.jsön --to fr --model mistral
+```
+
+### Options
+
+```
+-t, --to <lang>        Target language (required)
+                       Examples: es, ja, fr, de, ko
+
+-f, --form <level>     Formality level (optional)
+                       Levels: casual, informal, neutral, polite, formal, honorific
+
+-m, --model <name>     Ollama model to use (default: llama3.2)
+                       Examples: llama3.3, mistral, gemma2
+
+-o, --output <dir>     Output directory (default: same as source)
+
+--check                Check Ollama status and exit
+
+-h, --help             Show help message
+```
+
+### Environment Variables
+
+Create a `.env` file to configure defaults:
+
+```bash
+OLLAMA_BASE_URL=http://localhost:11434   # Ollama API URL
+OLLAMA_MODEL=llama3.3                    # Default model
+OLLAMA_TEMPERATURE=0.3                   # Creativity (0-1)
+```
+
+### Output Files
+
+The CLI automatically generates variant files with proper naming:
+
+```
+Input                    Output (--to es)           Output (--to ja --form polite)
+strings.jsön         →   strings:es.jsön           strings:ja:polite.jsön
+app.jsön             →   app:es.jsön               app:ja:polite.jsön
+```
+
+### Formality Support
+
+Language-specific formality guidance is built-in:
+
+- **Japanese**: Casual (だ), Polite (です/ます - keigo), Formal (でございます), Honorific (尊敬語)
+- **Korean**: Casual (반말), Polite (존댓말), Formal, Honorific
+- **German**: Casual (du), Formal (Sie)
+- **Spanish**: Casual (tú), Formal (usted)
+- **French**: Casual (tu), Formal (vous)
+
+### Example
+
+```bash
+# Original file
+$ cat strings.jsön
+{
+  "greeting": "Hello",
+  "farewell": "Goodbye",
+  "welcome": "Welcome to our application"
+}
+
+# Translate to Japanese polite
+$ json-translate strings.jsön --to ja --form polite
+
+# Generated file: strings:ja:polite.jsön
+{
+  "greeting": "こんにちはです",
+  "farewell": "さようならです",
+  "welcome": "私たちのアプリケーションへようこそです"
+}
+```
+
+### Privacy
+
+All translations happen **locally** on your machine using Ollama. No data is sent to external APIs.
+
 ## License
 
 MIT © [orb.zone](https://orb.zone)

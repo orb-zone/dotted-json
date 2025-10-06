@@ -6,6 +6,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "json-translate": "./tools/translate/index.ts"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -42,6 +45,7 @@
   },
   "files": [
     "dist",
+    "tools",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
