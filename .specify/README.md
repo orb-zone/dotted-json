@@ -6,16 +6,22 @@ This directory contains design documentation, memory files, and context for unde
 
 This is the **@orbzone/dotted-json** library - dynamic JSON data expansion using dot-prefixed property keys as expression triggers.
 
-### Current Status (v0.2.1)
+### Current Status (v0.3.0)
 
-- **Version**: 0.2.1 (tagged, not published to npm yet)
-- **Bundle**: 18.02 kB (within 20 kB constitution limit)
-- **Tests**: 190/193 passing (100% production code coverage)
-- **Status**: Feature-complete, ready for future npm publish
+- **Version**: 0.3.0 (tagged, not published to npm yet)
+- **Bundle**: 18.18 kB (within 20 kB constitution limit)
+- **Tests**: 198/201 passing (+8 new Zod plugin tests)
+- **Status**: Zod validation plugin complete, following ROADMAP Phase 2
 
 ### Recent Work
 
-Completed in this version:
+**v0.3.0** (Current):
+1. **Zod Plugin**: Runtime type validation with path and resolver schemas
+2. **Plugin Architecture**: ValidationOptions interface, core integration
+3. **Test Suite**: 8 comprehensive Zod tests, all passing
+4. **ROADMAP.md**: Complete product roadmap for plugin ecosystem
+
+**v0.2.0-0.2.1** (Previous):
 1. **Core Library**: Expression evaluation, caching, cycle detection
 2. **Variant System**: Language, gender, formality variants with automatic resolution
 3. **File Loader**: Variant-aware filesystem loading with security
@@ -56,6 +62,7 @@ dotted-json/
 Package exports:
 - @orbzone/dotted-json           # Core library
 - @orbzone/dotted-json/loaders/file  # File loader (separate to keep core small)
+- @orbzone/dotted-json/plugins/zod   # Zod validation plugin (v0.3.0)
 
 Global CLI:
 - json-translate                 # Translation tool (via npm install -g)
@@ -135,12 +142,14 @@ bun examples/file-loader-i18n.ts
 
 ### Release Plan
 
-**Current state**: v0.2.1 core is ready but **not published** to npm yet
+**Current state**: v0.3.0 with Zod plugin, **not published** to npm yet
 
 **Next steps** (see [ROADMAP.md](../ROADMAP.md)):
-1. Remove `__DRAFT__/` folder (3 failing tests are in this archive)
-2. Publish v0.2.2 to npm (core library)
-3. Begin Phase 2-5 plugin implementation
+1. ✅ Phase 2 (v0.3.0): Zod plugin - COMPLETE
+2. 🎯 Phase 3 (v0.4.0): SurrealDB plugin - Next
+3. 🔜 Phase 4 (v0.5.0): Pinia Colada plugin
+4. 🔜 Phase 5 (v0.6.0): TanStack plugin
+5. 📦 Publish to npm when ready
 
 To publish (when ready):
 ```bash
