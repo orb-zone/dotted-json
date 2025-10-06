@@ -7,6 +7,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-10-06
+
+### Added
+- **Pinia Colada Plugin** - Vue 3 data fetching with caching
+  - `withPiniaColada()` plugin factory for query/mutation resolvers
+  - Auto-generated query resolvers with intelligent caching
+  - Auto-generated mutation resolvers with cache invalidation
+  - Query caching with configurable stale time and garbage collection
+  - Cache management: `clearCache()` and `invalidateQueries()`
+  - Mutation lifecycle hooks: `onMutate`, `onSuccess`, `onError`, `onSettled`
+  - Nested resolver structure support (`api.users.getById`)
+  - Global cache shared across plugin instances
+  - Full TypeScript support with comprehensive types
+- **Vue 3 Ecosystem Support** - First-class Vue integration
+- **Test suite** - 12 comprehensive tests covering caching, mutations, hooks
+
+### Technical Details
+- Plugin is 451 lines of production-ready code
+- Pinia Colada, Pinia, and Vue are optional peer dependencies
+- Zero breaking changes - all existing code continues to work
+- Bundle size: 18.18 kB (unchanged, plugins are separate imports)
+- Test coverage: 210 passing tests (+12 new Pinia Colada tests)
+
+### Usage Example
+```typescript
+import { dotted } from '@orbzone/dotted-json';
+import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+
+const plugin = withPiniaColada({
+  queries: {
+    'api.getUser': {
+      key: (id: string) => ['user', id],
+      query: async (id: string) => {
+        const res = await fetch(`/api/users/${id}`);
+        return res.json();
+      },
+      staleTime: 60000 // 1 minute
+    }
+  },
+  mutations: {
+    'api.updateUser': {
+      mutation: async (id: string, data: any) => {
+        const res = await fetch(`/api/users/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(data)
+        });
+        return res.json();
+      },
+      invalidates: [
+        ['users'],
+        (id: string) => ['user', id]
+      ]
+    }
+  },
+  defaults: {
+    staleTime: 30000,
+    retry: 3
+  }
+});
+
+const data = dotted({
+  user: {
+    id: '123',
+    '.profile': 'api.getUser(${user.id})'
+  }
+}, { resolvers: plugin.resolvers });
+
+// Cached access
+const profile = await data.get('user.profile');
+
+// Clear cache
+plugin.clearCache();
+```
+
+### Note
+- Works standalone or with @pinia/colada in Vue components
+- Vue composables (`useDottedJSON`) planned for future release
+- See ROADMAP.md Phase 4 for full design documentation
+
 ## [0.4.0] - 2025-10-06
 
 ### Added
