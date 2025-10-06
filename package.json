@@ -11,6 +11,10 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./loaders/file": {
+      "import": "./dist/loaders/file.js",
+      "types": "./dist/loaders/file.d.ts"
+    },
     "./plugins/zod": {
       "import": "./dist/plugins/zod.js",
       "types": "./dist/plugins/zod.d.ts"
