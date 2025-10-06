@@ -498,6 +498,126 @@ interface DottedOptions {
 
 **Custom variants** (lower priority): Any string dimension you define
 
+## File Loader
+
+Load external JSON files with automatic variant resolution for i18n workflows.
+
+### Installation
+
+The file loader is available as a separate import to keep the core bundle small:
+
+```typescript
+import { FileLoader, withFileSystem } from '@orbzone/dotted-json/loaders/file';
+```
+
+### Basic Usage
+
+```typescript
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+
+const loader = new FileLoader({
+  baseDir: './i18n',
+  allowedVariants: {
+    lang: ['en', 'es', 'ja'],
+    form: ['casual', 'polite', 'formal']
+  },
+  preload: true,  // Pre-scan directory for performance
+  cache: true     // Cache loaded files
+});
+
+await loader.init();
+
+// Load variant-specific files
+const enStrings = await loader.load('strings');  // → strings.jsön
+const esStrings = await loader.load('strings', { lang: 'es' });  // → strings:es.jsön
+const jaPolite = await loader.load('strings', { lang: 'ja', form: 'polite' });  // → strings:ja:polite.jsön
+```
+
+### File Naming Convention
+
+Files use colon-separated variant suffixes:
+
+```
+i18n/
+  strings.jsön                  # Base (English)
+  strings:es.jsön              # Spanish
+  strings:es:formal.jsön       # Spanish formal
+  strings:ja.jsön              # Japanese
+  strings:ja:polite.jsön       # Japanese polite (keigo)
+  profile:f.jsön               # Female profile
+  profile:m.jsön               # Male profile
+```
+
+### Integration with dotted()
+
+Use `withFileSystem()` to integrate with the resolver system:
+
+```typescript
+import { dotted } from '@orbzone/dotted-json';
+import { withFileSystem } from '@orbzone/dotted-json/loaders/file';
+
+const app = dotted(
+  {
+    '.strings': 'extends("app-strings")',
+    '.greeting': '${strings.welcome}'
+  },
+  {
+    variants: { lang: 'es', form: 'formal' },
+    ...withFileSystem({
+      baseDir: './i18n',
+      allowedVariants: {
+        lang: ['en', 'es', 'fr'],
+        form: ['casual', 'polite', 'formal']
+      }
+    })
+  }
+);
+
+// Automatically loads strings:es:formal.jsön
+console.log(app.greeting);
+```
+
+### Variant Resolution
+
+The file loader uses the same scoring system as variant properties:
+
+1. **Exact match wins**: `strings:es:formal.jsön` when requesting `{ lang: 'es', form: 'formal' }`
+2. **Tiebreaker**: When scores equal, prefer fewer extra variants
+   - Request: `{ lang: 'es' }` → Chooses `strings:es.jsön` over `strings:es:formal.jsön`
+3. **Fallback**: When no match, uses base file
+
+### Security
+
+**Whitelist mode** (recommended):
+```typescript
+allowedVariants: {
+  lang: ['en', 'es', 'fr'],  // Only these values allowed
+  form: ['polite', 'formal']
+}
+```
+
+**Permissive mode**:
+```typescript
+allowedVariants: true  // Any variant (sanitized with regex)
+```
+
+**Strict mode**:
+```typescript
+allowedVariants: undefined  // No variants allowed (base files only)
+```
+
+Invalid variants are silently filtered out and fall back to base files.
+
+### Performance
+
+- **Pre-scanning**: O(n) directory scan once vs O(variants × extensions) per load
+- **Caching**: Loaded files cached by `baseName + sorted variants`
+- **Order-independent**: `strings:es:f.jsön` === `strings:f:es.jsön` (same cache key)
+
+### Example
+
+See [examples/file-loader-i18n.ts](examples/file-loader-i18n.ts) for a complete working example.
+
 ## License
 
 MIT © [orb.zone](https://orb.zone)
