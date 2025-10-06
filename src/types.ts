@@ -12,7 +12,8 @@
  * {
  *   lang: 'es-MX',      // Language/locale (well-known)
  *   gender: 'f',        // Gender for pronouns (well-known: m/f/x)
- *   dialect: 'formal',  // Custom dimension: register/tone
+ *   form: 'formal',     // Formality level (well-known)
+ *   dialect: 'surfer',  // Custom dimension: regional dialect
  *   source: 'aws'       // Custom dimension: translation source
  * }
  * ```
@@ -27,6 +28,14 @@ export interface VariantContext {
    * Gender for pronoun resolution ('m' | 'f' | 'x')
    */
   gender?: 'm' | 'f' | 'x';
+
+  /**
+   * Formality/honorific level (e.g., 'casual', 'informal', 'polite', 'formal', 'honorific')
+   *
+   * Common in languages with grammatical register like Japanese (keigo),
+   * Korean (jondaemal), German (Sie/du), etc.
+   */
+  form?: string;
 
   /**
    * Custom variant dimensions (dialect, tone, source, etc.)

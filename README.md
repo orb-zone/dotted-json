@@ -431,11 +431,46 @@ const data = dotted(
 );
 ```
 
+### Formality/Honorific Levels
+
+Use the `form` variant for languages with grammatical register (Japanese keigo, Korean jondaemal, German Sie/du, etc.):
+
+```typescript
+// Japanese formality levels
+const greetings = dotted(
+  {
+    '.greeting': 'Hello',
+    '.greeting:ja': 'こんにちは',           // Casual
+    '.greeting:ja:polite': 'おはようございます',    // Polite (teineigo)
+    '.greeting:ja:honorific': 'いらっしゃいませ'    // Honorific (keigo)
+  },
+  {
+    variants: { lang: 'ja', form: 'honorific' }
+  }
+);
+
+await greetings.get('.greeting'); // → 'いらっしゃいませ'
+```
+
+**Standard form levels**: `casual`, `informal`, `neutral`, `polite`, `formal`, `honorific`
+
+**More examples**:
+```typescript
+// Korean (jondaemal)
+{ lang: 'ko', form: 'formal' }
+'.question:ko:formal' // '어떻게 지내세요?'
+
+// German (Sie vs du)
+{ lang: 'de', form: 'formal' }
+'.you:de:formal' // 'Sie'
+```
+
 ### Variant Priority
 
 When multiple variants exist, resolution follows priority scoring:
 - **Language**: 1000 points (highest)
 - **Gender**: 100 points
+- **Form** (formality): 50 points
 - **Custom dimensions**: 10 points each
 
 Best matching variant wins. Falls back to base path if no variants match.
@@ -446,6 +481,7 @@ Best matching variant wins. Falls back to base path if no variants match.
 interface VariantContext {
   lang?: string;              // ISO 639-1 (e.g., 'en', 'es-MX', 'fr-CA')
   gender?: 'm' | 'f' | 'x';  // Gender for pronouns
+  form?: string;              // Formality level (e.g., 'casual', 'polite', 'formal', 'honorific')
   [dimension: string]: string | undefined;  // Unlimited custom dimensions
 }
 
@@ -454,6 +490,13 @@ interface DottedOptions {
   // ... other options
 }
 ```
+
+**Well-known variants** (higher priority in matching):
+- `lang`: Language/locale codes
+- `gender`: Pronoun gender (`m`/`f`/`x`)
+- `form`: Formality/honorific level
+
+**Custom variants** (lower priority): Any string dimension you define
 
 ## License
 

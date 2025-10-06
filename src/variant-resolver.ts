@@ -2,8 +2,8 @@
  * Variant resolution for localization and conditional content
  *
  * Supports flexible variant dimensions:
- * - Well-known: lang (ISO codes), gender (m/f/x)
- * - Custom: dialect, tone, source, register, etc.
+ * - Well-known: lang (ISO codes), gender (m/f/x), form (formality levels)
+ * - Custom: dialect, tone, source, etc.
  *
  * @module @orbzone/dotted-json/variant-resolver
  */
@@ -27,6 +27,9 @@ const VARIANT_PATTERNS = {
 
   // Gender: m (masculine), f (feminine), x (neutral/non-binary)
   gender: /^[mfx]$/,
+
+  // Formality/honorific level: casual, informal, neutral, polite, formal, honorific
+  form: /^(casual|informal|neutral|polite|formal|honorific)$/,
 };
 
 /**
@@ -56,6 +59,8 @@ export function parseVariantPath(path: string): ParsedVariants {
       variants.lang = part;
     } else if (VARIANT_PATTERNS.gender.test(part)) {
       variants.gender = part as 'm' | 'f' | 'x';
+    } else if (VARIANT_PATTERNS.form.test(part)) {
+      variants.form = part;
     } else {
       // Custom variant dimension (use value as both key and value)
       variants[part] = part;
@@ -71,9 +76,10 @@ export function parseVariantPath(path: string): ParsedVariants {
  * Higher score = better match
  *
  * Scoring weights:
- * - lang match: 1000 points
- * - gender match: 100 points
- * - custom variant match: 10 points each
+ * - lang match: 1000 points (highest - language is primary)
+ * - gender match: 100 points (high - affects pronouns)
+ * - form match: 50 points (medium - affects formality/honorifics)
+ * - custom variant match: 10 points each (lower - domain-specific)
  */
 export function scoreVariantMatch(
   pathVariants: VariantContext,
@@ -90,9 +96,13 @@ export function scoreVariantMatch(
     score += 100;
   }
 
+  if (pathVariants.form && pathVariants.form === contextVariants.form) {
+    score += 50;
+  }
+
   // Custom variant dimensions
   for (const [key, value] of Object.entries(pathVariants)) {
-    if (key !== 'lang' && key !== 'gender') {
+    if (key !== 'lang' && key !== 'gender' && key !== 'form') {
       if (contextVariants[key] === value) {
         score += 10;
       }

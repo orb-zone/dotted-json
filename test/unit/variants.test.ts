@@ -38,16 +38,16 @@ describe('Variant parsing', () => {
   });
 
   test('parses custom variants', () => {
-    const result = parseVariantPath('.bio:es:formal');
+    const result = parseVariantPath('.bio:es:surfer');
     expect(result.variants.lang).toBe('es');
-    expect(result.variants.formal).toBe('formal');
+    expect(result.variants.surfer).toBe('surfer');
   });
 
   test('parses complex multi-dimensional variants', () => {
     const result = parseVariantPath('.bio:es-MX:f:formal:aws');
     expect(result.variants.lang).toBe('es-MX');
     expect(result.variants.gender).toBe('f');
-    expect(result.variants.formal).toBe('formal');
+    expect(result.variants.form).toBe('formal');  // Now a well-known variant
     expect(result.variants.aws).toBe('aws');
   });
 });
@@ -99,6 +99,61 @@ describe('Variant scoring', () => {
       { lang: 'fr' }
     );
     expect(score).toBe(0);
+  });
+});
+
+describe('Form (formality) variants', () => {
+  test('parses form variant', () => {
+    const parsed = parseVariantPath('.greeting:polite');
+    expect(parsed.base).toBe('.greeting');
+    expect(parsed.variants.form).toBe('polite');
+  });
+
+  test('parses combined lang and form variants', () => {
+    const parsed = parseVariantPath('.greeting:ja:polite');
+    expect(parsed.base).toBe('.greeting');
+    expect(parsed.variants.lang).toBe('ja');
+    expect(parsed.variants.form).toBe('polite');
+  });
+
+  test('recognizes standard form levels', () => {
+    expect(parseVariantPath('.x:casual').variants.form).toBe('casual');
+    expect(parseVariantPath('.x:informal').variants.form).toBe('informal');
+    expect(parseVariantPath('.x:neutral').variants.form).toBe('neutral');
+    expect(parseVariantPath('.x:polite').variants.form).toBe('polite');
+    expect(parseVariantPath('.x:formal').variants.form).toBe('formal');
+    expect(parseVariantPath('.x:honorific').variants.form).toBe('honorific');
+  });
+
+  test('scores form match correctly (50 points)', () => {
+    const score = scoreVariantMatch(
+      { form: 'polite' },
+      { form: 'polite' }
+    );
+    expect(score).toBe(50);
+  });
+
+  test('prioritizes lang > gender > form > custom', () => {
+    const langScore = scoreVariantMatch({ lang: 'ja' }, { lang: 'ja' });
+    const genderScore = scoreVariantMatch({ gender: 'f' }, { gender: 'f' });
+    const formScore = scoreVariantMatch({ form: 'polite' }, { form: 'polite' });
+    const customScore = scoreVariantMatch({ tone: 'casual' }, { tone: 'casual' });
+
+    expect(langScore).toBe(1000);
+    expect(genderScore).toBe(100);
+    expect(formScore).toBe(50);
+    expect(customScore).toBe(10);
+    expect(langScore > genderScore).toBe(true);
+    expect(genderScore > formScore).toBe(true);
+    expect(formScore > customScore).toBe(true);
+  });
+
+  test('combines lang + form + gender scoring', () => {
+    const score = scoreVariantMatch(
+      { lang: 'ja', gender: 'f', form: 'polite' },
+      { lang: 'ja', gender: 'f', form: 'polite' }
+    );
+    expect(score).toBe(1150); // 1000 + 100 + 50
   });
 });
 
@@ -196,7 +251,7 @@ describe('Variant integration in DottedJson', () => {
         '.greeting:es:casual': '¡Ey!'
       },
       {
-        variants: { lang: 'es', formal: 'formal' }
+        variants: { lang: 'es', form: 'formal' }  // form is now a well-known variant
       }
     );
 
@@ -231,6 +286,84 @@ describe('Variant integration in DottedJson', () => {
     );
 
     expect(await data.get('name')).toBe('Default');
+  });
+
+  test('supports Japanese formality levels (keigo)', async () => {
+    const data = dotted(
+      {
+        '.greeting': 'Hello',
+        '.greeting:ja': 'こんにちは',           // Casual
+        '.greeting:ja:polite': 'おはようございます',    // Polite (teineigo)
+        '.greeting:ja:honorific': 'いらっしゃいませ'    // Honorific (keigo)
+      },
+      {
+        variants: { lang: 'ja', form: 'honorific' }
+      }
+    );
+
+    expect(await data.get('.greeting')).toBe('いらっしゃいませ');
+  });
+
+  test('supports Korean formality (jondaemal)', async () => {
+    const data = dotted(
+      {
+        '.question': 'How are you?',
+        '.question:ko': '어떻게 지내?',        // Informal (banmal)
+        '.question:ko:formal': '어떻게 지내세요?'  // Formal (jondaemal)
+      },
+      {
+        variants: { lang: 'ko', form: 'formal' }
+      }
+    );
+
+    expect(await data.get('.question')).toBe('어떻게 지내세요?');
+  });
+
+  test('supports German formality (Sie vs du)', async () => {
+    const data = dotted(
+      {
+        '.you': 'you',
+        '.you:de': 'du',              // Informal
+        '.you:de:formal': 'Sie'        // Formal
+      },
+      {
+        variants: { lang: 'de', form: 'formal' }
+      }
+    );
+
+    expect(await data.get('.you')).toBe('Sie');
+  });
+
+  test('combines lang + form + gender for Japanese', async () => {
+    const data = dotted(
+      {
+        '.title': 'Teacher',
+        '.title:ja': '先生',
+        '.title:ja:polite': '先生様',
+        '.title:ja:polite:f': '女性先生様'
+      },
+      {
+        variants: { lang: 'ja', form: 'polite', gender: 'f' }
+      }
+    );
+
+    expect(await data.get('.title')).toBe('女性先生様');
+  });
+
+  test('form variant falls back gracefully', async () => {
+    const data = dotted(
+      {
+        '.greeting': 'Hello',
+        '.greeting:ja': 'こんにちは'
+        // No :polite variant
+      },
+      {
+        variants: { lang: 'ja', form: 'polite' }
+      }
+    );
+
+    // Should fall back to .greeting:ja (lang match, no form match)
+    expect(await data.get('.greeting')).toBe('こんにちは');
   });
 
   test('works without variant context', async () => {
