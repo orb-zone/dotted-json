@@ -113,6 +113,45 @@ export function scoreVariantMatch(
 }
 
 /**
+ * Count how many variants are in pathVariants but not matching contextVariants
+ *
+ * Used as tiebreaker when scores are equal - prefer fewer mismatches/extras
+ *
+ * Counts as "extra" if:
+ * 1. Variant exists in path but not in context
+ * 2. Variant exists in both but values don't match (mismatch)
+ *
+ * @example
+ * ```typescript
+ * countExtraVariants({ lang: 'es', form: 'formal' }, { lang: 'es' })
+ * // → 1 (form is extra - not in context)
+ *
+ * countExtraVariants({ lang: 'es', form: 'formal' }, { lang: 'es', form: 'casual' })
+ * // → 1 (form is mismatch - different values)
+ *
+ * countExtraVariants({ lang: 'es' }, { lang: 'es' })
+ * // → 0 (perfect match)
+ * ```
+ */
+function countExtraVariants(
+  pathVariants: VariantContext,
+  contextVariants: VariantContext
+): number {
+  let count = 0;
+
+  for (const [key, value] of Object.entries(pathVariants)) {
+    const contextValue = contextVariants[key];
+
+    // Not in context, or value mismatch
+    if (contextValue === undefined || contextValue !== value) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+/**
  * Find the best matching property path from available candidates
  *
  * @param basePath - Base property name (e.g., '.bio')
@@ -149,11 +188,20 @@ export function resolveVariantPath(
       return {
         path: p,
         variants,
-        score: scoreVariantMatch(variants, context)
+        score: scoreVariantMatch(variants, context),
+        // Count extra variants (in path but not in context)
+        extraVariants: countExtraVariants(variants, context)
       };
     })
     .filter(c => c.score > 0)  // Only include paths with at least one matching variant
-    .sort((a, b) => b.score - a.score);  // Sort by score descending
+    .sort((a, b) => {
+      // Primary sort: score (descending - higher is better)
+      if (a.score !== b.score) {
+        return b.score - a.score;
+      }
+      // Tiebreaker: fewer extra variants (ascending - lower is better)
+      return a.extraVariants - b.extraVariants;
+    });
 
   // Return best match, or base path if no variants matched
   return candidates.length > 0 && candidates[0] ? candidates[0].path : basePath;
