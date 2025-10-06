@@ -113,21 +113,34 @@ bun examples/file-loader-i18n.ts
 
 ### What's NOT Done Yet
 
-**Deferred features** (documented in memory files):
+**Plugin Ecosystem** (documented in [ROADMAP.md](../ROADMAP.md)):
+- **Zod plugin** - Runtime validation (Phase 2, v0.3.0)
+- **SurrealDB plugin** - Database integration (Phase 3, v0.4.0)
+- **Pinia Colada plugin** - Vue 3 data fetching (Phase 4, v0.5.0)
+- **TanStack Query plugin** - Multi-framework React/Vue/Svelte/Solid/Angular (Phase 5, v0.6.0)
+- **Framework composables** - Vue/React hooks for reactive queries
+
+**Core deferred features** (documented in memory files):
 - URL loader (HTTP/HTTPS file loading)
 - Cloud translation providers (AWS, GCP, Azure)
 - Translation memory/caching
 - Glossary support for terminology
 - Batch file translation (glob patterns)
 
-**Why deferred?**
-- Not critical for v0.2.0
-- Can be added later without breaking changes
-- Local-only approach is differentiating feature
+**Why plugin ecosystem is priority:**
+- The `__DRAFT__` folder contains fully designed plugin architecture (115 tests, 5 integration guides)
+- Enables Vue/React adoption via familiar query libraries
+- Database integration is unique differentiator
+- See [ROADMAP.md](../ROADMAP.md) for complete plan
 
 ### Release Plan
 
-**Current state**: Ready but **not published** to npm yet
+**Current state**: v0.2.1 core is ready but **not published** to npm yet
+
+**Next steps** (see [ROADMAP.md](../ROADMAP.md)):
+1. Remove `__DRAFT__/` folder (3 failing tests are in this archive)
+2. Publish v0.2.2 to npm (core library)
+3. Begin Phase 2-5 plugin implementation
 
 To publish (when ready):
 ```bash
@@ -141,7 +154,7 @@ bun run build
 npm publish --access public
 
 # 4. Push tag
-git push origin v0.2.0
+git push origin v0.2.2
 ```
 
 ### Memory Files

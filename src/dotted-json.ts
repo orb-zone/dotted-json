@@ -16,7 +16,7 @@ export class DottedJson implements IDottedJson {
   private schema: Record<string, any>;
   private data: Record<string, any>;
   private cache: Map<string, any> = new Map();
-  private options: Required<DottedOptions>;
+  private options: Required<Omit<DottedOptions, 'validation'>> & Pick<DottedOptions, 'validation'>;
   private evaluationStack: Set<string> = new Set();
   private evaluationDepth = 0;
   private availablePaths: string[] = [];
@@ -29,7 +29,8 @@ export class DottedJson implements IDottedJson {
       errorDefault: options.errorDefault,
       resolvers: options.resolvers || {},
       maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH,
-      variants: options.variants || {}
+      variants: options.variants || {},
+      validation: options.validation
     };
 
     // Merge schema with initial data
@@ -59,10 +60,14 @@ export class DottedJson implements IDottedJson {
       const actualPath = resolvedPath.startsWith('.') ? resolvedPath.substring(1) : resolvedPath;
 
       // Get the value using dot-prop
-      const result = dotGet(this.data, actualPath);
+      let result = dotGet(this.data, actualPath);
 
-      // If value exists, return it
+      // If value exists, validate it if validation is configured
       if (result !== undefined) {
+        // Apply validation if enabled
+        if (this.options.validation?.enabled) {
+          result = this.options.validation.validate(path, result);
+        }
         return result;
       }
 

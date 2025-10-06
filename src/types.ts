@@ -86,6 +86,48 @@ export interface DottedOptions {
    * ```
    */
   variants?: VariantContext;
+
+  /**
+   * Validation options for runtime type checking
+   * Provided by plugins like @orbzone/dotted-json/plugins/zod
+   *
+   * @example
+   * ```typescript
+   * import { withZod } from '@orbzone/dotted-json/plugins/zod'
+   *
+   * const data = dotted(schema, {
+   *   ...withZod({ schemas, mode: 'strict' })
+   * })
+   * ```
+   */
+  validation?: ValidationOptions;
+}
+
+/**
+ * Validation options provided by validation plugins (e.g., Zod)
+ */
+export interface ValidationOptions {
+  /**
+   * Whether validation is enabled
+   */
+  enabled: boolean;
+
+  /**
+   * Validates a value at a specific path
+   * @param path - Dot-separated path being validated
+   * @param value - Value to validate
+   * @returns Validated/transformed value
+   */
+  validate: (path: string, value: any) => any;
+
+  /**
+   * Validates resolver input and output
+   * @param name - Resolver function name
+   * @param input - Input arguments array
+   * @param output - Output value from resolver
+   * @returns Validated/transformed output
+   */
+  validateResolver?: (name: string, input: any[], output: any) => any;
 }
 
 export interface GetOptions {

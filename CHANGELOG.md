@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-10-06
+
+### Added
+- **Zod Plugin** - Runtime type validation integration
+  - `withZod()` plugin factory for creating validation options
+  - Path-based validation (`schemas.paths`) for validating specific data paths
+  - Resolver validation (`schemas.resolvers`) for input/output validation
+  - Three validation modes: `strict` (throw on error), `loose` (log and continue), `off` (disable)
+  - `ValidationError` class with formatted error details
+  - Custom error handler support via `onError` callback
+  - Full TypeScript support with type definitions
+- **ValidationOptions** interface in core types
+  - Plugin architecture support for validation plugins
+  - `validate()` and `validateResolver()` hooks
+- **Core validation integration** - `DottedJson.get()` now validates results when validation is configured
+- **Test suite for Zod plugin** - 8 comprehensive tests covering all modes and error cases
+- **ROADMAP.md** - Complete product roadmap documenting plugin ecosystem phases
+
+### Changed
+- **Core types** - Added optional `validation` field to `DottedOptions`
+- **DottedJson class** - Integrated validation calls in `get()` method
+- **Bundle size** - Increased from 18.02 kB to 18.18 kB (+160 bytes for validation support)
+
+### Technical Details
+- Plugin architecture established for future plugins (SurrealDB, Pinia Colada, TanStack)
+- Zod is an optional peer dependency (install only when using the plugin)
+- Zero breaking changes - all existing code continues to work
+- Test coverage: 198 passing tests (+8 new Zod tests)
+
+### Migration Guide
+```typescript
+// Before (v0.2.x)
+const data = dotted(schema, { resolvers });
+
+// After (v0.3.0) - Add optional Zod validation
+import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { z } from 'zod';
+
+const data = dotted(schema, {
+  resolvers,
+  ...withZod({
+    schemas: {
+      paths: {
+        'user.profile': z.object({
+          email: z.string().email(),
+          name: z.string()
+        })
+      }
+    },
+    mode: 'strict'
+  })
+});
+```
+
+## [Unreleased - Archive]
+
 ## [0.2.1] - 2025-10-06
 
 ### Documentation
