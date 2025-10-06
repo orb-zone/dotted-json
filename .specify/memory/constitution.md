@@ -32,11 +32,19 @@ Follow-up TODOs: None
 The core library MUST remain lightweight and dependency-free (except essential utilities
 like dot-prop). All framework integrations (Zod, SurrealDB, TanStack, Pinia Colada,
 Vue/React) MUST be implemented as optional peer dependencies that users explicitly
-install. The core library MUST NOT exceed 15 kB minified bundle size.
+install. The core library MUST NOT exceed 20 kB minified bundle size.
+
+**Core features** (included in bundle limit):
+- Expression evaluation with lazy loading
+- Variant resolution (localization, gender, custom dimensions)
+- Pronoun placeholders for i18n
+- Cycle detection and depth limiting
+- Error handling and caching
 
 **Rationale**: Users adopting dotted-json should not pay the bundle cost for features
 they don't use. A minimal core ensures maximum flexibility and broad adoption across
-different tech stacks.
+different tech stacks. The 20 kB limit accommodates essential i18n/variant features
+while remaining lightweight.
 
 ### II. Security Through Transparency (NON-NEGOTIABLE)
 

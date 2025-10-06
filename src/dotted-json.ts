@@ -1,11 +1,13 @@
 import { getProperty as dotGet, setProperty as dotSet, hasProperty as dotHas } from 'dot-prop';
 import { createExpressionEvaluator } from './expression-evaluator.js';
+import { resolveVariantPath, getAvailablePaths } from './variant-resolver.js';
 import type {
   DottedOptions,
   GetOptions,
   SetOptions,
   HasOptions,
-  DottedJson as IDottedJson
+  DottedJson as IDottedJson,
+  VariantContext
 } from './types.js';
 
 const DEFAULT_MAX_DEPTH = 100;
@@ -17,6 +19,7 @@ export class DottedJson implements IDottedJson {
   private options: Required<DottedOptions>;
   private evaluationStack: Set<string> = new Set();
   private evaluationDepth = 0;
+  private availablePaths: string[] = [];
 
   constructor(schema: Record<string, any>, options: DottedOptions = {}) {
     this.schema = structuredClone(schema);
@@ -25,20 +28,35 @@ export class DottedJson implements IDottedJson {
       default: options.default,
       errorDefault: options.errorDefault,
       resolvers: options.resolvers || {},
-      maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH
+      maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH,
+      variants: options.variants || {}
     };
 
     // Merge schema with initial data
     this.data = this.mergeData(this.schema, this.options.initial);
+
+    // Cache available paths for variant resolution
+    this.updateAvailablePaths();
+  }
+
+  /**
+   * Update cached list of available property paths
+   * Called after data changes
+   */
+  private updateAvailablePaths(): void {
+    this.availablePaths = getAvailablePaths(this.data);
   }
 
   async get(path: string, options: GetOptions = {}): Promise<any> {
     try {
+      // Resolve variant path based on context (e.g., .bio → .bio:es:f)
+      const resolvedPath = this.resolveVariant(path);
+
       // Check if we need to evaluate any dot-prefixed expressions along the path
-      await this.evaluateExpressionsInPath(path, options.ignoreCache);
+      await this.evaluateExpressionsInPath(resolvedPath, options.ignoreCache);
 
       // Handle leading dot (expression prefix) - actual data is stored without the dot
-      const actualPath = path.startsWith('.') ? path.substring(1) : path;
+      const actualPath = resolvedPath.startsWith('.') ? resolvedPath.substring(1) : resolvedPath;
 
       // Get the value using dot-prop
       const result = dotGet(this.data, actualPath);
@@ -191,10 +209,28 @@ export class DottedJson implements IDottedJson {
     const evaluator = createExpressionEvaluator(
       this.data,
       this.options.resolvers,
-      []
+      [],
+      this.options.variants
     );
 
     return await evaluator.evaluate(expression);
+  }
+
+  /**
+   * Resolve variant path based on context
+   *
+   * @example
+   * // With variants: { lang: 'es', gender: 'f' }
+   * resolveVariant('.bio')
+   * // → '.bio:es:f' (if exists), or '.bio:es', or '.bio'
+   */
+  private resolveVariant(path: string): string {
+    const context = this.options.variants as VariantContext;
+    if (!context || Object.keys(context).length === 0) {
+      return path;  // No variant context
+    }
+
+    return resolveVariantPath(path, context, this.availablePaths);
   }
 
   private async resolveDependencies(expression: string): Promise<void> {

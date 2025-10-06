@@ -106,10 +106,10 @@ const { size } = await Bun.file(`${outdir}/index.js`).stat();
 const sizeKB = (size / 1024).toFixed(2);
 console.log(`📊 Core bundle size: ${sizeKB} kB`);
 
-// Constitution check: core must be < 15 kB
-if (size > 15 * 1024) {
-  console.error(`\n❌ CONSTITUTION VIOLATION: Core bundle (${sizeKB} kB) exceeds 15 kB limit`);
+// Constitution check: core must be < 20 kB
+if (size > 20 * 1024) {
+  console.error(`\n❌ CONSTITUTION VIOLATION: Core bundle (${sizeKB} kB) exceeds 20 kB limit`);
   process.exit(1);
 }
 
-console.log('✅ Constitution check passed: Core bundle within 15 kB limit');
+console.log('✅ Constitution check passed: Core bundle within 20 kB limit');

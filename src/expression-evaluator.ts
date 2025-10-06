@@ -1,5 +1,6 @@
 import { getProperty as dotGet } from 'dot-prop';
-import type { ExpressionContext, ResolverContext } from './types.js';
+import { resolvePronoun, isPronounPlaceholder, extractPronounForm, type Gender } from './pronouns.js';
+import type { ExpressionContext, ResolverContext, VariantContext } from './types.js';
 
 export class ExpressionEvaluator {
   private context: ExpressionContext;
@@ -55,6 +56,12 @@ export class ExpressionEvaluator {
     // Simple template literal evaluation - just replace ${path} with values
     return expression.replace(/\$\{([^}]+)\}/g, (_match, path) => {
       const trimmedPath = path.trim();
+
+      // Check for pronoun placeholder (:subject, :possessive, etc.)
+      if (isPronounPlaceholder(trimmedPath)) {
+        return this.resolvePronounPlaceholder(trimmedPath);
+      }
+
       // Handle leading dot (expression prefix) - actual data is stored without the dot
       const actualPath = trimmedPath.startsWith('.') ? trimmedPath.substring(1) : trimmedPath;
       const value = dotGet(this.context.data, actualPath);
@@ -69,9 +76,22 @@ export class ExpressionEvaluator {
 
   private executeTemplateExpression(expression: string): any {
     try {
+      // First, resolve pronoun placeholders
+      let processedExpression = expression;
+      const pronounMatches = expression.matchAll(/\$\{(:[a-z]+)\}/g);
+
+      for (const match of pronounMatches) {
+        const placeholder = match[1];
+        const fullMatch = match[0];
+        if (placeholder && fullMatch && isPronounPlaceholder(placeholder)) {
+          const resolved = this.resolvePronounPlaceholder(placeholder);
+          processedExpression = processedExpression.replace(fullMatch, resolved);
+        }
+      }
+
       // Extract all variable references from template expressions
       const variables: Record<string, any> = {};
-      const matches = expression.matchAll(/\$\{([^}]+)\}/g);
+      const matches = processedExpression.matchAll(/\$\{([^}]+)\}/g);
 
       for (const match of matches) {
         const expr = match[1];
@@ -108,11 +128,11 @@ export class ExpressionEvaluator {
       }
 
       // Track whether original expression has template literals
-      const hasTemplateLiterals = expression.includes('${');
+      const hasTemplateLiterals = processedExpression.includes('${');
 
       // Create safe variable names and replace in expression
       const safeVariables: Record<string, any> = {};
-      let safeExpression = expression;
+      let safeExpression = processedExpression;
 
       for (const [varName, value] of Object.entries(variables)) {
         // Create a safe identifier (replace dots with underscores, add prefix for leading dot)
@@ -145,9 +165,9 @@ export class ExpressionEvaluator {
         // Only do secondary evaluation if there were operators truly OUTSIDE template literals
         // E.g., "${x} * 2" should evaluate to 10, but "${.a} + ${.b}" should stay as "5 + 5"
         // Count template literals
-        const templateCount = (expression.match(/\$\{[^}]+\}/g) || []).length;
+        const templateCount = (processedExpression.match(/\$\{[^}]+\}/g) || []).length;
         // Check if operators exist after removing all template literals
-        const withoutTemplates = expression.replace(/\$\{[^}]+\}/g, '');
+        const withoutTemplates = processedExpression.replace(/\$\{[^}]+\}/g, '');
         const hasOperatorsOutsideTemplates = /[+\-*/()[\]<>=!&|?:]/.test(withoutTemplates);
 
         if (templateCount === 1 && hasOperatorsOutsideTemplates && typeof templateResult === 'string' && /^[\d\s+\-*/().]+$/.test(templateResult)) {
@@ -251,16 +271,34 @@ export class ExpressionEvaluator {
       }
     }
   }
+
+  /**
+   * Resolve pronoun placeholder based on variant context
+   *
+   * @param placeholder - Pronoun placeholder (e.g., ':subject', ':possessive')
+   * @returns Resolved pronoun string
+   */
+  private resolvePronounPlaceholder(placeholder: string): string {
+    const form = extractPronounForm(placeholder);
+    if (!form) return placeholder;  // Invalid placeholder
+
+    const gender = (this.context.variants?.gender || 'x') as Gender;
+    const lang = this.context.variants?.lang || 'en';
+
+    return resolvePronoun(form, gender, lang);
+  }
 }
 
 export function createExpressionEvaluator(
   data: Record<string, any>,
   resolvers: ResolverContext,
-  path: string[] = []
+  path: string[] = [],
+  variants?: VariantContext
 ): ExpressionEvaluator {
   return new ExpressionEvaluator({
     data,
     resolvers,
-    path
+    path,
+    variants
   });
 }

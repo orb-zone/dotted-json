@@ -4,6 +4,36 @@
  * @module @orbzone/dotted-json/types
  */
 
+/**
+ * Variant context for localization and conditional content
+ *
+ * @example
+ * ```typescript
+ * {
+ *   lang: 'es-MX',      // Language/locale (well-known)
+ *   gender: 'f',        // Gender for pronouns (well-known: m/f/x)
+ *   dialect: 'formal',  // Custom dimension: register/tone
+ *   source: 'aws'       // Custom dimension: translation source
+ * }
+ * ```
+ */
+export interface VariantContext {
+  /**
+   * Language/locale code (ISO 639-1, e.g., 'en', 'es', 'es-MX')
+   */
+  lang?: string;
+
+  /**
+   * Gender for pronoun resolution ('m' | 'f' | 'x')
+   */
+  gender?: 'm' | 'f' | 'x';
+
+  /**
+   * Custom variant dimensions (dialect, tone, source, etc.)
+   */
+  [dimension: string]: string | undefined;
+}
+
 export interface DottedOptions {
   /**
    * Initial data to merge with schema
@@ -26,10 +56,27 @@ export interface DottedOptions {
   resolvers?: Record<string, any>;
 
   /**
-   * Maximum evaluation depth to prevent infinite recursion (default: 10)
+   * Maximum evaluation depth to prevent infinite recursion (default: 100)
    * @constitution Principle VI - Cycle Detection and Safeguards
    */
   maxEvaluationDepth?: number;
+
+  /**
+   * Variant context for localization and conditional content
+   *
+   * Well-known variants: lang, gender
+   * Custom variants: any string dimension (dialect, source, tone, etc.)
+   *
+   * @example
+   * ```typescript
+   * variants: {
+   *   lang: 'es',
+   *   gender: 'f',
+   *   register: 'formal'
+   * }
+   * ```
+   */
+  variants?: VariantContext;
 }
 
 export interface GetOptions {
@@ -90,5 +137,6 @@ export interface ExpressionContext {
   data: Record<string, any>;
   resolvers: ResolverContext;
   path: string[];
+  variants?: VariantContext;  // Variant context for pronoun resolution
   error?: Error; // Available in .errorDefault expressions
 }
