@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-10-06
+
+### Documentation
+
+- Added `.specify/README.md` - Comprehensive project overview and session context guide
+- Added `.specify/memory/variant-system-design.md` - Variant scoring, tiebreaker logic, formality rationale
+- Added `.specify/memory/translation-cli-design.md` - Privacy-first design, batch translation, prompting strategy
+- Improved context preservation for future development sessions
+
 ## [0.2.0] - 2025-10-06
 
 ### Added

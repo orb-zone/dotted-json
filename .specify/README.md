@@ -6,9 +6,9 @@ This directory contains design documentation, memory files, and context for unde
 
 This is the **@orbzone/dotted-json** library - dynamic JSON data expansion using dot-prefixed property keys as expression triggers.
 
-### Current Status (v0.2.0)
+### Current Status (v0.2.1)
 
-- **Version**: 0.2.0 (tagged, not published to npm yet)
+- **Version**: 0.2.1 (tagged, not published to npm yet)
 - **Bundle**: 18.02 kB (within 20 kB constitution limit)
 - **Tests**: 190/193 passing (100% production code coverage)
 - **Status**: Feature-complete, ready for future npm publish
@@ -192,4 +192,4 @@ Key principles:
 
 ---
 
-**Last updated**: 2025-10-06 (v0.2.0 release)
+**Last updated**: 2025-10-06 (v0.2.1 - documentation improvements)
