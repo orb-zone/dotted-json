@@ -129,6 +129,8 @@ interface DottedOptions {
   default?: any;                       // Default value for missing values
   errorDefault?: any;                  // Default value for failed evaluations
   resolvers?: Record<string, any>;     // Function registry for expressions
+  variants?: VariantContext;           // Variant context for i18n/localization (v0.2.0+)
+  maxEvaluationDepth?: number;         // Maximum expression depth (default: 100)
 }
 ```
 
@@ -331,6 +333,127 @@ const data = dotted<UserSchema>(schema, options);
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and the project
 [constitution](.specify/memory/constitution.md) for core principles.
+
+## Variant System
+
+**New in v0.2.0**: Flexible variant support for localization, gender-aware text, and multi-dimensional content adaptation.
+
+### Language Variants
+
+Support multiple languages with automatic resolution:
+
+```typescript
+const data = dotted(
+  {
+    '.title': 'Author',
+    '.title:es': 'Autor',
+    '.title:es:f': 'Autora',
+    '.title:fr': 'Auteur',
+    '.title:fr:f': 'Auteure'
+  },
+  {
+    variants: { lang: 'es', gender: 'f' }
+  }
+);
+
+await data.get('.title'); // → 'Autora'
+```
+
+### Gender-Aware Pronouns
+
+Use pronoun placeholders that auto-resolve based on gender context:
+
+```typescript
+const data = dotted(
+  {
+    name: 'Alice',
+    '.bio': '${name} is a developer. ${:subject} loves coding and ${:possessive} work is excellent.'
+  },
+  {
+    variants: { gender: 'f' }
+  }
+);
+
+await data.get('.bio');
+// → 'Alice is a developer. she loves coding and her work is excellent.'
+```
+
+**Supported pronouns**:
+- `${:subject}` → he/she/they
+- `${:object}` → him/her/them
+- `${:possessive}` → his/her/their
+- `${:reflexive}` → himself/herself/themselves
+
+### Multi-Dimensional Variants
+
+Combine multiple variant dimensions for rich content adaptation:
+
+```typescript
+const data = dotted(
+  {
+    '.greeting': 'Hello',
+    '.greeting:es': 'Hola',
+    '.greeting:es:formal': 'Buenos días',
+    '.greeting:es:casual': '¿Qué tal?',
+    '.greeting:es:surfer': '¡Buenas olas!'
+  },
+  {
+    variants: { lang: 'es', tone: 'surfer' }
+  }
+);
+
+await data.get('.greeting'); // → '¡Buenas olas!'
+```
+
+### Order-Independent Syntax
+
+Variant order doesn't matter - type inference handles matching:
+
+```typescript
+'.bio:es:f' === '.bio:f:es' // Both resolve the same way
+```
+
+### Custom Variant Dimensions
+
+Define unlimited custom dimensions for your use case:
+
+```typescript
+const data = dotted(
+  {
+    '.error': 'An error occurred',
+    '.error:aws': 'AWS service unavailable',
+    '.error:gcp': 'GCP service timeout',
+    '.error:azure': 'Azure service error'
+  },
+  {
+    variants: { service: 'aws' }
+  }
+);
+```
+
+### Variant Priority
+
+When multiple variants exist, resolution follows priority scoring:
+- **Language**: 1000 points (highest)
+- **Gender**: 100 points
+- **Custom dimensions**: 10 points each
+
+Best matching variant wins. Falls back to base path if no variants match.
+
+### Variant Options
+
+```typescript
+interface VariantContext {
+  lang?: string;              // ISO 639-1 (e.g., 'en', 'es-MX', 'fr-CA')
+  gender?: 'm' | 'f' | 'x';  // Gender for pronouns
+  [dimension: string]: string | undefined;  // Unlimited custom dimensions
+}
+
+interface DottedOptions {
+  variants?: VariantContext;
+  // ... other options
+}
+```
 
 ## License
 

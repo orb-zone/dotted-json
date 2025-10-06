@@ -6,7 +6,26 @@
  * @see https://github.com/orbzone/dotted-json
  */
 
-export type { DottedOptions, GetOptions, SetOptions, HasOptions, DottedJson } from './types.js';
+export type {
+  DottedOptions,
+  GetOptions,
+  SetOptions,
+  HasOptions,
+  DottedJson,
+  VariantContext
+} from './types.js';
+
+export type {
+  Gender,
+  PronounForm
+} from './pronouns.js';
+
+export {
+  resolvePronoun,
+  isPronounPlaceholder,
+  extractPronounForm,
+  PRONOUNS
+} from './pronouns.js';
 
 import { DottedJson } from './dotted-json.js';
 import type { DottedOptions } from './types.js';

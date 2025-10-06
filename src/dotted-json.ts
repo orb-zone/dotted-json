@@ -145,7 +145,28 @@ export class DottedJson implements IDottedJson {
       const currentSegment = pathSegments[i];
 
       // Check if there's a dot-prefixed expression that would populate this segment
-      const escapedExpressionPath = parentPath ? `${parentPath}.\\.${currentSegment}` : `\\.${currentSegment}`;
+      let escapedExpressionPath = parentPath ? `${parentPath}.\\.${currentSegment}` : `\\.${currentSegment}`;
+
+      // Resolve variant for this expression key within parent context
+      const baseExpressionKey = `.${currentSegment}`;
+      const fullPathPrefix = parentPath ? `${parentPath}.` : '';
+
+      // Filter available paths to those matching the current parent context
+      const contextPaths = this.availablePaths
+        .filter(p => p.startsWith(fullPathPrefix))
+        .map(p => p.substring(fullPathPrefix.length));
+
+      const resolvedExpressionKey = resolveVariantPath(
+        baseExpressionKey,
+        this.options.variants as VariantContext,
+        contextPaths
+      );
+
+      // If variant resolution changed the key, update the escaped expression path
+      if (resolvedExpressionKey !== baseExpressionKey) {
+        const resolvedSegment = resolvedExpressionKey.substring(1); // Remove leading dot
+        escapedExpressionPath = parentPath ? `${parentPath}.\\.${resolvedSegment}` : `\\.${resolvedSegment}`;
+      }
 
       // If the expression exists and hasn't been evaluated yet (or we're ignoring cache)
       if (dotHas(this.data, escapedExpressionPath)) {
