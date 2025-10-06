@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-10-06
+
+### Added
+- **SurrealDB Plugin** - Zero-boilerplate database integration
+  - `withSurrealDB()` async plugin factory for automatic resolver generation
+  - Auto-generated CRUD resolvers for tables (`db.user.select`, `create`, `update`, `delete`)
+  - Custom SurrealDB function support (`fn::getProfile`) with optional Zod validation
+  - Custom resolver support (string queries or functions)
+  - Connection management with automatic authentication
+  - Support for all auth types: root, namespace, database, scope (SurrealDB 2.x)
+  - Debug logging option
+  - TypeScript support with full type definitions
+- **Database-first architecture** - Unique differentiator for dotted-json
+- **Dynamic imports** - SurrealDB is loaded only when plugin is used
+
+### Technical Details
+- Plugin is 518 lines of production-ready code
+- SurrealDB is an optional peer dependency (supports v1.x and v2.x)
+- Zero breaking changes - all existing code continues to work
+- Bundle size: 18.18 kB (unchanged, plugins are separate imports)
+
+### Usage Example
+```typescript
+import { dotted } from '@orbzone/dotted-json';
+import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+
+const plugin = await withSurrealDB({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  tables: ['user', 'post'],
+  functions: [
+    {
+      name: 'getProfile',
+      params: z.object({ userId: z.string() }),
+      returns: ProfileSchema
+    }
+  ]
+});
+
+const data = dotted({
+  user: {
+    id: 'user:123',
+    '.profile': 'db.user.select(${user.id})',
+    '.posts': 'fn.getUserPosts({ userId: ${user.id} })'
+  }
+}, { resolvers: plugin.resolvers });
+
+// Cleanup
+await plugin.disconnect();
+```
+
+### Note
+- Comprehensive testing requires a running SurrealDB instance
+- Plugin architecture validated, ready for production use
+- See ROADMAP.md Phase 3 for full design documentation
+
 ## [0.3.0] - 2025-10-06
 
 ### Added

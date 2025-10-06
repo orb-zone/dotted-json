@@ -1,6 +1,6 @@
 {
   "name": "@orbzone/dotted-json",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Dynamic JSON data expansion using dot-prefixed property keys as expression triggers",
   "type": "module",
   "main": "./dist/index.js",
@@ -101,10 +101,14 @@
     "url": "https://github.com/orbzone/dotted-json/issues"
   },
   "peerDependencies": {
-    "zod": "^3.0.0"
+    "zod": "^3.0.0",
+    "surrealdb": "^1.0.0 || ^2.0.0"
   },
   "peerDependenciesMeta": {
     "zod": {
+      "optional": true
+    },
+    "surrealdb": {
       "optional": true
     }
   },
