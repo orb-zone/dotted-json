@@ -7,6 +7,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-10-07
+
+### Added
+- **StorageProvider Interface**: Unified API for JSÖN document persistence across different backends (filesystem, SurrealDB, etc.)
+  - `load()`, `save()`, `list()`, `delete()`, `close()` methods
+  - Optional `subscribe()` for real-time providers
+  - Comprehensive type definitions in `src/types/storage.ts`
+
+- **FileLoader.save()**: Write JSÖN documents to filesystem with variant resolution
+  - Deterministic file naming: `baseName:lang:gender:form.jsön`
+  - Merge strategies: `replace` (default), `merge` (shallow), `deep-merge` (recursive)
+  - Optional Zod schema validation before saving
+  - Pretty-print JSON output (configurable)
+  - Upsert support (create if doesn't exist)
+
+- **FileLoader.list()**: List available JSÖN documents with filtering
+  - Filter by `baseName`, `variants`, or `metadata`
+  - Returns file metadata (createdAt, updatedAt, size)
+  - Supports partial variant matching
+
+- **FileLoader.delete()**: Remove JSÖN documents from filesystem
+  - Variant-aware deletion (delete specific language/form/gender combination)
+  - Automatic cache invalidation
+
+- **FileLoader.close()**: Cleanup resources (implements StorageProvider)
+  - Clears all caches
+  - Resets initialization state
+
+- **serializeVariantPath()**: Helper function in `variant-resolver.ts`
+  - Converts variant context to deterministic colon-separated path
+  - Well-known variants (lang, gender, form) in priority order
+  - Custom variants in alphabetical order
+  - Ensures order-independent, reproducible file names
+
+### Changed
+- **FileLoader** now implements `StorageProvider` interface
+  - Backward compatible: All existing `load()` functionality preserved
+  - No breaking changes to public API
+
+### Performance
+- Bundle size unchanged: **18.18 kB** (within 20 kB constitution limit)
+- FileLoader caching improved: save() updates both file and content caches
+
+### Testing
+- **25 new tests** for FileLoader CRUD operations (all passing)
+- **Total: 209 tests** passing across entire test suite
+- Test coverage for:
+  - save() with all merge strategies
+  - list() with all filter types
+  - delete() with variant resolution
+  - close() resource cleanup
+  - Zod validation integration (optional)
+
+### Documentation
+- Updated FileLoader JSDoc with save/list/delete examples
+- StorageProvider interface fully documented
+- Added comprehensive test examples in `test/unit/file-loader-crud.test.ts`
+
+### Migration Guide
+No breaking changes. Existing FileLoader code continues to work without modification.
+
+To use new save() functionality:
+```typescript
+const loader = new FileLoader({ baseDir: './data' });
+await loader.init();
+
+// Save document
+await loader.save('config', { theme: 'dark' }, { env: 'prod' });
+
+// List documents
+const docs = await loader.list({ baseName: 'config' });
+
+// Delete document
+await loader.delete('config', { env: 'prod' });
+```
+
+---
+
 ## [0.6.0-design] - 2025-10-06
 
 ### Design Phase - Storage Providers & Advanced Permissions

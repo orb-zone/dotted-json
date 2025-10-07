@@ -10,11 +10,12 @@
  * @module @orbzone/dotted-json/loaders/file
  */
 
-import { readFile, readdir } from 'fs/promises';
-import { readdirSync } from 'fs';
+import { readFile, readdir, writeFile, unlink, stat } from 'fs/promises';
+import { readdirSync, existsSync } from 'fs';
 import { join, resolve } from 'path';
-import { resolveVariantPath, parseVariantPath } from '../variant-resolver.js';
+import { resolveVariantPath, parseVariantPath, serializeVariantPath } from '../variant-resolver.js';
 import type { VariantContext } from '../types.js';
+import type { StorageProvider, SaveOptions, DocumentInfo, ListFilter } from '../types/storage.js';
 
 /**
  * Variant whitelist configuration
@@ -76,6 +77,8 @@ export interface FileLoaderOptions {
 /**
  * File loader with variant-aware resolution
  *
+ * Implements StorageProvider interface for filesystem storage.
+ *
  * @example
  * ```typescript
  * const loader = new FileLoader({
@@ -88,11 +91,20 @@ export interface FileLoaderOptions {
  *
  * await loader.init();
  *
- * // Loads best matching file: strings:es:formal.jsön
+ * // Load: Loads best matching file: strings:es:formal.jsön
  * const data = await loader.load('strings', { lang: 'es', form: 'formal' });
+ *
+ * // Save: Writes to strings:es:formal.jsön
+ * await loader.save('strings', data, { lang: 'es', form: 'formal' });
+ *
+ * // List: Get all documents
+ * const docs = await loader.list();
+ *
+ * // Delete: Remove specific variant
+ * await loader.delete('strings', { lang: 'es', form: 'formal' });
  * ```
  */
-export class FileLoader {
+export class FileLoader implements StorageProvider {
   private availableFiles: Set<string> = new Set();
   private fileCache = new Map<string, any>();
   private options: Required<Omit<FileLoaderOptions, 'allowedVariants'>> & { allowedVariants?: AllowedVariants | true };
@@ -241,8 +253,6 @@ export class FileLoader {
    * Find file on disk with one of the configured extensions
    */
   private findFileWithExtension(nameWithoutExt: string): string | null {
-    const { existsSync } = require('fs');
-
     for (const ext of this.options.extensions) {
       const filename = `${nameWithoutExt}${ext}`;
       const fullPath = join(this.options.baseDir, filename);
@@ -364,6 +374,273 @@ export class FileLoader {
       size: this.fileCache.size,
       keys: Array.from(this.fileCache.keys())
     };
+  }
+
+  /**
+   * Save JSÖN document to filesystem
+   *
+   * @param baseName - Base file name (without extension or variants)
+   * @param data - JSÖN document to save
+   * @param variants - Variant context for file naming
+   * @param options - Save options (merge strategy, validation, etc.)
+   *
+   * @example
+   * ```typescript
+   * // Saves to: strings:es:formal.jsön
+   * await loader.save('strings', { hello: 'Hola' }, { lang: 'es', form: 'formal' });
+   *
+   * // With validation
+   * await loader.save('config', data, { env: 'prod' }, {
+   *   schema: ConfigSchema,
+   *   strategy: 'merge'
+   * });
+   * ```
+   */
+  async save(
+    baseName: string,
+    data: any,
+    variants: VariantContext = {},
+    options: SaveOptions = {}
+  ): Promise<void> {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    const {
+      upsert = true,
+      schema,
+      strategy = 'replace',
+      pretty = true
+    } = options;
+
+    // 1. Validate variants
+    const validatedVariants = this.validateVariants(variants);
+
+    // 2. Validate data with schema if provided
+    if (schema) {
+      schema.parse(data);  // Throws ZodError if validation fails
+    }
+
+    // 3. Generate filename
+    const fileNameWithoutExt = serializeVariantPath(baseName, validatedVariants);
+    const extension = this.options.extensions[0];  // Use first extension (.jsön by default)
+    const fileName = `${fileNameWithoutExt}${extension}`;
+    const fullPath = resolve(this.options.baseDir, fileName);
+
+    // 4. Handle upsert and merge strategies
+    let dataToSave = data;
+    const fileExists = existsSync(fullPath);
+
+    // Check upsert requirement
+    if (!upsert && !fileExists) {
+      throw new Error(`File does not exist: ${fileName} (upsert: false)`);
+    }
+
+    // Handle merge strategies for existing files
+    if (strategy !== 'replace' && fileExists) {
+      try {
+        const existing = await this.loadFile(fileName);
+
+        if (strategy === 'merge') {
+          // Shallow merge
+          dataToSave = { ...existing, ...data };
+        } else if (strategy === 'deep-merge') {
+          // Deep merge (recursive)
+          dataToSave = this.deepMerge(existing, data);
+        }
+      } catch (error) {
+        // File exists but invalid JSON - replace with new data
+        dataToSave = data;
+      }
+    }
+
+    // 5. Write file
+    const content = pretty
+      ? JSON.stringify(dataToSave, null, 2)
+      : JSON.stringify(dataToSave);
+
+    await writeFile(fullPath, content, this.options.encoding);
+
+    // 6. Update available files cache
+    this.availableFiles.add(fileNameWithoutExt);
+
+    // 7. Update file content cache
+    const cacheKey = this.getCacheKey(baseName, validatedVariants);
+    if (this.options.cache) {
+      this.fileCache.set(cacheKey, dataToSave);
+    }
+  }
+
+  /**
+   * List available JSÖN documents
+   *
+   * @param filter - Filter criteria (baseName, variants, metadata)
+   * @returns Array of document metadata
+   *
+   * @example
+   * ```typescript
+   * // List all documents
+   * const all = await loader.list();
+   *
+   * // List all 'strings' documents
+   * const strings = await loader.list({ baseName: 'strings' });
+   *
+   * // List all Spanish documents
+   * const spanish = await loader.list({ variants: { lang: 'es' } });
+   * ```
+   */
+  async list(filter: ListFilter = {}): Promise<DocumentInfo[]> {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    const results: DocumentInfo[] = [];
+
+    // Iterate through available files
+    for (const fileNameWithoutExt of this.availableFiles) {
+      const parsed = parseVariantPath(fileNameWithoutExt);
+
+      // Apply baseName filter
+      if (filter.baseName && parsed.base !== filter.baseName) {
+        continue;
+      }
+
+      // Apply variants filter (partial match)
+      if (filter.variants) {
+        let matchesVariants = true;
+        for (const [key, value] of Object.entries(filter.variants)) {
+          if (parsed.variants[key] !== value) {
+            matchesVariants = false;
+            break;
+          }
+        }
+        if (!matchesVariants) continue;
+      }
+
+      // Find file with extension
+      const fileName = this.findFileWithExtension(fileNameWithoutExt);
+      if (!fileName) continue;
+
+      const fullPath = join(this.options.baseDir, fileName);
+
+      // Get file metadata
+      let metadata;
+      try {
+        const stats = await stat(fullPath);
+        metadata = {
+          createdAt: stats.birthtime,
+          updatedAt: stats.mtime,
+          size: stats.size
+        };
+      } catch (error) {
+        // File no longer exists or not readable
+        continue;
+      }
+
+      // Apply metadata filter
+      if (filter.metadata) {
+        let matchesMetadata = true;
+        for (const [key, value] of Object.entries(filter.metadata)) {
+          if (metadata[key as keyof typeof metadata] !== value) {
+            matchesMetadata = false;
+            break;
+          }
+        }
+        if (!matchesMetadata) continue;
+      }
+
+      results.push({
+        baseName: parsed.base,
+        variants: parsed.variants,
+        fullName: fileNameWithoutExt,
+        identifier: fullPath,
+        metadata
+      });
+    }
+
+    return results;
+  }
+
+  /**
+   * Delete JSÖN document from filesystem
+   *
+   * @param baseName - Base file name
+   * @param variants - Variant context identifying specific document
+   *
+   * @example
+   * ```typescript
+   * // Deletes: strings:es:formal.jsön
+   * await loader.delete('strings', { lang: 'es', form: 'formal' });
+   * ```
+   */
+  async delete(baseName: string, variants: VariantContext = {}): Promise<void> {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    // 1. Validate variants
+    const validatedVariants = this.validateVariants(variants);
+
+    // 2. Generate filename
+    const fileNameWithoutExt = serializeVariantPath(baseName, validatedVariants);
+    const fileName = this.findFileWithExtension(fileNameWithoutExt);
+
+    if (!fileName) {
+      throw new Error(`File not found: ${fileNameWithoutExt}`);
+    }
+
+    const fullPath = resolve(this.options.baseDir, fileName);
+
+    // 3. Delete file
+    await unlink(fullPath);
+
+    // 4. Update caches
+    this.availableFiles.delete(fileNameWithoutExt);
+
+    const cacheKey = this.getCacheKey(baseName, validatedVariants);
+    this.fileCache.delete(cacheKey);
+  }
+
+  /**
+   * Cleanup resources (implements StorageProvider)
+   *
+   * Clears caches but does not delete files.
+   */
+  async close(): Promise<void> {
+    this.clearCache();
+    this.availableFiles.clear();
+    this.initialized = false;
+  }
+
+  /**
+   * Deep merge two objects recursively
+   *
+   * Used for 'deep-merge' save strategy
+   */
+  private deepMerge(target: any, source: any): any {
+    if (typeof target !== 'object' || target === null ||
+        typeof source !== 'object' || source === null) {
+      return source;  // Primitive or null - return source
+    }
+
+    if (Array.isArray(source)) {
+      return source;  // Arrays replaced entirely (not merged)
+    }
+
+    const result = { ...target };
+
+    for (const [key, value] of Object.entries(source)) {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value) &&
+          typeof result[key] === 'object' && result[key] !== null && !Array.isArray(result[key])) {
+        // Recursive merge for nested objects
+        result[key] = this.deepMerge(result[key], value);
+      } else {
+        // Replace value
+        result[key] = value;
+      }
+    }
+
+    return result;
   }
 }
 

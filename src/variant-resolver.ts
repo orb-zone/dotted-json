@@ -71,6 +71,47 @@ export function parseVariantPath(path: string): ParsedVariants {
 }
 
 /**
+ * Serialize base name and variants into a colon-separated path
+ *
+ * Creates order-independent, deterministic file names from variant context.
+ *
+ * @param baseName - Base file name (without variants)
+ * @param variants - Variant context (lang, gender, form, custom)
+ * @returns Colon-separated path (e.g., 'strings:es:formal')
+ *
+ * @example
+ * ```typescript
+ * serializeVariantPath('strings', { lang: 'es', form: 'formal' })
+ * // → 'strings:es:formal'
+ *
+ * serializeVariantPath('strings', { form: 'formal', lang: 'es' })
+ * // → 'strings:es:formal' (same order, deterministic)
+ * ```
+ */
+export function serializeVariantPath(baseName: string, variants: VariantContext = {}): string {
+  const parts = [baseName];
+
+  // Well-known variants in priority order (deterministic)
+  if (variants.lang) parts.push(variants.lang);
+  if (variants.gender) parts.push(variants.gender);
+  if (variants.form) parts.push(variants.form);
+
+  // Custom variants in alphabetical order (deterministic)
+  const customKeys = Object.keys(variants)
+    .filter(k => k !== 'lang' && k !== 'gender' && k !== 'form')
+    .sort();
+
+  for (const key of customKeys) {
+    const value = variants[key];
+    if (typeof value === 'string') {
+      parts.push(value);
+    }
+  }
+
+  return parts.join(':');
+}
+
+/**
  * Score how well a set of path variants matches the context
  *
  * Higher score = better match

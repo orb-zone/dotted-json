@@ -838,50 +838,116 @@ Frontend → SurrealDB (business logic in fn::)
 
 ---
 
-### Phase 10: Monorepo Migration (v0.10.0) 🏗️ PLANNED
+### Phase 10: Monorepo Migration (v2.0.0) 🏗️ PLANNED
 
-**Goal**: Restructure as **@orbzone/web-craft** monorepo with separate packages
+**Goal**: Restructure as monorepo workspace with separate packages for different abstraction layers
 
-**Planned**: After v0.9.0 (when Phase 6 features are implemented)
-**Status**: Detailed plan complete - See [MONOREPO_MIGRATION_PLAN.md](MONOREPO_MIGRATION_PLAN.md)
+**Planned**: After v1.0.0 stable release (when Phase 6 features are production-ready)
+**Status**: Architecture defined - Will be executed post-1.0
 
 #### Package Structure
 
-Transform single package into monorepo workspace:
+Transform single package into Bun workspace monorepo:
 
-1. **@orbzone/dotted** - Core expression engine (renamed from dotted-json, 18-50 kB)
-2. **@orbzone/surrounded** - Full-stack SurrealDB framework for Vue (50-80 kB)
-3. **create-surrounded** - Project scaffolding CLI
+```
+packages/
+├── dotted/              # @orbzone/dotted-json (core engine)
+├── surrounded/          # @orbzone/surrounded (SurrealDB framework wrapper)
+└── aeonic/              # @orbzone/aeonic (opinionated schema framework)
+```
 
-#### Breaking Changes (v1.0.0)
+**Package Descriptions**:
+
+1. **@orbzone/dotted-json** (`packages/dotted/`)
+   - Core "dotted" expression engine (current codebase)
+   - Maintains backward compatibility with v1.x API
+   - Bundle: 18-25 kB (minimal core + plugins)
+   - Focus: General-purpose JSON expansion with variants, i18n, lazy evaluation
+
+2. **@orbzone/surrounded** (`packages/surrounded/`)
+   - "Surrounded" SurrealDB-focused framework layer
+   - Wraps dotted-json with opinionated SurrealDB integrations
+   - Storage providers, LIVE queries, permission detection, Zod integration
+   - Bundle: +30-50 kB (framework overhead)
+   - Focus: Zero-config SurrealDB + Vue fullstack development
+
+3. **@orbzone/aeonic** (`packages/aeonic/`)
+   - "Aeonic" opinionated framework with schema conventions
+   - **AEON** = **A**daptive **E**ntity **O**bjective **N**etwork
+   - Built on top of `surrounded` with predefined patterns
+   - Opinionated database schema model (users, roles, permissions, audit)
+   - Bundle: +20-40 kB (schema templates + conventions)
+   - Focus: Rapid fullstack app scaffolding with best practices baked in
+
+#### Migration Strategy
+
+**v1.0.0 Milestone First**:
+- ✅ Complete Phase 6 implementation (v0.6.0-v0.9.0)
+- ✅ Release stable v1.0.0 of `@orbzone/dotted-json`
+- ✅ Gather production feedback and stabilize API
+- ✅ Ensure 100% backward compatibility guarantee
+
+**v2.0.0 Monorepo Migration** (Breaking Changes):
 
 ```typescript
-// Before (v0.x.x)
+// v1.x.x (current single package)
+import { dotted } from '@orbzone/dotted-json';
+import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+
+// v2.0.0+ (monorepo packages)
+// Core users (minimal footprint)
 import { dotted } from '@orbzone/dotted-json';
 
-// After (v1.0.0) - Library users
-import { dotted } from '@orbzone/dotted';
-
-// After (v1.0.0) - Framework users
+// SurrealDB framework users
 import { useSurrounded } from '@orbzone/surrounded';
+
+// Opinionated fullstack users
+import { createAeonicApp } from '@orbzone/aeonic';
 ```
+
+**Package Independence**:
+- Each package can be used standalone
+- `surrounded` depends on `dotted-json`
+- `aeonic` depends on `surrounded` (and transitively `dotted-json`)
+- Users install only what they need
 
 #### Benefits
 
-- ✅ Clear separation: Core engine vs. opinionated framework
-- ✅ Independent versioning
-- ✅ Shared development in one repo
-- ✅ Better market positioning
+- ✅ **Clear abstraction layers**: Core → Framework → Opinionated
+- ✅ **Independent versioning**: dotted-json v2.x, surrounded v1.x, aeonic v0.x
+- ✅ **Market segmentation**:
+  - Library users get minimal core
+  - SurrealDB users get framework layer
+  - Rapid dev users get opinionated scaffold
+- ✅ **Shared monorepo**: Unified development, cross-package testing
+- ✅ **Bundle optimization**: Tree-shake unused layers
+
+#### Aeonic Framework Vision
+
+**AEON Principles** (**A**daptive **E**ntity **O**bjective **N**etwork):
+- Predefined entity schemas (User, Role, Permission, Team, Audit)
+- Opinionated relationship patterns (RBAC, multi-tenancy, audit trails)
+- Built-in permission templates (admin, editor, viewer roles)
+- Convention-over-configuration approach
+- CLI scaffolding: `bun create aeonic my-app`
+
+**Future Definition**: See `.specify/memory/aeonic-vision.md` (to be created)
 
 #### Timeline
 
-| Version | Description |
-|---------|-------------|
-| v0.6.0-v0.9.0 | Build features in current structure |
-| v0.10.0 | Execute monorepo migration (8 phases) |
-| v1.0.0 | Production release of all packages |
+| Version | Phase | Description |
+|---------|-------|-------------|
+| v0.6.0-v0.9.0 | Phase 6 Implementation | Build storage, permissions, LIVE queries in current structure |
+| v1.0.0 | Stable Release | Production-ready dotted-json single package |
+| v1.x.x | Stabilization | Production feedback, API refinement, backward compat guarantee |
+| v2.0.0 | Monorepo Migration | Restructure into packages/dotted, packages/surrounded, packages/aeonic |
+| v2.1.0+ | Ecosystem Growth | Expand aeonic framework, community templates |
 
-**Complete details**: [MONOREPO_MIGRATION_PLAN.md](MONOREPO_MIGRATION_PLAN.md)
+**Rationale**:
+- Preserve v1.0 API stability before breaking changes
+- Allow dotted-json to mature as standalone library
+- Build surrounded/aeonic on proven foundation
+- Avoid premature abstraction
 
 ---
 

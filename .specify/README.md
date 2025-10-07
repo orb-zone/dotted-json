@@ -286,7 +286,7 @@ Phase 6 Design Documents (read for implementation):
 
 Current state: Design phase complete, ready to begin v0.6.0 implementation (FileLoader enhancements).
 
-**Monorepo Migration**: Planned for v0.10.0 after Phase 6 implementation complete. Will restructure as @orbzone/web-craft workspace with @orbzone/dotted (core), @orbzone/surrounded (framework), and create-surrounded (scaffolding). See MONOREPO_MIGRATION_PLAN.md.
+**Monorepo Migration**: Planned for v2.0.0 after v1.0.0 stable release. Will restructure as Bun workspace monorepo with @orbzone/dotted-json (packages/dotted - core engine), @orbzone/surrounded (packages/surrounded - SurrealDB framework), and @orbzone/aeonic (packages/aeonic - opinionated AEON schema framework). Strategy: stabilize v1.0 API first, then migrate to monorepo with independent package versioning.
 ```
 
 ### Contributing

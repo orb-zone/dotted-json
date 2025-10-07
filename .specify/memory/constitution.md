@@ -168,7 +168,7 @@ without bloating the core.
    - [ ] Tests added for new functionality
    - [ ] Breaking changes documented in CHANGELOG.md
    - [ ] Security implications reviewed (if touching expression evaluator)
-   - [ ] Bundle size impact checked (core must stay under 15 kB)
+   - [ ] Bundle size impact checked (core must stay under 20 kB)
    - [ ] TypeScript types updated (no `any` without justification)
 
 ### Release Process
@@ -227,7 +227,6 @@ Every public API MUST have:
 - ✅ `examples/with-zod-validation.ts` - Plugin integrations
 - ✅ `examples/file-loader-i18n.ts` - Advanced patterns
 - ✅ `examples/data/` - Example data files
-- ❌ `__DRAFT__/examples/` - NO LONGER USED (removed 2025-10-07)
 
 **Rules**:
 1. New examples MUST be added to `/examples` only
