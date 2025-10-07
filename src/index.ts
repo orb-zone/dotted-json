@@ -37,7 +37,8 @@ export type {
 
 export type {
   LiveAction,
-  LiveUpdateEvent
+  LiveUpdateEvent,
+  PerformanceMetrics
 } from './loaders/surrealdb.js';
 
 // Note: Loaders are available via separate export paths to keep core bundle small

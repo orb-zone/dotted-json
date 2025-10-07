@@ -119,6 +119,36 @@ export interface SurrealDBLoaderOptions {
     /** Exponential backoff multiplier @default 2 */
     backoffMultiplier?: number;
   };
+
+  /**
+   * Enable performance metrics collection
+   * @default false
+   */
+  metrics?: boolean;
+
+  /**
+   * Callback for performance metrics
+   * Called after each operation with timing data
+   */
+  onMetrics?: (metrics: PerformanceMetrics) => void;
+}
+
+/**
+ * Performance metrics for loader operations
+ */
+export interface PerformanceMetrics {
+  /** Operation type */
+  operation: 'init' | 'load' | 'save' | 'delete' | 'list' | 'subscribe';
+  /** Duration in milliseconds */
+  duration: number;
+  /** Base name (for load/save/delete) */
+  baseName?: string;
+  /** Whether cache was used */
+  cacheHit?: boolean;
+  /** Number of candidates evaluated (for load) */
+  candidateCount?: number;
+  /** Timestamp when operation started */
+  timestamp: number;
 }
 
 /**
@@ -160,9 +190,10 @@ interface CacheEntry {
  */
 export class SurrealDBLoader implements StorageProvider {
   private db: Surreal | null = null;
-  private options: Required<Omit<SurrealDBLoaderOptions, 'auth' | 'onLiveUpdate' | 'retry'>> & {
+  private options: Required<Omit<SurrealDBLoaderOptions, 'auth' | 'onLiveUpdate' | 'retry' | 'onMetrics'>> & {
     auth?: SurrealDBLoaderOptions['auth'];
     onLiveUpdate?: (event: LiveUpdateEvent) => void;
+    onMetrics?: (metrics: PerformanceMetrics) => void;
     retry: {
       maxAttempts: number;
       initialDelay: number;
@@ -173,6 +204,8 @@ export class SurrealDBLoader implements StorageProvider {
   private cache = new Map<string, CacheEntry>();
   private initialized = false;
   private liveQueries = new Map<string, string>();  // baseName → queryUUID
+  private metricsEnabled: boolean;
+  private onMetricsCallback?: (metrics: PerformanceMetrics) => void;
 
   constructor(options: SurrealDBLoaderOptions) {
     this.options = {
@@ -182,6 +215,7 @@ export class SurrealDBLoader implements StorageProvider {
       table: options.table ?? 'ion',
       cache: options.cache ?? true,
       cacheTTL: options.cacheTTL ?? 60000,  // 1 minute
+      metrics: options.metrics ?? false,
       retry: {
         maxAttempts: options.retry?.maxAttempts ?? 3,
         initialDelay: options.retry?.initialDelay ?? 1000,
@@ -189,8 +223,27 @@ export class SurrealDBLoader implements StorageProvider {
         backoffMultiplier: options.retry?.backoffMultiplier ?? 2
       },
       auth: options.auth,
-      onLiveUpdate: options.onLiveUpdate
+      onLiveUpdate: options.onLiveUpdate,
+      onMetrics: options.onMetrics
     };
+    this.metricsEnabled = options.metrics ?? false;
+    this.onMetricsCallback = options.onMetrics;
+  }
+
+  /**
+   * Record performance metrics for an operation
+   */
+  private recordMetrics(metrics: Omit<PerformanceMetrics, 'timestamp'>): void {
+    if (!this.metricsEnabled) return;
+
+    const fullMetrics: PerformanceMetrics = {
+      ...metrics,
+      timestamp: Date.now()
+    };
+
+    if (this.onMetricsCallback) {
+      this.onMetricsCallback(fullMetrics);
+    }
   }
 
   /**
@@ -199,6 +252,7 @@ export class SurrealDBLoader implements StorageProvider {
   async init(): Promise<void> {
     if (this.initialized) return;
 
+    const startTime = performance.now();
     const { maxAttempts, initialDelay, maxDelay, backoffMultiplier } = this.options.retry;
     let lastError: Error | null = null;
 
@@ -219,6 +273,13 @@ export class SurrealDBLoader implements StorageProvider {
         }
 
         this.initialized = true;
+
+        // Record metrics
+        this.recordMetrics({
+          operation: 'init',
+          duration: performance.now() - startTime
+        });
+
         return;
 
       } catch (error: any) {
@@ -398,6 +459,8 @@ export class SurrealDBLoader implements StorageProvider {
    * 3. Return best match
    */
   async load(baseName: string, variants: VariantContext = {}): Promise<any> {
+    const startTime = performance.now();
+
     if (!this.initialized) {
       await this.init();
     }
@@ -411,6 +474,12 @@ export class SurrealDBLoader implements StorageProvider {
     if (this.options.cache) {
       const cached = this.cache.get(cacheKey);
       if (cached && cached.expiresAt > Date.now()) {
+        this.recordMetrics({
+          operation: 'load',
+          duration: performance.now() - startTime,
+          baseName,
+          cacheHit: true
+        });
         return cached.data;
       }
     }
@@ -455,6 +524,15 @@ export class SurrealDBLoader implements StorageProvider {
         expiresAt: Date.now() + this.options.cacheTTL
       });
     }
+
+    // Record metrics
+    this.recordMetrics({
+      operation: 'load',
+      duration: performance.now() - startTime,
+      baseName,
+      cacheHit: false,
+      candidateCount: candidates.length
+    });
 
     return bestMatch.data;
   }
