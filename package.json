@@ -54,8 +54,12 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build.ts",
     "test": "bun test",
+    "test:unit": "bun test test/unit",
+    "test:integration": "bun test test/integration",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
+    "db:start": "surreal start --user root --pass root memory",
+    "db:test": "surreal start --user root --pass root --bind 127.0.0.1:9000 memory",
     "lint": "eslint . --ext .js,.ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build && bun test"

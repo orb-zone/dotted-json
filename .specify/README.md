@@ -285,6 +285,8 @@ Phase 6 Design Documents (read for implementation):
 - integration-patterns.md - 30+ production patterns
 
 Current state: Design phase complete, ready to begin v0.6.0 implementation (FileLoader enhancements).
+
+**Monorepo Migration**: Planned for v0.10.0 after Phase 6 implementation complete. Will restructure as @orbzone/web-craft workspace with @orbzone/dotted (core), @orbzone/surrounded (framework), and create-surrounded (scaffolding). See MONOREPO_MIGRATION_PLAN.md.
 ```
 
 ### Contributing

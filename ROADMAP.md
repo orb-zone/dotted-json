@@ -375,19 +375,33 @@ The `__DRAFT__` folder contains a **fully designed plugin architecture** (v1.0-v
 
 ---
 
-### Phase 6: Unified SurrealDB + Pinia Integration (v0.6.0+) 🎯 PROPOSED
+### Phase 6: Storage Providers & Schema-Driven Development (v0.6.0 - v0.9.0) 🚀 IN PROGRESS
 
-**Goal**: Seamless real-time sync between SurrealDB and Vue client via unified plugin
+**Goal**: SurrealDB as single source of truth - auto-generate everything from `.surql` schema
 
-**Status**: Design phase - See [.specify/memory/surrealdb-vue-vision.md](.specify/memory/surrealdb-vue-vision.md)
-**Priority**: High (ideal DX for Vue + SurrealDB stack)
-**Reference**: `.specify/memory/surrealdb-vue-vision.md`, `.specify/memory/integration-patterns.md`
+**Started**: 2025-10-06
+**Status**: Design complete (9 documents, ~6,000+ lines), ready for implementation
+**Priority**: **HIGHEST** - This is the killer feature
 
-**Vision**: Combine SurrealDB plugin + Pinia Colada plugin into unified experience where:
-- Business logic lives in database (`fn::` custom functions)
-- LIVE queries provide real-time sync
-- Pinia Colada provides intelligent caching
-- Dotted-JSON bridges database and client state
+**References**:
+- `.specify/memory/storage-providers-design.md` (1,200+ lines)
+- `.specify/memory/function-resolver-inference.md` (Auto-generate resolvers)
+- `.specify/memory/record-id-variants-design.md` (10-100x faster queries)
+- `.specify/memory/surql-to-zod-inference.md` (800+ lines)
+- `.specify/memory/field-level-permissions-design.md` (1,000+ lines)
+- `.specify/memory/schema-driven-complete-workflow.md` (Complete end-to-end)
+- `.specify/memory/surrealdb-vue-vision.md` (Grand vision)
+- `.specify/memory/integration-patterns.md` (30+ patterns)
+- `.specify/memory/permissions-and-zod-integration.md` (900+ lines)
+
+**Vision**: Define schema once in `.surql`, auto-generate everything else:
+- ✅ Zod schemas (validation)
+- ✅ TypeScript types (type safety)
+- ✅ Resolvers (runtime execution)
+- ✅ Permissions (field-level detection)
+- ✅ Storage (variant-aware JSÖN documents)
+
+**Result**: 90% less code, zero type drift, full type safety end-to-end
 
 #### Features
 
@@ -802,6 +816,53 @@ Frontend → SurrealDB (business logic in fn::)
 - [ ] ✅ Community feedback incorporated
 - [ ] ✅ Production case studies (3+ published)
 - [ ] ✅ API stability guaranteed
+
+---
+
+### Phase 10: Monorepo Migration (v0.10.0) 🏗️ PLANNED
+
+**Goal**: Restructure as **@orbzone/web-craft** monorepo with separate packages
+
+**Planned**: After v0.9.0 (when Phase 6 features are implemented)
+**Status**: Detailed plan complete - See [MONOREPO_MIGRATION_PLAN.md](MONOREPO_MIGRATION_PLAN.md)
+
+#### Package Structure
+
+Transform single package into monorepo workspace:
+
+1. **@orbzone/dotted** - Core expression engine (renamed from dotted-json, 18-50 kB)
+2. **@orbzone/surrounded** - Full-stack SurrealDB framework for Vue (50-80 kB)
+3. **create-surrounded** - Project scaffolding CLI
+
+#### Breaking Changes (v1.0.0)
+
+```typescript
+// Before (v0.x.x)
+import { dotted } from '@orbzone/dotted-json';
+
+// After (v1.0.0) - Library users
+import { dotted } from '@orbzone/dotted';
+
+// After (v1.0.0) - Framework users
+import { useSurrounded } from '@orbzone/surrounded';
+```
+
+#### Benefits
+
+- ✅ Clear separation: Core engine vs. opinionated framework
+- ✅ Independent versioning
+- ✅ Shared development in one repo
+- ✅ Better market positioning
+
+#### Timeline
+
+| Version | Description |
+|---------|-------------|
+| v0.6.0-v0.9.0 | Build features in current structure |
+| v0.10.0 | Execute monorepo migration (8 phases) |
+| v1.0.0 | Production release of all packages |
+
+**Complete details**: [MONOREPO_MIGRATION_PLAN.md](MONOREPO_MIGRATION_PLAN.md)
 
 ---
 
