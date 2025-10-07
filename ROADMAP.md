@@ -954,20 +954,39 @@ import { createAeonicApp } from '@orbzone/aeonic';
 
 **Future Definition**: See `.specify/memory/aeonic-vision.md` (to be created)
 
+#### Package Structure (v2.0.0+)
+
+```
+packages/
+├── dotted/              @orbzone/dotted-json
+├── surrounded/          @orbzone/surrounded
+├── aeonic/              @orbzone/aeonic
+└── flow/                @orbzone/flow (Flöw app layer)
+```
+
+**Flöw** (`@orbzone/flow-app`, `apps/flow`):
+- User-facing application layer built on AEON/ION architecture
+- Multi-tenant SaaS reference implementation
+- Showcases full stack: dotted-json → surrounded → aeonic → flow
+- Real-world example of A-H entity hierarchy in production
+- **Status**: Future development (v2.1+)
+
 #### Timeline
 
 | Version | Phase | Description |
 |---------|-------|-------------|
-| v0.6.0-v0.9.0 | Phase 6 Implementation | Build storage, permissions, LIVE queries in current structure |
+| v0.6.0-v0.7.0 | Phase 6 Implementation | ✅ Storage, ION naming, AEON design |
+| v0.8.0-v0.9.0 | Polish & Examples | Real-world examples, performance benchmarks |
 | v1.0.0 | Stable Release | Production-ready dotted-json single package |
 | v1.x.x | Stabilization | Production feedback, API refinement, backward compat guarantee |
 | v2.0.0 | Monorepo Migration | Restructure into packages/dotted, packages/surrounded, packages/aeonic |
-| v2.1.0+ | Ecosystem Growth | Expand aeonic framework, community templates |
+| v2.1.0+ | Ecosystem Growth | Expand aeonic framework, build Flöw reference app |
 
 **Rationale**:
 - Preserve v1.0 API stability before breaking changes
 - Allow dotted-json to mature as standalone library
 - Build surrounded/aeonic on proven foundation
+- Flöw demonstrates AEON/ION in real application
 - Avoid premature abstraction
 
 ---
@@ -1007,4 +1026,4 @@ import { createAeonicApp } from '@orbzone/aeonic';
 **Repository**: https://github.com/orbzone/dotted-json
 **Status**: 🚧 In Active Development
 
-*Last Reviewed: 2025-10-06*
+*Last Reviewed: 2025-10-07*
