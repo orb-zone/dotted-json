@@ -7,6 +7,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-10-07
+
+### Added
+- **SurrealDB LIVE Queries**: Real-time document synchronization with automatic cache invalidation
+  - `subscribe()` method in SurrealDBLoader for watching ion changes
+  - Supports watching specific variants or all variants of a baseName
+  - DIFF mode for efficient WebSocket updates
+  - Automatic local cache invalidation on LIVE updates
+  - Optional `onLiveUpdate` callback for global change notifications
+  - Graceful cleanup with `unsubscribe()` and `close()`
+
+- **Unified withSurrealDBPinia Plugin**: Single-config integration of SurrealDB + Pinia Colada
+  - Auto-generates cached query resolvers from ion definitions
+  - Real-time LIVE query integration with automatic cache invalidation
+  - `db.loadIon(baseName, variants)` resolver API
+  - Configurable cache timing (staleTime, gcTime, retry)
+  - Environment-specific defaults
+  - Zero-config real-time sync for specified ions
+
+- **LiveUpdateEvent Types**: Type-safe LIVE query event handling
+  - `LiveAction`: 'CREATE' | 'UPDATE' | 'DELETE'
+  - `LiveUpdateEvent`: Complete event structure with baseName, variants, data
+  - Full TypeScript support for callbacks
+
+### Changed
+- SurrealDBLoader now implements optional `subscribe()` from StorageProvider interface
+- Enhanced close() method to kill all active LIVE queries before disconnecting
+- Added liveQueries tracking map for proper cleanup
+
+### Performance
+- LIVE queries use SurrealDB's native WebSocket streaming (DIFF mode)
+- Cache invalidation is instant (no polling)
+- Zero overhead when LIVE queries are not enabled
+
+### Examples
+- **Real-time Config Manager** (`examples/realtime-config-manager.ts`)
+  - Multi-environment configuration with instant propagation
+  - Demonstrates LIVE query + cache invalidation workflow
+  - Production-ready implementation pattern
+
+### Testing
+- **All 226 tests passing** (including 17 new LIVE query type tests)
+- Type-safe test coverage for LiveUpdateEvent, LiveAction, plugin interfaces
+- Integration test patterns documented for real SurrealDB instances
+
+### Documentation
+- LIVE query API documented with JSDoc and usage examples
+- withSurrealDBPinia plugin configuration guide
+- Real-time sync patterns documented in example
+
+### Migration Guide
+No breaking changes. LIVE queries are an optional feature.
+
+To use LIVE queries with SurrealDBLoader:
+```typescript
+import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+
+const loader = new SurrealDBLoader({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  onLiveUpdate: (event) => {
+    console.log(`${event.action}: ${event.baseName}`, event.data)
+  }
+})
+
+await loader.init()
+
+// Subscribe to specific variant
+const unsubscribe = await loader.subscribe('config', { env: 'prod' }, (data) => {
+  console.log('Config updated:', data)
+})
+
+// Stop listening
+await unsubscribe()
+```
+
+To use unified SurrealDB + Pinia plugin:
+```typescript
+import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia'
+
+const plugin = await withSurrealDBPinia({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  ions: {
+    'config': { staleTime: 60_000 },
+    'strings': { staleTime: 300_000 }
+  },
+  live: {
+    enabled: true,
+    ions: ['config', 'strings']
+  }
+})
+
+// Use in dotted-json
+const data = dotted({
+  '.config': 'db.loadIon("config", { env: "prod" })'
+}, { resolvers: plugin.resolvers })
+
+// Automatic cache invalidation via LIVE queries!
+const config = await data.get('config')
+```
+
+---
+
 ## [0.7.0] - 2025-10-07
 
 ### Added

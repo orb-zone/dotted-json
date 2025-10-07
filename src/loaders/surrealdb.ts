@@ -22,6 +22,27 @@ import { scoreVariantMatch } from '../variant-resolver.js';
 type Surreal = any;
 
 /**
+ * Action types for LIVE query updates
+ */
+export type LiveAction = 'CREATE' | 'UPDATE' | 'DELETE';
+
+/**
+ * LIVE query update event
+ */
+export interface LiveUpdateEvent {
+  /** Action type */
+  action: LiveAction;
+  /** Record ID that changed */
+  id: any;
+  /** Base name from the Record ID */
+  baseName: string;
+  /** Variants from the Record ID */
+  variants: VariantContext;
+  /** New data (for CREATE/UPDATE) */
+  data?: any;
+}
+
+/**
  * SurrealDB connection and authentication options
  */
 export interface SurrealDBLoaderOptions {
@@ -70,6 +91,20 @@ export interface SurrealDBLoaderOptions {
    * @default 60000 (1 minute)
    */
   cacheTTL?: number;
+
+  /**
+   * Callback for LIVE query updates
+   * Called whenever a document changes in real-time
+   *
+   * @example
+   * ```typescript
+   * onLiveUpdate: (event) => {
+   *   console.log(`${event.action}: ${event.baseName}`, event.data);
+   *   // Invalidate cache, update UI, etc.
+   * }
+   * ```
+   */
+  onLiveUpdate?: (event: LiveUpdateEvent) => void;
 }
 
 /**
@@ -111,9 +146,13 @@ interface CacheEntry {
  */
 export class SurrealDBLoader implements StorageProvider {
   private db: Surreal | null = null;
-  private options: Required<Omit<SurrealDBLoaderOptions, 'auth'>> & { auth?: SurrealDBLoaderOptions['auth'] };
+  private options: Required<Omit<SurrealDBLoaderOptions, 'auth' | 'onLiveUpdate'>> & {
+    auth?: SurrealDBLoaderOptions['auth'];
+    onLiveUpdate?: (event: LiveUpdateEvent) => void;
+  };
   private cache = new Map<string, CacheEntry>();
   private initialized = false;
+  private liveQueries = new Map<string, string>();  // baseName → queryUUID
 
   constructor(options: SurrealDBLoaderOptions) {
     this.options = {
@@ -558,10 +597,136 @@ export class SurrealDBLoader implements StorageProvider {
   }
 
   /**
+   * Subscribe to ion changes in real-time
+   *
+   * Uses SurrealDB LIVE SELECT with DIFF mode for efficient updates.
+   * Automatically invalidates local cache and calls onLiveUpdate callback.
+   *
+   * @param baseName - Document identifier to watch
+   * @param variants - Variant context (optional, watches all variants if omitted)
+   * @param callback - Called when document changes
+   * @returns Unsubscribe function
+   *
+   * @example
+   * ```typescript
+   * // Watch all 'config' variants
+   * const unsubscribe = await loader.subscribe('config', undefined, (data) => {
+   *   console.log('Config updated:', data);
+   * });
+   *
+   * // Watch specific variant
+   * const unsubscribe2 = await loader.subscribe('strings', { lang: 'es' }, (data) => {
+   *   console.log('Spanish strings updated:', data);
+   * });
+   *
+   * // Stop listening
+   * await unsubscribe();
+   * ```
+   */
+  async subscribe(
+    baseName: string,
+    variants: VariantContext | undefined,
+    callback: (data: any) => void
+  ): Promise<() => void> {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.db) {
+      throw new Error('SurrealDB not initialized');
+    }
+
+    // Build LIVE SELECT query
+    // If variants specified, watch specific record; otherwise watch all with baseName prefix
+    let liveQuery: string;
+    let queryParams: Record<string, any>;
+
+    if (variants && Object.keys(variants).length > 0) {
+      // Watch specific variant
+      const recordIdArray = this.buildRecordId(baseName, variants);
+      const recordId = `${this.options.table}:${JSON.stringify(recordIdArray)}`;
+
+      liveQuery = `LIVE SELECT DIFF FROM ${recordId}`;
+      queryParams = {};
+    } else {
+      // Watch all variants with this baseName
+      const startId = [baseName];
+      const endId = [baseName, '\uffff'];
+
+      liveQuery = `
+        LIVE SELECT DIFF FROM type::table($table)
+        WHERE id >= type::thing($table, $startId)
+          AND id < type::thing($table, $endId)
+      `;
+      queryParams = {
+        table: this.options.table,
+        startId,
+        endId
+      };
+    }
+
+    // Execute LIVE query
+    const queryUUID = await this.db.query(liveQuery, queryParams);
+
+    // Track this subscription
+    const subscriptionKey = this.getCacheKey(baseName, variants || {});
+    this.liveQueries.set(subscriptionKey, queryUUID);
+
+    // Listen for updates
+    this.db.listenLive(queryUUID, (action: LiveAction, result: any) => {
+      // Parse Record ID to get baseName and variants
+      const { baseName: updatedBaseName, variants: updatedVariants } = this.parseRecordId(result.id);
+
+      // Extract data based on action
+      let data: any = undefined;
+      if (action === 'CREATE' || action === 'UPDATE') {
+        data = result.data;
+      }
+
+      // Invalidate cache for this document
+      const cacheKey = this.getCacheKey(updatedBaseName, updatedVariants);
+      this.cache.delete(cacheKey);
+
+      // Call user callback
+      callback(data);
+
+      // Call global onLiveUpdate callback if configured
+      if (this.options.onLiveUpdate) {
+        this.options.onLiveUpdate({
+          action,
+          id: result.id,
+          baseName: updatedBaseName,
+          variants: updatedVariants,
+          data
+        });
+      }
+    });
+
+    // Return unsubscribe function
+    return async () => {
+      if (this.db) {
+        await this.db.kill(queryUUID);
+        this.liveQueries.delete(subscriptionKey);
+      }
+    };
+  }
+
+  /**
    * Close connection and cleanup resources
    */
   async close(): Promise<void> {
+    // Kill all active LIVE queries
     if (this.db) {
+      for (const queryUUID of this.liveQueries.values()) {
+        try {
+          await this.db.kill(queryUUID);
+        } catch (error) {
+          // Ignore errors when killing queries
+          console.warn('Error killing LIVE query:', error);
+        }
+      }
+      this.liveQueries.clear();
+
       await this.db.close();
       this.db = null;
     }

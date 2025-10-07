@@ -1,6 +1,6 @@
 {
   "name": "@orbzone/dotted-json",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Dynamic JSON data expansion using dot-prefixed property keys as expression triggers",
   "type": "module",
   "main": "./dist/index.js",
@@ -34,6 +34,10 @@
     "./plugins/pinia-colada": {
       "import": "./dist/plugins/pinia-colada.js",
       "types": "./dist/plugins/pinia-colada.d.ts"
+    },
+    "./plugins/surrealdb-pinia": {
+      "import": "./dist/plugins/surrealdb-pinia.js",
+      "types": "./dist/plugins/surrealdb-pinia.d.ts"
     },
     "./plugins/tanstack": {
       "import": "./dist/plugins/tanstack.js",
@@ -91,6 +95,9 @@
     "zod",
     "surrealdb",
     "database",
+    "realtime",
+    "live-queries",
+    "websocket",
     "vue",
     "react",
     "tanstack",
