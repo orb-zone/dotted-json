@@ -7,6 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-10-07
+
+### Added
+- **SurrealDBLoader**: High-performance SurrealDB storage provider for ions (variant documents)
+  - Array-based Record IDs: `ion:['baseName', 'lang', 'gender', 'form']`
+  - **10-100x performance improvement** over WHERE clause queries via range scans
+  - Full StorageProvider interface implementation
+  - Supports all SurrealDB auth types (root, namespace, database, scope)
+  - In-memory cache with configurable TTL (default: 60 seconds)
+  - Merge strategies: `replace`, `merge` (shallow), `deep-merge` (recursive)
+  - Optional Zod schema validation
+  - Dynamic import (peer dependency) - zero bundle impact
+
+- **Ion Naming Convention**: Aligned with AEON model
+  - Default table name: `ion` (not `jsön_documents`)
+  - "Ions" as code-name for variant-aware data objects
+  - Building block entities within the Aeonic platform
+
+### Changed
+- **Loaders now use separate export paths** to keep core bundle small:
+  ```typescript
+  import { FileLoader } from '@orbzone/dotted-json/loaders/file'
+  import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+  ```
+- Core bundle remains at **18.18 kB** (within 20 kB constitution limit)
+
+### Performance
+- SurrealDB range queries vs WHERE clauses: **10-100x faster** for variant resolution
+- Deterministic Record ID sorting enables efficient hierarchical queries
+- Zero bundle size impact (dynamic imports for optional loaders)
+
+### Testing
+- **All 209 tests passing** (including FileLoader CRUD and SurrealDB integration tests)
+- SurrealDB tests use mock implementation (peer dependency optional)
+
+### Documentation
+- SurrealDBLoader fully documented with JSDoc examples
+- Ion naming convention documented in codebase
+- Array Record ID format documented with performance rationale
+
+### Migration Guide
+No breaking changes. SurrealDBLoader is a new feature.
+
+To use SurrealDBLoader:
+```typescript
+import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+
+const loader = new SurrealDBLoader({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  auth: { type: 'root', username: 'root', password: 'root' }
+})
+
+await loader.init()
+
+// Save ion with variants
+await loader.save('strings', { hello: 'Hola' }, { lang: 'es', form: 'formal' })
+
+// Load with variant resolution
+const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
+```
+
+---
+
 ## [0.6.0] - 2025-10-07
 
 ### Added

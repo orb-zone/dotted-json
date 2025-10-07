@@ -1,289 +1,96 @@
 /**
- * SurrealDB loader with variant-aware document storage
+ * SurrealDB loader for ions (variant-aware document storage)
  *
- * Stores JSÖN documents in SurrealDB with:
- * - Array-based Record IDs for 10-100x faster queries
- * - Variant-aware resolution (language, formality, etc.)
- * - Real-time subscriptions via LIVE queries
- * - Full CRUD operations (load, save, list, delete)
+ * Uses array-based Record IDs for performant variant resolution:
+ * - ion:['strings', 'es', 'formal'] - Spanish formal strings
+ * - ion:['config', 'prod'] - Production config
+ * - ion:['user-prefs', 'alice'] - User-specific preferences
+ *
+ * Benefits:
+ * - 10-100x faster queries (Record ID ranges vs WHERE clauses)
+ * - Natural hierarchical sorting
+ * - No redundant base_name/variants fields
  *
  * @module @orbzone/dotted-json/loaders/surrealdb
  */
 
 import type { VariantContext } from '../types.js';
+import type { StorageProvider, SaveOptions, DocumentInfo, ListFilter } from '../types/storage.js';
+import { scoreVariantMatch } from '../variant-resolver.js';
+
+// SurrealDB types (will be properly typed if surrealdb is installed)
+type Surreal = any;
 
 /**
- * Storage provider interface for JSÖN documents
- *
- * All storage providers (File, SurrealDB, etc.) must implement this interface
+ * SurrealDB connection and authentication options
  */
-export interface StorageProvider {
+export interface SurrealDBLoaderOptions {
   /**
-   * Initialize the storage provider
-   *
-   * Called once before any operations. Throws if initialization fails.
-   */
-  init(): Promise<void>;
-
-  /**
-   * Load a document by base name and variants
-   *
-   * @param baseName - Document identifier (e.g., 'greetings', 'app-config')
-   * @param variants - Variant context for resolution (e.g., { lang: 'es', form: 'formal' })
-   * @returns Document data, or null if not found
-   *
-   * @throws Error if baseName is empty or invalid
-   */
-  load(baseName: string, variants?: VariantContext): Promise<any>;
-
-  /**
-   * Save a document with optional variants
-   *
-   * @param baseName - Document identifier
-   * @param data - Document contents
-   * @param variants - Variant context (e.g., { lang: 'es' })
-   * @param options - Save options (merge strategy, etc.)
-   *
-   * @throws Error if baseName is empty or data is invalid
-   */
-  save(
-    baseName: string,
-    data: any,
-    variants?: VariantContext,
-    options?: SaveOptions
-  ): Promise<void>;
-
-  /**
-   * List all documents matching a base name pattern
-   *
-   * @param pattern - Base name pattern (exact match or wildcard)
-   * @param variants - Optional variant filter
-   * @returns Array of document metadata
-   *
-   * @example
-   * ```typescript
-   * // List all variants of 'greetings'
-   * await loader.list('greetings');
-   * // → ['greetings:en', 'greetings:es', 'greetings:es:formal']
-   *
-   * // List all documents with lang=es
-   * await loader.list('*', { lang: 'es' });
-   * // → ['greetings:es', 'greetings:es:formal', 'errors:es']
-   * ```
-   */
-  list(pattern?: string, variants?: Partial<VariantContext>): Promise<DocumentMetadata[]>;
-
-  /**
-   * Delete a document by base name and variants
-   *
-   * @param baseName - Document identifier
-   * @param variants - Variant context (optional)
-   *
-   * @throws Error if document not found
-   */
-  delete(baseName: string, variants?: VariantContext): Promise<void>;
-
-  /**
-   * Subscribe to real-time updates for a document
-   *
-   * @param baseName - Document identifier
-   * @param callback - Called when document changes
-   * @param variants - Variant context (optional)
-   * @returns Unsubscribe function
-   */
-  subscribe?(
-    baseName: string,
-    callback: (data: any) => void,
-    variants?: VariantContext
-  ): Promise<() => void>;
-
-  /**
-   * Cleanup resources (close connections, etc.)
-   */
-  close?(): Promise<void>;
-}
-
-/**
- * Document metadata returned by list()
- */
-export interface DocumentMetadata {
-  /**
-   * Record ID (e.g., 'jsön_documents:["greetings", "es"]')
-   */
-  id: string;
-
-  /**
-   * Base document name (e.g., 'greetings')
-   */
-  baseName: string;
-
-  /**
-   * Variant context (e.g., { lang: 'es', form: 'formal' })
-   */
-  variants: VariantContext;
-
-  /**
-   * Last modified timestamp
-   */
-  updatedAt?: Date;
-
-  /**
-   * Creation timestamp
-   */
-  createdAt?: Date;
-
-  /**
-   * Document size in bytes (if available)
-   */
-  size?: number;
-}
-
-/**
- * Options for save() operation
- */
-export interface SaveOptions {
-  /**
-   * Merge strategy when document exists
-   *
-   * - 'replace': Overwrite entire document (default)
-   * - 'merge': Deep merge with existing document
-   * - 'error': Throw error if document exists
-   */
-  merge?: 'replace' | 'merge' | 'error';
-
-  /**
-   * Create document if it doesn't exist
-   *
-   * @default true
-   */
-  upsert?: boolean;
-
-  /**
-   * Additional metadata to store
-   */
-  metadata?: Record<string, any>;
-}
-
-/**
- * SurrealDB connection configuration
- */
-export interface SurrealDBConnection {
-  /**
-   * SurrealDB WebSocket URL
-   *
+   * SurrealDB connection URL
    * @example 'ws://localhost:8000/rpc'
-   * @example 'wss://db.example.com/rpc'
    */
   url: string;
 
   /**
-   * Namespace
+   * Namespace and database
    */
   namespace: string;
-
-  /**
-   * Database
-   */
   database: string;
 
   /**
-   * Authentication (optional)
+   * Authentication credentials
    */
   auth?: {
-    /**
-     * Authentication type
-     */
+    /** Auth type */
     type: 'root' | 'namespace' | 'database' | 'scope';
-
-    /**
-     * Username (for root/namespace/database auth)
-     */
+    /** Username (for root/namespace/database) */
     username?: string;
-
-    /**
-     * Password (for root/namespace/database auth)
-     */
+    /** Password (for root/namespace/database) */
     password?: string;
-
-    /**
-     * Scope name (for scope auth)
-     */
-    scope?: string;
-
-    /**
-     * Scope variables (for scope auth)
-     */
+    /** Access method (for scope) */
+    access?: string;
+    /** Scope variables (for scope) */
     variables?: Record<string, any>;
   };
-}
 
-/**
- * SurrealDB loader configuration
- */
-export interface SurrealDBLoaderOptions extends SurrealDBConnection {
   /**
-   * Table name for JSÖN documents
-   *
-   * @default 'jsön_documents'
+   * Table to store ions (variant documents)
+   * @default 'ion'
    */
   table?: string;
 
   /**
-   * Enable LIVE query subscriptions
-   *
-   * @default false
-   */
-  enableLiveQueries?: boolean;
-
-  /**
    * Cache loaded documents in memory
-   *
    * @default true
    */
   cache?: boolean;
 
   /**
    * Cache TTL in milliseconds
-   *
    * @default 60000 (1 minute)
    */
   cacheTTL?: number;
-
-  /**
-   * Automatically invalidate cache on save
-   *
-   * @default true
-   */
-  autoInvalidateCache?: boolean;
-
-  /**
-   * Priority order for variant resolution
-   *
-   * @default ['lang', 'form', 'gender']
-   */
-  variantPriority?: string[];
 }
 
 /**
- * Internal cache entry
+ * Cache entry with expiration
  */
 interface CacheEntry {
   data: any;
-  timestamp: number;
+  expiresAt: number;
 }
 
 /**
- * SurrealDB loader for JSÖN documents
+ * SurrealDB loader for ions (JSÖN documents with variant support)
  *
- * Uses array-based Record IDs for 10-100x faster queries:
- * - `jsön_documents:['greetings', 'es']` (O(log n) index lookup)
- * - vs WHERE base_name = 'greetings' AND variants.lang = 'es' (O(n) table scan)
+ * Implements StorageProvider interface with array-based Record IDs
+ * for performant variant resolution.
  *
  * @example
  * ```typescript
  * const loader = new SurrealDBLoader({
  *   url: 'ws://localhost:8000/rpc',
- *   namespace: 'my_app',
+ *   namespace: 'app',
  *   database: 'main',
  *   auth: {
  *     type: 'root',
@@ -294,122 +101,283 @@ interface CacheEntry {
  *
  * await loader.init();
  *
- * // Save document with variants
- * await loader.save('greetings', { hello: 'Hola' }, { lang: 'es' });
+ * // Save ion with variants
+ * await loader.save('strings', { hello: 'Hola' }, { lang: 'es', form: 'formal' });
  *
- * // Load best matching variant
- * const data = await loader.load('greetings', { lang: 'es', form: 'formal' });
+ * // Load with variant resolution
+ * const strings = await loader.load('strings', { lang: 'es', form: 'formal' });
+ * console.log(strings.hello);  // "Hola"
  * ```
  */
 export class SurrealDBLoader implements StorageProvider {
-  private db: any = null;
-  private initialized = false;
-  private options: Required<Omit<SurrealDBLoaderOptions, 'auth'>> & {
-    auth?: SurrealDBLoaderOptions['auth'];
-  };
+  private db: Surreal | null = null;
+  private options: Required<Omit<SurrealDBLoaderOptions, 'auth'>> & { auth?: SurrealDBLoaderOptions['auth'] };
   private cache = new Map<string, CacheEntry>();
-  private liveQueries = new Map<string, { queryId: string; callbacks: Set<Function> }>();
+  private initialized = false;
 
   constructor(options: SurrealDBLoaderOptions) {
     this.options = {
-      table: 'jsön_documents',
-      enableLiveQueries: false,
+      table: 'ion',
       cache: true,
-      cacheTTL: 60000,
-      autoInvalidateCache: true,
-      variantPriority: ['lang', 'form', 'gender'],
+      cacheTTL: 60000,  // 1 minute
       ...options
     };
   }
 
   /**
-   * Initialize SurrealDB connection
+   * Initialize connection to SurrealDB
    */
   async init(): Promise<void> {
     if (this.initialized) return;
 
     try {
-      // Dynamic import to avoid bundling surrealdb if not used
-      const { default: Surreal } = await import('surrealdb') as { default: any };
+      // Dynamic import of surrealdb (peer dependency)
+      const surrealdb = await import('surrealdb');
+      this.db = new surrealdb.default();
 
-      this.db = new Surreal();
       await this.db.connect(this.options.url);
-
-      // Authenticate if credentials provided
-      if (this.options.auth) {
-        const { type, username, password, scope, variables } = this.options.auth;
-
-        if (type === 'root' || type === 'namespace' || type === 'database') {
-          await this.db.signin({ username, password });
-        } else if (type === 'scope') {
-          await this.db.signin({ scope, ...variables });
-        }
-      }
-
-      // Select namespace and database
       await this.db.use({
         namespace: this.options.namespace,
         database: this.options.database
       });
 
+      if (this.options.auth) {
+        await this.authenticate();
+      }
+
       this.initialized = true;
-    } catch (error) {
-      throw new Error(
-        `Failed to initialize SurrealDBLoader: ${error instanceof Error ? error.message : error}`
-      );
+    } catch (error: any) {
+      if (error.message?.includes('Cannot find')) {
+        throw new Error(
+          'SurrealDB not installed. Install with: bun add surrealdb'
+        );
+      }
+      throw error;
     }
   }
 
   /**
-   * Load document with variant resolution
-   *
-   * Uses array Record ID range queries for fast lookup
+   * Authenticate with SurrealDB
    */
-  async load(baseName: string, variants: VariantContext = {}): Promise<any> {
-    this.ensureInitialized();
+  private async authenticate(): Promise<void> {
+    const { auth } = this.options;
+    if (!auth || !this.db) return;
 
-    if (!baseName || baseName.trim() === '') {
-      throw new Error('baseName is required and cannot be empty');
+    switch (auth.type) {
+      case 'root':
+      case 'namespace':
+      case 'database':
+        if (!auth.username || !auth.password) {
+          throw new Error(`${auth.type} auth requires username and password`);
+        }
+        await this.db.signin({
+          username: auth.username,
+          password: auth.password
+        });
+        break;
+
+      case 'scope':
+        if (!auth.access) {
+          throw new Error('Scope auth requires access method');
+        }
+        await this.db.signin({
+          namespace: this.options.namespace,
+          database: this.options.database,
+          access: auth.access,
+          variables: auth.variables || {}
+        });
+        break;
     }
+  }
 
-    // Check cache first
-    const cacheKey = this.getCacheKey(baseName, variants);
-    if (this.options.cache) {
-      const cached = this.getCached(cacheKey);
-      if (cached !== null) {
-        return cached;
+  /**
+   * Build array Record ID from base name and variants
+   *
+   * Format: [base_name, lang?, gender?, form?, ...custom]
+   * Well-known variants in priority order, custom variants alphabetically
+   *
+   * @example
+   * ```typescript
+   * buildRecordId('strings', { lang: 'es', form: 'formal' })
+   * // → ['strings', 'es', 'formal']
+   *
+   * buildRecordId('config', { env: 'prod' })
+   * // → ['config', 'prod']
+   * ```
+   */
+  private buildRecordId(baseName: string, variants: VariantContext = {}): any[] {
+    const parts = [baseName];
+
+    // Well-known variants in priority order
+    if (variants.lang) parts.push(variants.lang);
+    if (variants.gender) parts.push(variants.gender);
+    if (variants.form) parts.push(variants.form);
+
+    // Custom variants in alphabetical order
+    const customKeys = Object.keys(variants)
+      .filter(k => k !== 'lang' && k !== 'gender' && k !== 'form')
+      .sort();
+
+    for (const key of customKeys) {
+      const value = variants[key];
+      if (typeof value === 'string') {
+        parts.push(value);
       }
     }
 
-    // Build Record ID for exact match
-    const recordID = this.makeRecordID(baseName, variants);
-
-    // Try exact match first
-    let result = await this.db.select([this.options.table, recordID]);
-
-    // If no exact match, try range query for partial matches
-    if (!result) {
-      result = await this.findBestMatch(baseName, variants);
-    }
-
-    if (!result) {
-      return null;
-    }
-
-    const data = result.data;
-
-    // Cache result
-    if (this.options.cache && data) {
-      this.setCached(cacheKey, data);
-    }
-
-    return data;
+    return parts;
   }
 
   /**
-   * Save document with variants
+   * Parse array Record ID into base name and variants
    *
-   * Creates/updates document with array-based Record ID
+   * Inverse of buildRecordId()
+   */
+  private parseRecordId(recordId: any[]): { baseName: string; variants: VariantContext } {
+    if (!Array.isArray(recordId) || recordId.length === 0) {
+      throw new Error('Invalid Record ID: expected array with at least base_name');
+    }
+
+    const baseName = recordId[0];
+    const variants: VariantContext = {};
+
+    // Well-known variant positions
+    if (recordId[1]) {
+      // Could be lang, gender, form, or custom
+      // Try to detect based on pattern
+      if (/^[a-z]{2}(-[A-Z]{2})?$/.test(recordId[1])) {
+        variants.lang = recordId[1];
+      } else if (/^[mfx]$/.test(recordId[1])) {
+        variants.gender = recordId[1] as 'm' | 'f' | 'x';
+      } else if (/^(casual|informal|neutral|polite|formal|honorific)$/.test(recordId[1])) {
+        variants.form = recordId[1];
+      } else {
+        // Custom variant
+        variants[recordId[1]] = recordId[1];
+      }
+    }
+
+    if (recordId[2]) {
+      if (/^[mfx]$/.test(recordId[2])) {
+        variants.gender = recordId[2] as 'm' | 'f' | 'x';
+      } else if (/^(casual|informal|neutral|polite|formal|honorific)$/.test(recordId[2])) {
+        variants.form = recordId[2];
+      } else {
+        variants[recordId[2]] = recordId[2];
+      }
+    }
+
+    if (recordId[3]) {
+      if (/^(casual|informal|neutral|polite|formal|honorific)$/.test(recordId[3])) {
+        variants.form = recordId[3];
+      } else {
+        variants[recordId[3]] = recordId[3];
+      }
+    }
+
+    // Remaining are custom variants
+    for (let i = 4; i < recordId.length; i++) {
+      variants[recordId[i]] = recordId[i];
+    }
+
+    return { baseName, variants };
+  }
+
+  /**
+   * Load ion with variant resolution
+   *
+   * Uses range query for efficient variant matching:
+   * 1. Query all ions with matching base_name prefix
+   * 2. Score candidates using variant resolver
+   * 3. Return best match
+   */
+  async load(baseName: string, variants: VariantContext = {}): Promise<any> {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.db) {
+      throw new Error('SurrealDB not initialized');
+    }
+
+    // Check cache
+    const cacheKey = this.getCacheKey(baseName, variants);
+    if (this.options.cache) {
+      const cached = this.cache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        return cached.data;
+      }
+    }
+
+    // Build range query for all ions with this base_name
+    // Range: [baseName] to [baseName, '\uffff'] catches all variants
+    const startId = [baseName];
+    const endId = [baseName, '\uffff'];
+
+    const query = `
+      SELECT * FROM type::table($table)
+      WHERE id >= type::thing($table, $startId)
+        AND id < type::thing($table, $endId)
+    `;
+
+    const [result] = await this.db.query(query, {
+      table: this.options.table,
+      startId,
+      endId
+    });
+
+    const candidates = result as any[];
+
+    if (!candidates || candidates.length === 0) {
+      throw new Error(`Ion not found: ${baseName} (variants: ${JSON.stringify(variants)})`);
+    }
+
+    // Resolve best matching variant
+    const bestMatch = this.resolveBestVariant(candidates, variants);
+
+    // Cache result
+    if (this.options.cache) {
+      this.cache.set(cacheKey, {
+        data: bestMatch.data,
+        expiresAt: Date.now() + this.options.cacheTTL
+      });
+    }
+
+    return bestMatch.data;
+  }
+
+  /**
+   * Resolve best matching document based on variant scoring
+   */
+  private resolveBestVariant(candidates: any[], contextVariants: VariantContext): any {
+    if (candidates.length === 1) {
+      return candidates[0];
+    }
+
+    // Score each candidate
+    let bestScore = -1;
+    let bestMatch = candidates[0];
+
+    for (const candidate of candidates) {
+      // Parse Record ID to get variants
+      const { variants: docVariants } = this.parseRecordId(candidate.id);
+
+      // Score match
+      const score = scoreVariantMatch(docVariants, contextVariants);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = candidate;
+      }
+    }
+
+    return bestMatch;
+  }
+
+  /**
+   * Save ion to SurrealDB
+   *
+   * Uses array Record ID for efficient variant storage
    */
   async save(
     baseName: string,
@@ -417,318 +385,192 @@ export class SurrealDBLoader implements StorageProvider {
     variants: VariantContext = {},
     options: SaveOptions = {}
   ): Promise<void> {
-    this.ensureInitialized();
-
-    if (!baseName || baseName.trim() === '') {
-      throw new Error('baseName is required and cannot be empty');
+    if (!this.initialized) {
+      await this.init();
     }
 
-    const { merge = 'replace', metadata = {} } = options;
+    if (!this.db) {
+      throw new Error('SurrealDB not initialized');
+    }
+
+    const {
+      upsert = true,
+      schema,
+      strategy = 'replace',
+      metadata = {}
+    } = options;
+
+    // Validate with Zod if schema provided
+    if (schema) {
+      schema.parse(data);
+    }
 
     // Build Record ID
-    const recordID = this.makeRecordID(baseName, variants);
-    const fullID = [this.options.table, recordID];
+    const recordIdArray = this.buildRecordId(baseName, variants);
+    const recordId = `${this.options.table}:${JSON.stringify(recordIdArray)}`;
 
-    // Check if document exists
-    const existing = await this.db.select(fullID);
+    // Build document
+    let documentData = data;
 
-    if (existing && merge === 'error') {
-      throw new Error(`Document already exists: ${baseName} with variants ${JSON.stringify(variants)}`);
+    // Handle merge strategies
+    if (strategy !== 'replace' && upsert) {
+      try {
+        // Try to load existing
+        const existing = await this.db.select(recordId);
+        if (existing && existing.length > 0) {
+          const existingDoc = existing[0];
+
+          if (strategy === 'merge') {
+            // Shallow merge
+            documentData = { ...existingDoc.data, ...data };
+          } else if (strategy === 'deep-merge') {
+            // Deep merge
+            documentData = this.deepMerge(existingDoc.data, data);
+          }
+        }
+      } catch (error) {
+        // Document doesn't exist - will create new
+      }
     }
 
-    // Prepare document
-    const document: Record<string, any> = {
-      base_name: baseName,
-      variants: variants || {},
-      data,
-      ...metadata,
-      updated_at: new Date().toISOString()
+    // Create/update ion record
+    const record: any = {
+      data: documentData,
+      updated_at: new Date().toISOString(),
+      ...metadata
     };
 
-    if (!existing) {
-      document.created_at = new Date().toISOString();
-    }
-
-    // Save document
-    if (merge === 'merge' && existing) {
-      // Deep merge with existing data
-      await this.db.merge(fullID, {
-        data: this.deepMerge(existing.data, data),
-        updated_at: document.updated_at
-      });
+    if (upsert) {
+      // Upsert (create or update)
+      await this.db.upsert(recordId, record);
     } else {
-      // Replace or create
-      await this.db.update(fullID, document);
+      // Create only
+      record.created_at = new Date().toISOString();
+      await this.db.create(recordId, record);
     }
 
     // Invalidate cache
-    if (this.options.autoInvalidateCache) {
-      this.invalidateCache(baseName, variants);
-    }
+    const cacheKey = this.getCacheKey(baseName, variants);
+    this.cache.delete(cacheKey);
   }
 
   /**
-   * List documents matching pattern and variants
+   * List available ions
+   *
+   * Uses range queries for efficient filtering
    */
-  async list(pattern: string = '*', variants?: Partial<VariantContext>): Promise<DocumentMetadata[]> {
-    this.ensureInitialized();
+  async list(filter: ListFilter = {}): Promise<DocumentInfo[]> {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    if (!this.db) {
+      throw new Error('SurrealDB not initialized');
+    }
 
     let query: string;
-    const params: Record<string, any> = {};
+    let params: Record<string, any>;
 
-    if (pattern === '*' && !variants) {
-      // List all documents
-      query = `SELECT * FROM ${this.options.table}`;
-    } else if (pattern !== '*' && !variants) {
-      // List all variants of a base name
-      params.baseName = pattern;
-      query = `SELECT * FROM ${this.options.table} WHERE base_name = $baseName`;
+    if (filter.baseName) {
+      // Range query for specific base_name
+      const startId = [filter.baseName];
+      const endId = [filter.baseName, '\uffff'];
+
+      query = `
+        SELECT * FROM type::table($table)
+        WHERE id >= type::thing($table, $startId)
+          AND id < type::thing($table, $endId)
+      `;
+      params = {
+        table: this.options.table,
+        startId,
+        endId
+      };
     } else {
-      // List with variant filter
-      query = `SELECT * FROM ${this.options.table} WHERE base_name = $baseName`;
-      params.baseName = pattern === '*' ? null : pattern;
-
-      // Add variant filters
-      if (variants) {
-        const conditions: string[] = [];
-        if (params.baseName) {
-          conditions.push('base_name = $baseName');
-        }
-
-        for (const [key, value] of Object.entries(variants)) {
-          if (value !== undefined) {
-            const paramKey = `variant_${key}`;
-            params[paramKey] = value;
-            conditions.push(`variants.${key} = $${paramKey}`);
-          }
-        }
-
-        query = `SELECT * FROM ${this.options.table} WHERE ${conditions.join(' AND ')}`;
-      }
+      // List all ions
+      query = `SELECT * FROM type::table($table)`;
+      params = { table: this.options.table };
     }
 
-    const result = await this.db.query(query, params);
-    const documents = result[0] || [];
+    const [result] = await this.db.query(query, params);
+    let ions = result as any[];
 
-    return documents.map((doc: any) => ({
-      id: doc.id,
-      baseName: doc.base_name,
-      variants: doc.variants || {},
-      createdAt: doc.created_at ? new Date(doc.created_at) : undefined,
-      updatedAt: doc.updated_at ? new Date(doc.updated_at) : undefined
-    }));
+    // Apply variant filter
+    if (filter.variants) {
+      ions = ions.filter(ion => {
+        const { variants: ionVariants } = this.parseRecordId(ion.id);
+
+        for (const [key, value] of Object.entries(filter.variants!)) {
+          if (ionVariants[key] !== value) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    // Convert to DocumentInfo
+    return ions.map(ion => {
+      const { baseName, variants } = this.parseRecordId(ion.id);
+      const variantStr = Object.values(variants)
+        .join(':');
+
+      return {
+        baseName,
+        variants,
+        fullName: baseName + (variantStr ? ':' + variantStr : ''),
+        identifier: ion.id,
+        metadata: {
+          createdAt: ion.created_at ? new Date(ion.created_at) : undefined,
+          updatedAt: ion.updated_at ? new Date(ion.updated_at) : undefined,
+          version: ion.version
+        }
+      };
+    });
   }
 
   /**
-   * Delete document by base name and variants
+   * Delete ion from SurrealDB
    */
   async delete(baseName: string, variants: VariantContext = {}): Promise<void> {
-    this.ensureInitialized();
-
-    if (!baseName || baseName.trim() === '') {
-      throw new Error('baseName is required and cannot be empty');
+    if (!this.initialized) {
+      await this.init();
     }
 
-    const recordID = this.makeRecordID(baseName, variants);
-    const fullID = [this.options.table, recordID];
+    if (!this.db) {
+      throw new Error('SurrealDB not initialized');
+    }
 
-    const result = await this.db.delete(fullID);
+    // Build Record ID
+    const recordIdArray = this.buildRecordId(baseName, variants);
+    const recordId = `${this.options.table}:${JSON.stringify(recordIdArray)}`;
 
-    if (!result) {
-      throw new Error(`Document not found: ${baseName} with variants ${JSON.stringify(variants)}`);
+    // Delete ion
+    const deleted = await this.db.delete(recordId);
+
+    if (!deleted || deleted.length === 0) {
+      throw new Error(`Ion not found: ${baseName} (variants: ${JSON.stringify(variants)})`);
     }
 
     // Invalidate cache
-    if (this.options.autoInvalidateCache) {
-      this.invalidateCache(baseName, variants);
-    }
-  }
-
-  /**
-   * Subscribe to real-time updates via LIVE query
-   */
-  async subscribe(
-    baseName: string,
-    callback: (data: any) => void,
-    variants: VariantContext = {}
-  ): Promise<() => void> {
-    this.ensureInitialized();
-
-    if (!this.options.enableLiveQueries) {
-      throw new Error('LIVE queries not enabled. Set enableLiveQueries: true in options.');
-    }
-
     const cacheKey = this.getCacheKey(baseName, variants);
-
-    // Check if LIVE query already exists for this document
-    let liveQuery = this.liveQueries.get(cacheKey);
-
-    if (!liveQuery) {
-      // Create new LIVE query
-      const recordID = this.makeRecordID(baseName, variants);
-      const fullID = `${this.options.table}:${JSON.stringify(recordID)}`;
-
-      const queryId = await this.db.live(fullID, (_action: string, result: any) => {
-        // Notify all subscribers
-        const callbacks = this.liveQueries.get(cacheKey)?.callbacks;
-        if (callbacks) {
-          for (const cb of callbacks) {
-            cb(result?.data);
-          }
-        }
-
-        // Update cache
-        if (this.options.cache && result?.data) {
-          this.setCached(cacheKey, result.data);
-        }
-      });
-
-      liveQuery = {
-        queryId,
-        callbacks: new Set([callback])
-      };
-
-      this.liveQueries.set(cacheKey, liveQuery);
-    } else {
-      // Add callback to existing LIVE query
-      liveQuery.callbacks.add(callback);
-    }
-
-    // Return unsubscribe function
-    return () => {
-      const query = this.liveQueries.get(cacheKey);
-      if (query) {
-        query.callbacks.delete(callback);
-
-        // Kill LIVE query if no more subscribers
-        if (query.callbacks.size === 0) {
-          this.db.kill(query.queryId);
-          this.liveQueries.delete(cacheKey);
-        }
-      }
-    };
+    this.cache.delete(cacheKey);
   }
 
   /**
-   * Close SurrealDB connection and cleanup resources
+   * Close connection and cleanup resources
    */
   async close(): Promise<void> {
-    if (!this.initialized) return;
-
-    // Kill all LIVE queries
-    for (const { queryId } of this.liveQueries.values()) {
-      try {
-        await this.db.kill(queryId);
-      } catch (error) {
-        // Ignore errors on cleanup
-      }
+    if (this.db) {
+      await this.db.close();
+      this.db = null;
     }
-
-    this.liveQueries.clear();
     this.cache.clear();
-
-    await this.db.close();
     this.initialized = false;
   }
 
   /**
-   * Generate array-based Record ID from base name and variants
-   *
-   * Priority order ensures consistent sorting:
-   * 1. lang (most common)
-   * 2. form (formality level)
-   * 3. gender
-   * 4. Other variants (alphabetically)
-   *
-   * Examples:
-   * - makeRecordID('greetings', { lang: 'es' }) → ['greetings', 'es']
-   * - makeRecordID('greetings', { lang: 'es', form: 'formal' }) → ['greetings', 'es', 'formal']
-   * - makeRecordID('profile', { gender: 'f' }) → ['profile', '', '', 'f']
-   */
-  private makeRecordID(baseName: string, variants: VariantContext = {}): any[] {
-    const id: any[] = [baseName];
-
-    // Add variants in priority order
-    for (const key of this.options.variantPriority) {
-      id.push(variants[key] || '');
-    }
-
-    // Add remaining variants alphabetically
-    const remaining = Object.keys(variants)
-      .filter(key => !this.options.variantPriority.includes(key))
-      .sort();
-
-    for (const key of remaining) {
-      id.push(variants[key]);
-    }
-
-    // Trim trailing empty strings
-    while (id.length > 1 && id[id.length - 1] === '') {
-      id.pop();
-    }
-
-    return id;
-  }
-
-  /**
-   * Find best matching document using range query
-   *
-   * Tries progressively less specific variants until match found
-   */
-  private async findBestMatch(baseName: string, variants: VariantContext): Promise<any> {
-    // Build candidates by removing variants one by one
-    const candidates: VariantContext[] = [variants];
-
-    // Try removing each variant
-    for (const key of Object.keys(variants)) {
-      const partial = { ...variants };
-      delete partial[key];
-      candidates.push(partial);
-    }
-
-    // Try base document (no variants)
-    candidates.push({});
-
-    // Try each candidate in order
-    for (const candidate of candidates) {
-      const recordID = this.makeRecordID(baseName, candidate);
-      const result = await this.db.select([this.options.table, recordID]);
-
-      if (result) {
-        return result;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Deep merge two objects
-   */
-  private deepMerge(target: any, source: any): any {
-    if (typeof source !== 'object' || source === null) {
-      return source;
-    }
-
-    if (Array.isArray(source)) {
-      return source;
-    }
-
-    const merged = { ...target };
-
-    for (const key in source) {
-      if (typeof source[key] === 'object' && !Array.isArray(source[key]) && source[key] !== null) {
-        merged[key] = this.deepMerge(merged[key] || {}, source[key]);
-      } else {
-        merged[key] = source[key];
-      }
-    }
-
-    return merged;
-  }
-
-  /**
-   * Get cache key from base name and variants
+   * Generate cache key from base name + sorted variants
    */
   private getCacheKey(baseName: string, variants: VariantContext): string {
     const sorted = Object.keys(variants).sort();
@@ -737,131 +579,29 @@ export class SurrealDBLoader implements StorageProvider {
   }
 
   /**
-   * Get cached value if still valid
+   * Deep merge two objects recursively
    */
-  private getCached(key: string): any | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-
-    const now = Date.now();
-    if (now - entry.timestamp > this.options.cacheTTL) {
-      this.cache.delete(key);
-      return null;
+  private deepMerge(target: any, source: any): any {
+    if (typeof target !== 'object' || target === null ||
+        typeof source !== 'object' || source === null) {
+      return source;
     }
 
-    return entry.data;
-  }
-
-  /**
-   * Set cached value
-   */
-  private setCached(key: string, data: any): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now()
-    });
-  }
-
-  /**
-   * Invalidate cache for a document
-   */
-  private invalidateCache(baseName: string, variants: VariantContext): void {
-    const key = this.getCacheKey(baseName, variants);
-    this.cache.delete(key);
-  }
-
-  /**
-   * Ensure loader is initialized before operations
-   */
-  private ensureInitialized(): void {
-    if (!this.initialized) {
-      throw new Error('SurrealDBLoader not initialized. Call init() first.');
+    if (Array.isArray(source)) {
+      return source;  // Arrays replaced entirely
     }
-  }
 
-  /**
-   * Get cache statistics
-   */
-  getCacheStats() {
-    return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
-      liveQueries: this.liveQueries.size
-    };
-  }
+    const result = { ...target };
 
-  /**
-   * Clear cache
-   */
-  clearCache(): void {
-    this.cache.clear();
-  }
-}
-
-/**
- * Plugin factory for SurrealDB integration
- *
- * @example
- * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withSurrealDB } from '@orbzone/dotted-json/loaders/surrealdb';
- *
- * const plugin = await withSurrealDB({
- *   url: 'ws://localhost:8000/rpc',
- *   namespace: 'my_app',
- *   database: 'main'
- * });
- *
- * const data = dotted(
- *   {
- *     '.config': 'db.load("app-config")'
- *   },
- *   {
- *     resolvers: plugin.resolvers
- *   }
- * );
- * ```
- */
-export async function withSurrealDB(options: SurrealDBLoaderOptions) {
-  const loader = new SurrealDBLoader(options);
-  await loader.init();
-
-  return {
-    resolvers: {
-      db: {
-        /**
-         * Load document from SurrealDB
-         */
-        async load(this: any, baseName: string, variants?: VariantContext) {
-          const ctx = this?.variants || variants || {};
-          return await loader.load(baseName, ctx);
-        },
-
-        /**
-         * Save document to SurrealDB
-         */
-        async save(this: any, baseName: string, data: any, variants?: VariantContext) {
-          const ctx = this?.variants || variants || {};
-          return await loader.save(baseName, data, ctx);
-        },
-
-        /**
-         * List documents
-         */
-        async list(pattern?: string, variants?: Partial<VariantContext>) {
-          return await loader.list(pattern, variants);
-        },
-
-        /**
-         * Delete document
-         */
-        async delete(baseName: string, variants?: VariantContext) {
-          return await loader.delete(baseName, variants);
-        }
+    for (const [key, value] of Object.entries(source)) {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value) &&
+          typeof result[key] === 'object' && result[key] !== null && !Array.isArray(result[key])) {
+        result[key] = this.deepMerge(result[key], value);
+      } else {
+        result[key] = value;
       }
-    },
+    }
 
-    // Expose loader for advanced usage
-    __loader: loader
-  };
+    return result;
+  }
 }

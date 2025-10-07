@@ -27,6 +27,18 @@ export {
   PRONOUNS
 } from './pronouns.js';
 
+export type {
+  StorageProvider,
+  SaveOptions,
+  DocumentInfo,
+  ListFilter,
+  MergeStrategy
+} from './types/storage.js';
+
+// Note: Loaders are available via separate export paths to keep core bundle small
+// import { FileLoader } from '@orbzone/dotted-json/loaders/file'
+// import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+
 import { DottedJson } from './dotted-json.js';
 import type { DottedOptions } from './types.js';
 

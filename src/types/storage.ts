@@ -11,6 +11,11 @@ import type { VariantContext } from '../types.js';
 type ZodType = any;
 
 /**
+ * Merge strategy for save operations
+ */
+export type MergeStrategy = 'replace' | 'merge' | 'deep-merge';
+
+/**
  * Storage provider interface for JSÖN documents
  *
  * All storage backends (filesystem, SurrealDB, etc.) implement this interface
@@ -149,7 +154,7 @@ export interface SaveOptions {
    * - `merge`: Shallow merge (Object.assign)
    * - `deep-merge`: Deep merge (recursive)
    */
-  strategy?: 'replace' | 'merge' | 'deep-merge';
+  strategy?: MergeStrategy;
 
   /**
    * Provider-specific metadata
