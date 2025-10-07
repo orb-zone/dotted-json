@@ -1,14 +1,35 @@
 # dotted-json (jsön) - Product Roadmap
 
-**Current Version**: v0.8.0-dev
+**Current Version**: v0.7.0
 **Last Updated**: 2025-10-07
-**Status**: Implementation phase - Function auto-discovery & TypeScript codegen complete
+**Status**: Foundation complete - AEON/ION architecture design phase
 
 ---
 
-## 📍 Current State (v0.8.0-dev)
+## 📍 Current State (v0.7.0)
 
-### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.8.0)
+### ✅ AEON/ION Architecture Design Complete
+
+#### Design Documents (2 comprehensive specs)
+- [x] **aeon-entity-hierarchy.md** - Complete A-H layer taxonomy (935 lines)
+  - Layer definitions (ION, ART, BIO, COG, DOT, ECO, FAD, GEN, HUB)
+  - Graph edge patterns and reusability
+  - Subdomain architecture (DNS → entity mapping)
+  - Inheritance queries and anti-patterns
+  - Multi-tenant SaaS use cases
+
+- [x] **aeonic-vision.md** - Framework vision and ecosystem (830 lines)
+  - AEON/ION nomenclature and core concepts
+  - Web-craft ecosystem (dotted-json → surrounded → aeonic)
+  - Full-stack ION flow examples
+  - Package relationship diagrams
+  - Design principles across all layers
+
+**Status**: Foundation design complete, ready for v2.0.0 monorepo implementation
+
+---
+
+### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.7.0)
 
 #### Storage & Persistence (v0.6.0) ✅
 - [x] **StorageProvider Interface** - Unified API for JSÖN document storage
