@@ -31,6 +31,9 @@
  * ```
  */
 
+import { discoverFunctions, parseFunctionsFromSchema } from './surrealdb/function-discovery.js';
+import { generateFunctionResolvers } from './surrealdb/resolver-generator.js';
+
 // Use dynamic import to support optional peer dependency
 type Surreal = any;
 type ZodType = any;
@@ -135,6 +138,22 @@ export interface SurrealDBOptions {
    * @example [{ name: 'getProfile', params: UserIdSchema, returns: ProfileSchema }]
    */
   functions?: FunctionDefinition[];
+
+  /**
+   * Auto-discover custom functions from SurrealDB using INFO FOR DATABASE
+   *
+   * When enabled, automatically generates resolvers for all DEFINE FUNCTION statements
+   * @default false
+   */
+  autoDiscoverFunctions?: boolean;
+
+  /**
+   * Path to .surql schema file for function discovery
+   *
+   * Alternative to runtime discovery via autoDiscoverFunctions
+   * @example './schema.surql'
+   */
+  schemaFile?: string;
 
   /**
    * Custom resolvers (string queries or functions)
@@ -459,6 +478,53 @@ export async function withSurrealDB(
     db: {},
     fn: {}
   };
+
+  // Auto-discover functions from SurrealDB or schema file
+  if (options.autoDiscoverFunctions || options.schemaFile) {
+    try {
+      let functions;
+
+      if (options.schemaFile) {
+        // Parse from .surql file
+        const { readFileSync } = await import('fs');
+        const schemaContent = readFileSync(options.schemaFile, 'utf-8');
+        functions = parseFunctionsFromSchema(schemaContent);
+
+        if (options.debug) {
+          console.log(`[surrealdb] Discovered ${functions.length} functions from ${options.schemaFile}`);
+        }
+      } else {
+        // Runtime discovery via INFO FOR DATABASE
+        functions = await discoverFunctions(client.getDB());
+
+        if (options.debug) {
+          console.log(`[surrealdb] Auto-discovered ${functions.length} functions from database`);
+        }
+      }
+
+      // Generate resolvers from discovered functions
+      const autoResolvers = generateFunctionResolvers(
+        client.getDB(),
+        functions,
+        { debug: options.debug }
+      );
+
+      // Merge auto-generated resolvers
+      for (const [namespace, fns] of Object.entries(autoResolvers)) {
+        if (!resolvers[namespace]) {
+          resolvers[namespace] = {};
+        }
+        Object.assign(resolvers[namespace], fns);
+      }
+
+      if (options.debug) {
+        console.log('[surrealdb] Auto-generated resolvers:', Object.keys(autoResolvers));
+      }
+    } catch (error) {
+      console.error('[surrealdb] Function discovery failed:', error);
+      // Continue without auto-generated resolvers
+    }
+  }
 
   // Generate CRUD resolvers for each table
   if (options.tables && options.tables.length > 0) {
