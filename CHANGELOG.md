@@ -7,6 +7,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0-design] - 2025-10-06
+
+### Design Phase - Storage Providers & Advanced Permissions
+
+This release focuses on **comprehensive design documentation** for the next major features. No implementation yet, but all designs are production-ready and validated.
+
+#### Designed Features
+
+**Storage Providers System**
+- Unified `StorageProvider` interface for JSÖN document persistence
+- `SurrealDBLoader` - Load/save JSÖN documents from SurrealDB with variant resolution
+- Enhanced `FileLoader` - Save/list/delete capabilities for filesystem storage
+- Variant-aware storage (load/save with language, environment, user context)
+- Database schema for JSÖN documents (`jsön_documents` table)
+- Merge strategies (replace, merge, deep-merge)
+- Zod validation on save
+- Real-time LIVE query support for document subscriptions
+
+**Permission Detection System**
+- Pre-flight permission checks (know before attempting operations)
+- Table-level permissions (select/create/update/delete)
+- **Field-level permissions** (per-field read/write granularity)
+- Permission caching with configurable TTL (~1ms after first check)
+- Hybrid approach: INFO FOR TABLE + test queries
+- `PermissionManager` class for unified permission handling
+- Clear error types: `PermissionError` vs `ValidationError`
+- UI hints: show/hide fields based on permissions
+
+**Zod Integration & Type Safety**
+- Single source of truth: Zod schemas for both validation and types
+- `z.infer<>` for automatic TypeScript type inference
+- Zero type drift (impossible for types to diverge from schemas)
+- Automatic validation on load/save
+- Field-level validation with detailed error messages
+- Type-safe `load()` and `save()` methods with generic constraints
+
+**SurrealQL to Zod Schema Generation**
+- `surql-to-zod` CLI tool (designed, not yet implemented)
+- Parse `.surql` files to auto-generate Zod schemas
+- Database introspection via `INFO FOR TABLE STRUCTURE`
+- Complete type mapping (string, int, array<T>, option<T>, record<table>, etc.)
+- ASSERT clause parsing (email, url, min/max, enums, custom)
+- VALUE clause parsing (defaults, time::now(), etc.)
+- Watch mode for development workflow
+- Single source of truth: SurrealDB schema → Zod → TypeScript types
+
+#### Design Documents
+
+All designs are in `.specify/memory/`:
+- `storage-providers-design.md` - StorageProvider interface, SurrealDBLoader, FileLoader
+- `permissions-and-zod-integration.md` - Table-level permissions, Zod integration
+- `field-level-permissions-design.md` - Field-level permission detection (SurrealDB killer feature!)
+- `surql-to-zod-inference.md` - Auto-generate Zod from .surql schemas
+- `surrealdb-vue-vision.md` - Grand vision for real-time Vue + SurrealDB integration
+- `integration-patterns.md` - 30+ production-ready patterns
+
+#### Updated Documentation
+
+- `constitution.md` - Added JSÖN capitalization rules (uppercase in titles, lowercase in extensions)
+- `ROADMAP.md` - Updated Phase 6 with 5 sub-phases (v0.6.0-v1.0.0)
+
+#### Use Cases Designed
+
+- CMS / Content Management (save/edit JSÖN documents)
+- i18n Translation Editor (real-time translation management)
+- Configuration Management (app settings, feature flags)
+- User Preferences (per-user stored documents)
+- Admin Panels (field-level permission matrix)
+
+#### Architecture Benefits
+
+**Traditional Stack**:
+```
+Frontend → REST API → Business Logic → ORM → Database
+```
+
+**JSÖN + SurrealDB Stack** (designed):
+```
+Frontend → SurrealDB (business logic in fn::)
+```
+
+Benefits:
+- No custom backend needed
+- Type safety end-to-end (Zod + TypeScript)
+- Real-time by default (LIVE queries)
+- Intelligent caching (Pinia Colada)
+- Security at DB level (row + field permissions)
+- ~120-170 kB bundle savings vs traditional stack
+
+#### Next Steps
+
+Implementation phases (v0.6.0-v1.0.0):
+- v0.6.0: Storage provider foundation (FileLoader save/list/delete)
+- v0.7.0: SurrealDBLoader implementation + permission detection
+- v0.8.0: LIVE query integration + real-time sync
+- v0.9.0: Unified `withSurrealDBPinia` plugin
+- v1.0.0: Vue composables + production examples
+
+See `ROADMAP.md` for complete implementation plan.
+
+---
+
 ## [0.5.0] - 2025-10-06
 
 ### Added

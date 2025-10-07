@@ -200,6 +200,25 @@ Every public API MUST have:
 - Entry in README.md or plugin-specific doc (e.g., ZOD-INTEGRATION.md)
 - Migration guide if deprecating existing API
 
+### Naming Conventions
+
+**JSÖN Capitalization** (added 2025-10-06):
+
+- **Titles and headings**: Use uppercase acronym format "JSÖN"
+  - ✅ "JSÖN Document Provider"
+  - ✅ "SurrealDB JSÖN Storage"
+  - ❌ "jsön Document Provider"
+
+- **File extensions**: Use lowercase ".jsön"
+  - ✅ `strings.jsön`, `config:prod.jsön`
+  - ❌ `strings.JSÖN`
+
+- **Code/variables**: Use lowercase when referring to file extensions
+  - ✅ `extensions: ['.jsön', '.json']`
+  - ❌ `extensions: ['.JSÖN', '.JSON']`
+
+**Rationale**: Uppercase "JSÖN" in titles emphasizes the library name as a proper acronym/brand. Lowercase ".jsön" in file extensions follows Unix convention for file extensions (e.g., .json, .yaml, .xml).
+
 ## Governance
 
 ### Amendment Procedure
