@@ -1,10 +1,291 @@
 # Aeonic Framework Vision
 
 **AEON**: **A**daptive **E**ntity **O**bjective **N**etwork
+**ION**: **I**nteractive **O**bject **N**ode (atomic building block)
 
-**Version**: 0.1.0-vision
+**Version**: 0.1.1-vision
 **Status**: Conceptual (planned for v2.0.0+ monorepo)
 **Last Updated**: 2025-10-07
+
+---
+
+## Core Concepts
+
+### AEON Model
+
+The **AEON model** is a graph-based architecture where entities form an adaptive network that responds to context, objectives, and relationships.
+
+**A**daptive - Applications respond to context (user, locale, permissions, environment)
+**E**ntity - Strongly-typed nodes in the graph (User, Team, Role, etc.)
+**O**bjective - Business logic defined as database functions with clear goals
+**N**etwork - Entities connected through SurrealDB graph relations
+
+### ION (Interactive Object Node)
+
+**IONs** are the atomic building blocks of the AEON model - variant-aware data objects that:
+
+- **Interactive**: Respond to variant context (language, user, environment, formality)
+- **Object**: Structured data with schema validation
+- **Node**: Exists in a graph network with relationships to other entities
+
+**Storage Format**: SurrealDB table `ion` with array-based Record IDs
+- Format: `ion:['baseName', 'lang', 'gender', 'form', ...custom]`
+- Example: `ion:['welcome', 'es', 'neutral', 'formal']`
+- Benefits: 10-100x faster queries via range scans vs WHERE clauses
+
+**Use Cases**:
+- i18n translation strings (variant: language, formality, gender)
+- User preferences (variant: userId, environment)
+- Configuration data (variant: environment, region)
+- Multi-tenant content (variant: teamId, locale)
+
+**ION Lifecycle in AEON**:
+1. **Creation**: IONs are created with variant dimensions (lang, env, userId, etc.)
+2. **Storage**: Stored in SurrealDB `ion` table with array Record IDs
+3. **Resolution**: Queried via range scans for optimal performance
+4. **Adaptation**: Best-match variant selected based on context scoring
+5. **Interaction**: Consumed by UI components via composables (Vue/React)
+6. **Evolution**: Variants added/updated without schema migrations
+
+---
+
+## Web-Craft Ecosystem: AEON/ION Across the Monorepo
+
+The AEON/ION model provides a unified mental framework across all `@orbzone` packages in the future monorepo.
+
+### Package Relationships
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    @orbzone/aeonic                          │
+│         (Opinionated fullstack framework)                   │
+│  - Scaffolding CLI                                          │
+│  - Predefined entities (User, Role, Team)                   │
+│  - Database functions (fn::auth::*, fn::team::*)            │
+│  - Vue composables (useAeonicAuth, useAeonicEntity)         │
+└────────────────────┬────────────────────────────────────────┘
+                     │ depends on
+┌────────────────────▼────────────────────────────────────────┐
+│                  @orbzone/surrounded                        │
+│         (SurrealDB integration layer)                       │
+│  - LIVE query subscriptions                                 │
+│  - Real-time data sync                                      │
+│  - ION storage providers (SurrealDBLoader)                  │
+│  - Graph traversal helpers                                  │
+│  - Permission introspection                                 │
+└────────────────────┬────────────────────────────────────────┘
+                     │ depends on
+┌────────────────────▼────────────────────────────────────────┐
+│                @orbzone/dotted-json                         │
+│         (Core expression engine + ION foundation)           │
+│  - Expression evaluation (.property syntax)                 │
+│  - Variant resolution system                                │
+│  - ION concept implementation                               │
+│  - FileLoader (filesystem IONs)                             │
+│  - Zod validation integration                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Cross-Package ION Concepts
+
+| Package | ION Usage | Example |
+|---------|-----------|---------|
+| **dotted-json** | Foundation - variant resolution engine | `ion:['welcome', 'es', 'formal']` loaded from filesystem |
+| **surrounded** | ION persistence to SurrealDB | `SurrealDBLoader` stores/retrieves IONs with array Record IDs |
+| **aeonic** | ION-powered i18n + config | Pre-built ION collections for app strings, user prefs |
+
+### How IONs Flow Through the Stack
+
+**Example: Multi-Language Welcome Message**
+
+1. **Developer creates ION** (via CLI or manually):
+   ```bash
+   # Using aeonic CLI (future)
+   bun aeonic ion create welcome --lang=en --form=formal
+   # Creates: ion:['welcome', 'en', 'formal']
+   ```
+
+2. **ION stored in SurrealDB** (via `surrounded`):
+   ```typescript
+   import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+
+   const loader = new SurrealDBLoader({ /* config */ })
+   await loader.save('welcome',
+     { title: 'Welcome', message: 'Hello, esteemed guest!' },
+     { lang: 'en', form: 'formal' }
+   )
+   // Stored as: ion:['welcome', 'en', 'formal']
+   ```
+
+3. **ION resolved in Vue app** (via `aeonic` composable):
+   ```vue
+   <script setup>
+   import { useIon } from '@orbzone/aeonic'
+
+   const { user } = useAeonicAuth()
+   const welcome = useIon('welcome', {
+     lang: user.value.locale,      // 'es'
+     form: user.value.formality    // 'formal'
+   })
+   // Resolves to: ion:['welcome', 'es', 'formal']
+   // Falls back to: ion:['welcome', 'es'] or ion:['welcome']
+   </script>
+
+   <template>
+     <h1>{{ welcome.title }}</h1>
+     <p>{{ welcome.message }}</p>
+   </template>
+   ```
+
+4. **ION updates in real-time** (via `surrounded` LIVE query):
+   ```typescript
+   // Backend updates Spanish formal welcome
+   await loader.save('welcome',
+     { title: 'Bienvenido', message: '¡Hola, distinguido invitado!' },
+     { lang: 'es', form: 'formal' }
+   )
+
+   // Frontend automatically receives update via LIVE query
+   // Vue component re-renders with new Spanish text
+   ```
+
+### Entity Hierarchy in AEON Model
+
+**Standard Entities** (predefined in `aeonic`):
+- `user` - User accounts with authentication
+- `role` - RBAC roles (admin, editor, viewer)
+- `permission` - Granular access control
+- `team` - Multi-tenant organizations
+- `audit_log` - Change tracking for compliance
+
+**IONs** (dynamic content nodes):
+- `ion` - Variant-aware data objects (strings, config, user prefs)
+
+**Custom Entities** (app-specific):
+- `post`, `comment`, `product`, etc. (defined by developer)
+
+**Relationship Pattern**:
+```
+┌──────────┐        ┌──────────┐        ┌──────────┐
+│   User   │◄──────►│   Team   │◄──────►│   Role   │
+└────┬─────┘        └──────────┘        └──────────┘
+     │
+     │ owns
+     ▼
+┌──────────┐        ┌──────────┐
+│   Post   │◄──────►│   ION    │ (post title variants)
+└──────────┘        └──────────┘
+```
+
+### AEON Design Principles Across Packages
+
+#### 1. Adaptive (Context-Aware)
+
+**dotted-json**: Expressions adapt based on variant context
+```typescript
+const doc = dotted({ greeting: '.welcome' }, {
+  variants: { lang: 'ja', form: 'polite' }
+})
+// Returns: "いらっしゃいませ" (Japanese polite welcome)
+```
+
+**surrounded**: Queries adapt based on user permissions
+```typescript
+// Automatically filters results by $auth.id
+const posts = await query('SELECT * FROM post WHERE author = $auth.id')
+```
+
+**aeonic**: UI adapts based on user role
+```vue
+<template>
+  <AdminPanel v-if="hasRole('admin')" />
+  <EditorPanel v-else-if="hasRole('editor')" />
+  <ViewerPanel v-else />
+</template>
+```
+
+#### 2. Entity (Strongly-Typed Nodes)
+
+**dotted-json**: Type-safe ION schemas via Zod
+```typescript
+import { z } from 'zod'
+
+const WelcomeIonSchema = z.object({
+  title: z.string(),
+  message: z.string(),
+  cta: z.string().optional()
+})
+
+await loader.save('welcome', data, variants, { schema: WelcomeIonSchema })
+```
+
+**surrounded**: Auto-generate TypeScript types from SurrealDB schemas
+```bash
+bun surql-to-ts schema/user.surql > src/generated/user.ts
+```
+
+**aeonic**: Full-stack type safety (DB → API → UI)
+```typescript
+// Shared types across frontend and backend
+type User = z.infer<typeof UserSchema>
+```
+
+#### 3. Objective (Business Logic as Functions)
+
+**dotted-json**: Resolver functions for complex logic
+```typescript
+const resolvers = {
+  math: {
+    calculateTax: (price: number, rate: number) => price * rate
+  }
+}
+```
+
+**surrounded**: Database functions for server-side logic
+```sql
+DEFINE FUNCTION fn::user::register($email: string, $password: string) {
+  -- Hash password, create user, assign default role
+  RETURN $user;
+}
+```
+
+**aeonic**: Pre-built objective functions for common patterns
+```typescript
+// Composable wraps fn::user::register
+const { register } = useAeonicAuth()
+await register(email, password, displayName)
+```
+
+#### 4. Network (Graph Relationships)
+
+**dotted-json**: References between IONs
+```json
+{
+  "profile.greeting": ".ion:welcome",
+  "profile.bio": ".ion:bio",
+  "profile.settings": ".ion:settings"
+}
+```
+
+**surrounded**: Graph traversal helpers
+```typescript
+// Get all posts by users in my teams
+const posts = await traverse('$auth.id')
+  .edge('member_of')
+  .node('team')
+  .edge('has_member')
+  .node('user')
+  .edge('authored')
+  .node('post')
+  .execute()
+```
+
+**aeonic**: Pre-defined relationship patterns
+```sql
+-- User -[member_of]-> Team
+-- Team -[owns]-> Project
+-- Project -[has]-> Post
+```
 
 ---
 
@@ -13,6 +294,7 @@
 **Aeonic** is an opinionated fullstack framework built on top of `@orbzone/surrounded`, providing predefined schema conventions, entity patterns, and rapid scaffolding for SurrealDB + Vue applications.
 
 **Market Position**: Rails for SurrealDB + Vue
+**Foundation**: Built on AEON/ION architecture for adaptive, graph-based applications
 
 **Target Audience**:
 - Fullstack developers building CRUD applications
