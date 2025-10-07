@@ -259,10 +259,32 @@ function extractReturnType(definition: string): string | undefined {
  * @internal
  */
 function extractComment(definition: string): string | undefined {
-  // Match SQL comment before DEFINE
-  const commentMatch = definition.match(/^--\s*(.+?)(?:\n|$)/m);
-  if (commentMatch && commentMatch[1]) {
-    return commentMatch[1].trim();
+  // Match SQL comment(s) before DEFINE statement
+  // Look for the last substantive comment (not just separator lines)
+  const lines = definition.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const currentLine = lines[i];
+    if (currentLine && currentLine.trim().toUpperCase().startsWith('DEFINE FUNCTION')) {
+      // Found DEFINE line, look backwards for comment
+      for (let j = i - 1; j >= 0; j--) {
+        const line = lines[j]?.trim() || '';
+
+        // Skip empty lines and separator comments (====)
+        if (!line || line.match(/^--\s*={3,}/)) {
+          continue;
+        }
+
+        // Found a substantive comment
+        if (line.startsWith('--')) {
+          return line.replace(/^--\s*/, '').trim();
+        }
+
+        // Stop if we hit non-comment content
+        break;
+      }
+      break;
+    }
   }
 
   return undefined;
