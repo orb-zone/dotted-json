@@ -105,6 +105,20 @@ export interface SurrealDBLoaderOptions {
    * ```
    */
   onLiveUpdate?: (event: LiveUpdateEvent) => void;
+
+  /**
+   * Connection retry configuration
+   */
+  retry?: {
+    /** Maximum number of retry attempts @default 3 */
+    maxAttempts?: number;
+    /** Initial delay in ms @default 1000 */
+    initialDelay?: number;
+    /** Maximum delay in ms @default 10000 */
+    maxDelay?: number;
+    /** Exponential backoff multiplier @default 2 */
+    backoffMultiplier?: number;
+  };
 }
 
 /**
@@ -146,9 +160,15 @@ interface CacheEntry {
  */
 export class SurrealDBLoader implements StorageProvider {
   private db: Surreal | null = null;
-  private options: Required<Omit<SurrealDBLoaderOptions, 'auth' | 'onLiveUpdate'>> & {
+  private options: Required<Omit<SurrealDBLoaderOptions, 'auth' | 'onLiveUpdate' | 'retry'>> & {
     auth?: SurrealDBLoaderOptions['auth'];
     onLiveUpdate?: (event: LiveUpdateEvent) => void;
+    retry: {
+      maxAttempts: number;
+      initialDelay: number;
+      maxDelay: number;
+      backoffMultiplier: number;
+    };
   };
   private cache = new Map<string, CacheEntry>();
   private initialized = false;
@@ -156,43 +176,90 @@ export class SurrealDBLoader implements StorageProvider {
 
   constructor(options: SurrealDBLoaderOptions) {
     this.options = {
-      table: 'ion',
-      cache: true,
-      cacheTTL: 60000,  // 1 minute
-      ...options
+      url: options.url,
+      namespace: options.namespace,
+      database: options.database,
+      table: options.table ?? 'ion',
+      cache: options.cache ?? true,
+      cacheTTL: options.cacheTTL ?? 60000,  // 1 minute
+      retry: {
+        maxAttempts: options.retry?.maxAttempts ?? 3,
+        initialDelay: options.retry?.initialDelay ?? 1000,
+        maxDelay: options.retry?.maxDelay ?? 10000,
+        backoffMultiplier: options.retry?.backoffMultiplier ?? 2
+      },
+      auth: options.auth,
+      onLiveUpdate: options.onLiveUpdate
     };
   }
 
   /**
-   * Initialize connection to SurrealDB
+   * Initialize connection to SurrealDB with automatic retry
    */
   async init(): Promise<void> {
     if (this.initialized) return;
 
-    try {
-      // Dynamic import of surrealdb (peer dependency)
-      const surrealdb = await import('surrealdb');
-      this.db = new surrealdb.default();
+    const { maxAttempts, initialDelay, maxDelay, backoffMultiplier } = this.options.retry;
+    let lastError: Error | null = null;
 
-      await this.db.connect(this.options.url);
-      await this.db.use({
-        namespace: this.options.namespace,
-        database: this.options.database
-      });
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        // Dynamic import of surrealdb (peer dependency)
+        const surrealdb = await import('surrealdb');
+        this.db = new surrealdb.default();
 
-      if (this.options.auth) {
-        await this.authenticate();
-      }
+        await this.db.connect(this.options.url);
+        await this.db.use({
+          namespace: this.options.namespace,
+          database: this.options.database
+        });
 
-      this.initialized = true;
-    } catch (error: any) {
-      if (error.message?.includes('Cannot find')) {
-        throw new Error(
-          'SurrealDB not installed. Install with: bun add surrealdb'
+        if (this.options.auth) {
+          await this.authenticate();
+        }
+
+        this.initialized = true;
+        return;
+
+      } catch (error: any) {
+        lastError = error;
+
+        // Don't retry on missing dependency
+        if (error.message?.includes('Cannot find')) {
+          throw new Error(
+            'SurrealDB not installed. Install with: bun add surrealdb'
+          );
+        }
+
+        // Don't retry on auth errors
+        if (error.message?.includes('auth') || error.message?.includes('permission')) {
+          throw new Error(
+            `SurrealDB authentication failed: ${error.message}. Check your credentials.`
+          );
+        }
+
+        // Calculate backoff delay with exponential growth
+        const delay = Math.min(
+          initialDelay * Math.pow(backoffMultiplier, attempt),
+          maxDelay
         );
+
+        // Log retry attempt (if not last attempt)
+        if (attempt < maxAttempts - 1) {
+          console.warn(
+            `[SurrealDBLoader] Connection failed (attempt ${attempt + 1}/${maxAttempts}): ${error.message}. Retrying in ${delay}ms...`
+          );
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
-      throw error;
     }
+
+    // All retries exhausted
+    throw new Error(
+      `SurrealDBLoader: Failed to connect after ${maxAttempts} attempts. ` +
+      `Last error: ${lastError?.message}. ` +
+      `Check if SurrealDB is running at ${this.options.url} and credentials are correct.`
+    );
   }
 
   /**
@@ -368,7 +435,14 @@ export class SurrealDBLoader implements StorageProvider {
     const candidates = result as any[];
 
     if (!candidates || candidates.length === 0) {
-      throw new Error(`Ion not found: ${baseName} (variants: ${JSON.stringify(variants)})`);
+      const variantStr = Object.keys(variants).length > 0
+        ? ` with variants ${JSON.stringify(variants)}`
+        : '';
+      throw new Error(
+        `Ion not found: "${baseName}"${variantStr}. ` +
+        `Searched in table "${this.options.table}". ` +
+        `Make sure the ion exists or create it with loader.save().`
+      );
     }
 
     // Resolve best matching variant
@@ -588,7 +662,13 @@ export class SurrealDBLoader implements StorageProvider {
     const deleted = await this.db.delete(recordId);
 
     if (!deleted || deleted.length === 0) {
-      throw new Error(`Ion not found: ${baseName} (variants: ${JSON.stringify(variants)})`);
+      const variantStr = Object.keys(variants).length > 0
+        ? ` with variants ${JSON.stringify(variants)}`
+        : '';
+      throw new Error(
+        `Cannot delete ion: "${baseName}"${variantStr} not found. ` +
+        `Record ID: ${recordId}`
+      );
     }
 
     // Invalidate cache
