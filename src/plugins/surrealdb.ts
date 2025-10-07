@@ -441,8 +441,7 @@ export async function withSurrealDB(
   // Dynamic import for optional peer dependency
   let Surreal: any;
   try {
-    // @ts-ignore - Dynamic import of optional peer dependency
-    const surrealdb = await import('surrealdb');
+    const surrealdb = await import('surrealdb') as any;
     Surreal = surrealdb.Surreal || surrealdb.default?.Surreal || surrealdb.default;
   } catch (error) {
     throw new Error(

@@ -18,6 +18,10 @@
       "import": "./dist/loaders/file.js",
       "types": "./dist/loaders/file.d.ts"
     },
+    "./loaders/surrealdb": {
+      "import": "./dist/loaders/surrealdb.js",
+      "types": "./dist/loaders/surrealdb.d.ts"
+    },
     "./plugins/zod": {
       "import": "./dist/plugins/zod.js",
       "types": "./dist/plugins/zod.d.ts"
