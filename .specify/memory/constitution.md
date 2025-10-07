@@ -219,6 +219,30 @@ Every public API MUST have:
 
 **Rationale**: Uppercase "JSÖN" in titles emphasizes the library name as a proper acronym/brand. Lowercase ".jsön" in file extensions follows Unix convention for file extensions (e.g., .json, .yaml, .xml).
 
+### Example Organization (added 2025-10-07)
+
+**Official Examples Directory**: All production-ready examples MUST live in `/examples`
+
+- ✅ `examples/basic-usage.ts` - Core functionality demonstrations
+- ✅ `examples/with-zod-validation.ts` - Plugin integrations
+- ✅ `examples/file-loader-i18n.ts` - Advanced patterns
+- ✅ `examples/data/` - Example data files
+- ❌ `__DRAFT__/examples/` - NO LONGER USED (removed 2025-10-07)
+
+**Rules**:
+1. New examples MUST be added to `/examples` only
+2. Examples MUST be runnable without modification
+3. Examples MUST include comments explaining key concepts
+4. Examples MUST demonstrate production-ready patterns
+5. Experimental/WIP code should use branch-specific naming, NOT a DRAFT folder
+
+**Rationale**:
+- Single source of truth for examples
+- Easier discoverability for users
+- Reduces maintenance burden
+- Prevents stale draft code accumulation
+- Git branches are better for WIP/experimental work
+
 ## Governance
 
 ### Amendment Procedure

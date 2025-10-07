@@ -56,7 +56,3 @@ bun.lockb
 # OS
 Thumbs.db
 Desktop.ini
-
-# Draft folder (keeping for reference during development)
-# Remove this line before publishing
-__DRAFT__/
