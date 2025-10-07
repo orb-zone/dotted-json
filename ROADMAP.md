@@ -1,36 +1,55 @@
 # dotted-json (jsön) - Product Roadmap
 
-**Current Version**: v0.6.0-design
-**Last Updated**: 2025-10-06
-**Status**: Design phase - Storage providers & advanced permissions architecture complete
+**Current Version**: v0.8.0-dev
+**Last Updated**: 2025-10-07
+**Status**: Implementation phase - Function auto-discovery & TypeScript codegen complete
 
 ---
 
-## 📍 Current State (v0.6.0-design)
+## 📍 Current State (v0.8.0-dev)
 
-### 🎨 Design Phase Complete
+### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.8.0)
 
-#### Storage & Persistence Architecture (v0.6.0+)
+#### Storage & Persistence (v0.6.0) ✅
 - [x] **StorageProvider Interface** - Unified API for JSÖN document storage
-- [x] **SurrealDBLoader Design** - Load/save JSÖN documents with variant resolution
-- [x] **FileLoader Enhancements** - Save/list/delete for filesystem storage
-- [x] **Permission Detection System** - Pre-flight checks for table and field permissions
-- [x] **Field-Level Permissions** - Granular per-field read/write control
-- [x] **Zod Integration Design** - Type-safe schemas with auto-inference
-- [x] **SurrealQL to Zod Generator** - Auto-generate schemas from `.surql` files
+- [x] **SurrealDBLoader** - Full CRUD with array Record IDs (10-100x faster)
+- [x] **Array Record ID Strategy** - O(log n) queries vs O(n) table scans
+- [x] **Real-time LIVE queries** - WebSocket subscriptions with DIFF mode
+- [x] **Variant-aware resolution** - Load correct i18n document by context
+- [x] **Cache management** - TTL-based caching with auto-invalidation
 
-#### Design Documents Created
-- [x] `storage-providers-design.md` - 1,200+ lines, complete StorageProvider system
-- [x] `permissions-and-zod-integration.md` - 900+ lines, permission detection + Zod
-- [x] `field-level-permissions-design.md` - 1,000+ lines, SurrealDB field permissions
-- [x] `surql-to-zod-inference.md` - 800+ lines, auto-generate Zod from SurrealQL
-- [x] `surrealdb-vue-vision.md` - 450+ lines, grand vision document
-- [x] `integration-patterns.md` - 30+ production-ready patterns
+#### Function Auto-Discovery (v0.7.0) ✅
+- [x] **Runtime Discovery** - Parse DEFINE FUNCTION from INFO FOR DATABASE
+- [x] **Schema File Parsing** - Extract functions from .surql files
+- [x] **Resolver Generation** - Auto-generate runtime resolvers
+- [x] **Namespace Support** - Handle fn::admin.listUsers patterns
+- [x] **Comment Extraction** - Preserve documentation in metadata
+- [x] **Integration** - Seamless withSurrealDB plugin support
 
-#### Documentation Updates
-- [x] Constitution updated with JSÖN capitalization rules
-- [x] ROADMAP restructured with Phase 6 (5 sub-phases)
-- [x] All designs cross-referenced and linked
+#### TypeScript Codegen (v0.8.0) ✅
+- [x] **surql-to-ts CLI** - Generate types from schemas
+- [x] **Type Mapping** - SurrealDB → TypeScript conversion
+- [x] **Parameter Interfaces** - Typed function params
+- [x] **Return Types** - Typed function returns
+- [x] **Resolver Interface** - Fully typed DBResolvers
+- [x] **Zod Schema Generation** - Optional runtime validation
+- [x] **Watch Mode** - Auto-regenerate on schema changes
+
+#### Design Documents (12 total)
+- [x] `storage-providers-design.md` - 1,200+ lines
+- [x] `function-resolver-inference.md` - 800+ lines
+- [x] `record-id-variants-design.md` - 600+ lines
+- [x] `schema-driven-complete-workflow.md` - 700+ lines
+- [x] `permissions-and-zod-integration.md` - 900+ lines
+- [x] `field-level-permissions-design.md` - 1,000+ lines
+- [x] `surql-to-zod-inference.md` - 800+ lines
+- [x] `surrealdb-vue-vision.md` - 450+ lines
+
+#### Implementation Stats
+- **Lines of Code**: 3,000+ (function discovery, loaders, type generation)
+- **Test Coverage**: 184/184 tests passing ✅
+- **Bundle Size**: 18.18 kB / 20.00 kB (within limit) ✅
+- **CLI Tools**: 2 (json-translate, surql-to-ts)
 
 ---
 
