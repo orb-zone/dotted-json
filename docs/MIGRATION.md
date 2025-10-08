@@ -48,25 +48,25 @@ const count = i18next.t('items', { count: 5 });
 
 ### After (jsön)
 
-**Step 1: Convert to JSÖN format**
+**Step 1: Convert to JSöN format and rename keys**
 
 Create `strings:en.jsön`:
 ```json
 {
-  "welcome": "Welcome, ${user.name}!",
-  "items": "You have ${count} item${count > 1 ? 's' : ''}"
+  ".welcome": "Welcome, ${user.name}!",
+  ".items": "You have ${count} item${count > 1 ? 's' : ''}"
 }
 ```
 
 Create `strings:es.jsön`:
 ```json
 {
-  "welcome": "¡Bienvenido, ${user.name}!",
-  "items": "Tienes ${count} artículo${count > 1 ? 's' : ''}"
+  ".welcome": "¡Bienvenido, ${user.name}!",
+  ".items": "Tienes ${count} artículo${count > 1 ? 's' : ''}"
 }
 ```
 
-**Step 2: Load with FileLoader**
+**Step 2: Use naturally with variant resolution**
 
 ```typescript
 import { dotted } from '@orbzone/dotted-json';
@@ -75,18 +75,30 @@ import { FileLoader } from '@orbzone/dotted-json/loaders/file';
 const loader = new FileLoader({ baseDir: './locales' });
 await loader.init();
 
+// Load strings file once - FileLoader handles variant resolution
+const strings = await loader.load('strings', { lang: 'es' });
+
 const data = dotted({
   user: { name: 'Alice' },
   count: 5,
-  '.strings': 'extends("strings")'
+  ...strings  // Spread the loaded strings
+});
+
+// Access directly - expressions evaluate automatically
+const welcome = await data.get('welcome');  // "¡Bienvenido, Alice!"
+const items = await data.get('items');      // "Tienes 5 artículos"
+```
+
+**Alternative: Dynamic loading**
+
+```typescript
+const data = dotted({
+  user: { name: 'Alice' },
+  count: 5,
+  '.strings': 'loader.load("strings", ${variants})'
 }, {
-  resolvers: {
-    extends: async (baseName: string) => {
-      return await loader.load(baseName, {
-        lang: 'es'  // or get from context
-      });
-    }
-  }
+  resolvers: { loader },
+  variants: { lang: 'es' }  // Variant context
 });
 
 const welcome = await data.get('strings.welcome');
@@ -145,52 +157,54 @@ function App() {
 
 ### After (jsön)
 
-**Create translation files:**
+**Step 1: Create translation files with dot-prefixed keys**
 
 `strings:en.jsön`:
 ```json
 {
-  "greeting": "Hello, ${user.name}!",
-  "price": "Price: $${amount.toFixed(2)}"
+  ".greeting": "Hello, ${user.name}!",
+  ".price": "Price: $${amount.toFixed(2)}"
 }
 ```
 
 `strings:es.jsön`:
 ```json
 {
-  "greeting": "¡Hola, ${user.name}!",
-  "price": "Precio: $${amount.toFixed(2)}"
+  ".greeting": "¡Hola, ${user.name}!",
+  ".price": "Precio: $${amount.toFixed(2)}"
 }
 ```
 
-**React component:**
+**Step 2: React component with natural integration**
 
 ```typescript
 import { dotted } from '@orbzone/dotted-json';
-import { useTanstackDottedJSON } from '@orbzone/dotted-json/react';
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { useState, useEffect } from 'react';
 
 const loader = new FileLoader({ baseDir: './locales' });
 
 function App() {
-  const { data, isLoading } = useTanstackDottedJSON({
+  const [translations, setTranslations] = useState(null);
+
+  useEffect(() => {
+    loader.init().then(() => {
+      loader.load('strings', { lang: 'en' }).then(setTranslations);
+    });
+  }, []);
+
+  if (!translations) return <div>Loading...</div>;
+
+  const data = dotted({
     user: { name: 'Alice' },
     amount: 99.99,
-    '.strings': 'extends("strings")'
-  }, {
-    resolvers: {
-      extends: async (baseName: string) => {
-        return await loader.load(baseName, { lang: 'en' });
-      }
-    }
+    ...translations  // Spread translations into schema
   });
-
-  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
-      <p>{data.get('strings.greeting')}</p>
-      <p>{data.get('strings.price')}</p>
+      <p>{data.get('greeting')}</p>
+      <p>{data.get('price')}</p>
     </div>
   );
 }
@@ -246,62 +260,67 @@ app.use(i18n);
 
 ### After (jsön)
 
-**Create translation files:**
+**Step 1: Create translation files with dot-prefixed keys**
 
 `strings:en.jsön`:
 ```json
 {
-  "message": {
-    "hello": "hello world",
-    "named": "hello ${user.name}"
-  }
+  ".hello": "hello world",
+  ".named": "hello ${user.name}"
 }
 ```
 
 `strings:ja.jsön`:
 ```json
 {
-  "message": {
-    "hello": "こんにちは、世界",
-    "named": "こんにちは、${user.name}"
-  }
+  ".hello": "こんにちは、世界",
+  ".named": "こんにちは、${user.name}"
 }
 ```
 
-**Vue component:**
+**Step 2: Vue component with natural integration**
 
 ```vue
 <script setup>
 import { dotted } from '@orbzone/dotted-json';
-import { useTanstackDottedJSON } from '@orbzone/dotted-json/vue';
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { ref, onMounted } from 'vue';
 
 const loader = new FileLoader({ baseDir: './locales' });
+const translations = ref(null);
 
-const { data, isLoading } = useTanstackDottedJSON({
-  user: { name: 'Alice' },
-  '.strings': 'extends("strings")'
-}, {
-  resolvers: {
-    extends: async (baseName: string) => {
-      return await loader.load(baseName, { lang: 'ja' });
-    }
-  }
+onMounted(async () => {
+  await loader.init();
+  translations.value = await loader.load('strings', { lang: 'ja' });
 });
+
+// Create data once translations are loaded
+const getData = () => {
+  if (!translations.value) return null;
+  return dotted({
+    user: { name: 'Alice' },
+    ...translations.value  // Spread translations
+  });
+};
 </script>
 
 <template>
-  <p v-if="!isLoading">{{ data.get('strings.message.hello') }}</p>
-  <p v-if="!isLoading">{{ data.get('strings.message.named') }}</p>
+  <div v-if="translations">
+    <p>{{ getData().get('hello') }}</p>
+    <p>{{ getData().get('named') }}</p>
+  </div>
+  <div v-else>Loading...</div>
 </template>
 ```
 
 ### Migration Strategy
 
 1. **Extract messages**: Export vue-i18n messages to JSON files
-2. **Add expressions**: Replace `{var}` with `${var}`
-3. **File organization**: Split by locale (`strings:en.jsön`, `strings:ja.jsön`)
-4. **Formality support**: Add formality variants for Japanese
+2. **Rename keys**: Add `.` prefix to all message keys (enables expressions)
+3. **Update interpolation**: Replace `{var}` with `${var}`
+4. **File organization**: Split by locale (`strings:en.jsön`, `strings:ja.jsön`)
+5. **Load and spread**: Use FileLoader to load variants, spread into dotted schema
+6. **Formality support**: Add formality variants for Japanese (optional)
    - `strings:ja:polite.jsön` - Teineigo (丁寧語)
    - `strings:ja:honorific.jsön` - Keigo (敬語)
 
@@ -724,7 +743,7 @@ const strings = await data.get('strings');
 
 ### Data Migration
 - [ ] Export data from old system
-- [ ] Convert to JSÖN format
+- [ ] Convert to JSöN format
 - [ ] Validate with Zod schemas
 - [ ] Test variant resolution
 - [ ] Import to new system (FileLoader or SurrealDB)
