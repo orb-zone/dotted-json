@@ -55,7 +55,71 @@ import { DottedJson } from './dotted-json.js';
 import type { DottedOptions } from './types.js';
 
 /**
- * Create a dotted JSON object with lazy expression evaluation
+ * Create a dotted JSON object with lazy expression evaluation.
+ *
+ * Dotted JSON allows you to define JSON schemas with special dot-prefixed property keys
+ * that contain expressions. These expressions are evaluated lazily when accessed, with
+ * results cached for performance.
+ *
+ * @param schema - JSON object with optional dot-prefixed expression keys
+ * @param options - Configuration options
+ * @returns DottedJson proxy object for lazy evaluation
+ *
+ * @example
+ * Basic usage:
+ * ```typescript
+ * import { dotted } from '@orbzone/dotted-json';
+ *
+ * const data = dotted({
+ *   user: {
+ *     name: 'Alice',
+ *     '.greeting': 'Hello, ${user.name}!'
+ *   }
+ * });
+ *
+ * await data.get('user.greeting');  // "Hello, Alice!"
+ * ```
+ *
+ * @example
+ * With resolvers:
+ * ```typescript
+ * const data = dotted({
+ *   user: { id: 123 },
+ *   '.profile': 'db.users.findById(${user.id})'
+ * }, {
+ *   resolvers: {
+ *     db: {
+ *       users: {
+ *         findById: async (id: number) => ({
+ *           id,
+ *           email: `user${id}@example.com`
+ *         })
+ *       }
+ *     }
+ *   }
+ * });
+ *
+ * await data.get('profile.email');  // "user123@example.com"
+ * ```
+ *
+ * @example
+ * With variants (i18n):
+ * ```typescript
+ * const data = dotted({
+ *   '.strings': 'extends("strings")'
+ * }, {
+ *   resolvers: {
+ *     extends: async (baseName: string) => {
+ *       return await loader.load(baseName, { lang: 'es', form: 'formal' });
+ *     }
+ *   }
+ * });
+ *
+ * await data.get('strings.welcome');  // "¡Bienvenido!"
+ * ```
+ *
+ * @see {@link DottedOptions} for configuration options
+ * @see {@link DottedJson} for instance methods
  */
 export function dotted(schema: Record<string, any>, options?: DottedOptions): any {
   return new DottedJson(schema, options);

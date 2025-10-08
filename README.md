@@ -37,6 +37,106 @@ yarn add @orbzone/dotted-json
 
 ## Quick Start
 
+### 30-Second Example
+
+```typescript
+import { dotted } from '@orbzone/dotted-json';
+
+const data = dotted({
+  user: {
+    name: 'Alice',
+    '.greeting': 'Hello, ${user.name}!'  // Expression evaluated on access
+  }
+});
+
+await data.get('user.greeting');  // "Hello, Alice!"
+```
+
+### Common Use Cases
+
+#### 🌍 Internationalization (i18n)
+
+```typescript
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+
+const loader = new FileLoader({ baseDir: './locales' });
+await loader.init();
+
+// Loads best match: strings:es:formal.jsön
+const strings = await loader.load('strings', {
+  lang: 'es',
+  form: 'formal'
+});
+
+console.log(strings.welcome);  // "¡Bienvenido!"
+```
+
+#### 🚩 Feature Flags
+
+```typescript
+import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
+
+const plugin = await withSurrealDBPinia({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  ions: { 'flags': { staleTime: 60_000 } },
+  live: { enabled: true, ions: ['flags'] }  // Real-time updates!
+});
+
+const data = dotted({
+  '.flags': 'db.loadIon("flags", { env: "prod" })'
+}, { resolvers: plugin.resolvers });
+
+const flags = await data.get('flags');
+if (flags.newFeature?.enabled) {
+  // Show new feature
+}
+```
+
+#### 🗄️ Database Queries
+
+```typescript
+import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+
+const plugin = await withSurrealDB({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  tables: ['user', 'post']
+});
+
+const data = dotted({
+  user: {
+    id: 'user:alice',
+    '.profile': 'db.user.select(${user.id})',
+    '.posts': 'db.post.select(${user.id})'
+  }
+}, { resolvers: plugin.resolvers });
+
+const profile = await data.get('user.profile');
+const posts = await data.get('user.posts');
+```
+
+#### ⚙️ Configuration Management
+
+```typescript
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+
+const loader = new FileLoader({ baseDir: './config' });
+await loader.init();
+
+// Loads: config:prod.jsön (or config:dev.jsön in development)
+const config = await loader.load('config', {
+  env: process.env.NODE_ENV || 'development'
+});
+
+console.log(config.apiUrl);   // "https://api.example.com"
+console.log(config.timeout);  // 5000
+```
+
+### Full Example
+
 ```typescript
 import { dotted } from '@orbzone/dotted-json';
 
@@ -741,9 +841,20 @@ All translations happen **locally** on your machine using Ollama. No data is sen
 
 MIT © [orb.zone](https://orb.zone)
 
+## Documentation
+
+- 📚 [API Reference](docs/API.md) - Complete API documentation
+- 🔄 [Migration Guide](docs/MIGRATION.md) - Migrate from i18next, react-intl, LaunchDarkly, etc.
+- ⚡ [Performance Guide](docs/PERFORMANCE.md) - Optimization tips and best practices
+- 📝 [Examples](examples/) - Production-ready examples:
+  - [Feature Flag Manager](examples/feature-flag-manager.ts)
+  - [i18n Translation Editor](examples/i18n-translation-editor.ts)
+  - [Real-time Config Manager](examples/realtime-config-manager.ts)
+
 ## Links
 
-- [GitHub Repository](https://github.com/orbzone/dotted-json)
-- [Issue Tracker](https://github.com/orbzone/dotted-json/issues)
-- [Changelog](CHANGELOG.md)
-- [Constitution](.specify/memory/constitution.md)
+- 🐙 [GitHub Repository](https://github.com/orbzone/dotted-json)
+- 🐛 [Issue Tracker](https://github.com/orbzone/dotted-json/issues)
+- 📋 [Changelog](CHANGELOG.md)
+- 🗺️ [Roadmap](ROADMAP.md)
+- ⚖️ [Constitution](.specify/memory/constitution.md)

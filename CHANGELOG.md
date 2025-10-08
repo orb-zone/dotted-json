@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2025-10-07
+
+### Added
+- **Feature Flag Manager Example** (`examples/feature-flag-manager.ts`):
+  - Production-ready feature flag system with environment-based configuration
+  - User and team-based targeting for precise feature rollouts
+  - Percentage-based rollouts with consistent hashing
+  - Real-time flag updates via LIVE queries
+  - A/B testing support with evaluation tracking
+  - `FeatureFlagManager` class with complete API:
+    - `setFlag()` - Create/update feature flags
+    - `isEnabled()` - Evaluate flags for user/team context
+    - `evaluateFlags()` - Batch evaluation for multiple flags
+    - `watchFlags()` - Real-time flag change monitoring
+    - `getStats()` - Evaluation analytics and insights
+  - Progressive rollout patterns (25% → 50% → 100%)
+  - Kill switch support for emergency shutdowns
+  - Environment isolation (dev/staging/prod)
+
+### Documentation
+- Complete feature flag example with real-world patterns
+- Demonstrates LIVE query integration for instant flag propagation
+- Shows percentage rollout with stable user bucketing (consistent hashing)
+- Production-ready implementation ready to adapt
+
+### Developer Experience
+- Feature flag best practices demonstrated
+- Clear separation of concerns (storage, evaluation, analytics)
+- Type-safe flag evaluation with detailed results
+
+---
+
 ## [0.9.1] - 2025-10-07
 
 ### Added
