@@ -1,8 +1,11 @@
 # Monorepo Migration Plan: @orbzone/web-craft
 
-**Status**: Planning
-**Target**: v0.10.0
+**Status**: Future Planning (v0.10.0+)
+**Target**: v0.10.0 (after v0.9.2 publication)
 **Created**: 2025-10-06
+**Updated**: 2025-10-08
+
+**Note**: This is a future vision document. Current project (v0.9.2) is a single package ready for publication. Monorepo transformation will occur after initial release and user feedback.
 
 ## Overview
 
@@ -876,12 +879,14 @@ import { useSurrounded } from '@orbzone/surrounded';
 
 | Version | Date | Status | Description |
 |---------|------|--------|-------------|
-| v0.6.0 | Current | ✅ Complete | Design phase, test infrastructure |
-| v0.7.0 | +2 weeks | 🔜 Planned | SurrealDBLoader + function discovery |
-| v0.8.0 | +4 weeks | 🔜 Planned | Zod auto-gen + field permissions |
-| v0.9.0 | +6 weeks | 🔜 Planned | CLI tools + type generation |
-| v0.10.0 | +8 weeks | 🔜 Planned | **Monorepo migration** |
-| v1.0.0 | +10 weeks | 🔜 Planned | Production release |
+| v0.6.0 | 2025-10-07 | ✅ Complete | Storage providers, FileLoader CRUD |
+| v0.7.0 | 2025-10-07 | ✅ Complete | SurrealDBLoader + array Record IDs |
+| v0.8.0 | 2025-10-07 | ✅ Complete | LIVE queries + real-time integration |
+| v0.9.0 | 2025-10-07 | ✅ Complete | Production polish (retry, metrics) |
+| v0.9.1 | 2025-10-07 | ✅ Complete | Documentation + examples |
+| v0.9.2 | 2025-10-08 | ✅ Complete | API docs + migration guides |
+| v0.10.0 | TBD | 🔜 Planned | **Monorepo migration** (after publication) |
+| v1.0.0 | TBD | 🔜 Planned | Production release of framework |
 
 ## Benefits of Monorepo
 

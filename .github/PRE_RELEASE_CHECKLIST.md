@@ -4,7 +4,8 @@ Complete this checklist before publishing to @orbzone organization and public re
 
 ## ✅ Repository Setup
 
-- [x] **Repository Name**: `json`
+- [x] **Repository Name**: `dotted-json` (ASCII-friendly, per constitution)
+- [x] **Fun Name**: `jsön` (with umlaut, used in branding/docs)
 - [x] **Package Name**: `@orbzone/dotted-json`
 - [x] **Organization**: `@orbzone`
 - [x] **License**: MIT
@@ -114,16 +115,16 @@ Before publishing, ensure these secrets are configured in GitHub repository sett
 
 ## 📋 Pre-Publication Steps
 
-1. **Update URLs in package.json** (if not already done):
+1. **Update URLs in package.json** (✅ Already done):
    ```json
-   "repository": "git+https://github.com/orbzone/json.git",
-   "homepage": "https://github.com/orbzone/json#readme",
-   "bugs": "https://github.com/orbzone/json/issues"
+   "repository": "git+https://github.com/orbzone/dotted-json.git",
+   "homepage": "https://github.com/orbzone/dotted-json#readme",
+   "bugs": "https://github.com/orbzone/dotted-json/issues"
    ```
 
 2. **Create GitHub repository**:
    ```bash
-   # On GitHub: create new repository "json" under @orbzone org
+   # On GitHub: create new repository "dotted-json" under @orbzone org
    # Settings > General > Make repository public
    ```
 
@@ -131,7 +132,7 @@ Before publishing, ensure these secrets are configured in GitHub repository sett
 
 4. **Push to GitHub**:
    ```bash
-   git remote add origin git@github.com:orbzone/json.git
+   git remote add origin git@github.com:orbzone/dotted-json.git
    git push -u origin 001-implement-core-library
    git push --tags
    ```

@@ -27,8 +27,7 @@ commit-msg:
     # Enforce conventional commits
     conventional-commit:
       run: |
-        MSG_FILE=$1
-        COMMIT_MSG=$(cat "$MSG_FILE")
+        COMMIT_MSG=$(cat {1})
 
         # Allow merge commits
         if echo "$COMMIT_MSG" | grep -qE "^Merge (branch|pull request)"; then
@@ -52,8 +51,7 @@ commit-msg:
     # Ensure commit message not too long
     message-length:
       run: |
-        MSG_FILE=$1
-        FIRST_LINE=$(head -n 1 "$MSG_FILE")
+        FIRST_LINE=$(head -n 1 {1})
         LENGTH=${#FIRST_LINE}
 
         if [ $LENGTH -gt 100 ]; then

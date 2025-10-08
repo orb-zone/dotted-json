@@ -111,11 +111,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/orbzone/json.git"
+    "url": "git+https://github.com/orbzone/dotted-json.git"
   },
-  "homepage": "https://github.com/orbzone/json#readme",
+  "homepage": "https://github.com/orbzone/dotted-json#readme",
   "bugs": {
-    "url": "https://github.com/orbzone/json/issues"
+    "url": "https://github.com/orbzone/dotted-json/issues"
   },
   "publishConfig": {
     "access": "public",
