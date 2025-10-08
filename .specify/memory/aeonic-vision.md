@@ -313,7 +313,7 @@ Applications adapt to user context (authentication, permissions, locale, theme) 
 **Example**:
 - Automatic permission enforcement based on `$auth` scope
 - Dynamic UI based on user role (admin sees more features)
-- Locale-aware content from JSÖN documents
+- Locale-aware content from JSöN documents
 
 ### Entity
 Predefined entity schemas for common patterns (User, Role, Permission, Team, Audit).

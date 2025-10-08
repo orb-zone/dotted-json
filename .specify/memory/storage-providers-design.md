@@ -1,4 +1,4 @@
-# Storage Providers Design: JSÖN Document Persistence
+# Storage Providers Design: JSöN Document Persistence
 
 **Created**: 2025-10-06
 **Status**: Design Phase
@@ -10,12 +10,12 @@
 
 This document designs a **unified storage provider system** for dotted-json that enables:
 
-1. **Loading** JSÖN documents from various backends (filesystem, SurrealDB, remote APIs)
-2. **Saving** JSÖN documents back to storage for persistence
+1. **Loading** JSöN documents from various backends (filesystem, SurrealDB, remote APIs)
+2. **Saving** JSöN documents back to storage for persistence
 3. **Variant-aware** loading (like existing FileLoader)
 4. **Cache management** across storage layers
 
-The goal is to treat JSÖN documents as **first-class data** that can be stored, versioned, and synchronized across systems.
+The goal is to treat JSöN documents as **first-class data** that can be stored, versioned, and synchronized across systems.
 
 ---
 
@@ -63,7 +63,7 @@ await loader.save('ui-strings', strings, { lang: 'es' });
 
 ### 3. User Preferences / State
 
-**Scenario**: Per-user JSÖN documents for preferences, dashboards, etc.
+**Scenario**: Per-user JSöN documents for preferences, dashboards, etc.
 
 ```typescript
 const loader = new SurrealDBLoader({
@@ -81,7 +81,7 @@ await loader.save('dashboard', dashboard, { userId: 'user:alice' });
 
 ### 4. CMS Content
 
-**Scenario**: Blog posts, pages, etc. stored as JSÖN with expressions
+**Scenario**: Blog posts, pages, etc. stored as JSöN with expressions
 
 ```typescript
 const post = {
@@ -111,7 +111,7 @@ All storage providers implement a common interface:
 
 ```typescript
 /**
- * Storage provider for JSÖN documents
+ * Storage provider for JSöN documents
  */
 interface StorageProvider {
   /**
@@ -120,19 +120,19 @@ interface StorageProvider {
   init(): Promise<void>;
 
   /**
-   * Load JSÖN document with variant resolution
+   * Load JSöN document with variant resolution
    *
    * @param baseName - Document identifier (e.g., 'app-settings', 'strings')
    * @param variants - Variant context for resolution (lang, env, userId, etc.)
-   * @returns Parsed JSÖN document
+   * @returns Parsed JSöN document
    */
   load(baseName: string, variants?: VariantContext): Promise<any>;
 
   /**
-   * Save JSÖN document
+   * Save JSöN document
    *
    * @param baseName - Document identifier
-   * @param data - JSÖN document to save
+   * @param data - JSöN document to save
    * @param variants - Variant context for storage
    * @param options - Provider-specific save options
    */
@@ -219,7 +219,7 @@ interface ListFilter {
 ### Database Schema
 
 ```sql
--- Table for JSÖN documents
+-- Table for JSöN documents
 DEFINE TABLE jsön_documents SCHEMAFULL;
 
 -- Core fields
@@ -290,7 +290,7 @@ export interface SurrealDBLoaderOptions {
   };
 
   /**
-   * Table to store JSÖN documents
+   * Table to store JSöN documents
    * @default 'jsön_documents'
    */
   table?: string;
@@ -373,7 +373,7 @@ export class SurrealDBLoader implements StorageProvider {
   }
 
   /**
-   * Load JSÖN document with variant resolution
+   * Load JSöN document with variant resolution
    */
   async load(baseName: string, variants: VariantContext = {}): Promise<any> {
     if (!this.initialized) {
@@ -446,7 +446,7 @@ export class SurrealDBLoader implements StorageProvider {
   }
 
   /**
-   * Save JSÖN document
+   * Save JSöN document
    */
   async save(
     baseName: string,
@@ -752,7 +752,7 @@ export class FileLoader implements StorageProvider {
   // ... existing implementation ...
 
   /**
-   * Save JSÖN document to filesystem
+   * Save JSöN document to filesystem
    */
   async save(
     baseName: string,
@@ -989,7 +989,7 @@ await loader.save('strings', esStrings, { lang: 'es' });
 
 **v0.7.0 - SurrealDB Storage Provider**
 - [ ] Implement `SurrealDBLoader` class
-- [ ] Design database schema for JSÖN documents
+- [ ] Design database schema for JSöN documents
 - [ ] Add variant resolution for DB queries
 - [ ] Implement save with upsert/merge strategies
 - [ ] Add `list()` and `delete()` operations
@@ -1049,7 +1049,7 @@ await loader.save('strings', strings, { lang: 'es' }, {
 ### Use Case Unlocked
 
 1. **Admin Panels**: Edit config/translations in UI, save to DB
-2. **CMS**: Store pages/posts as JSÖN with expressions
+2. **CMS**: Store pages/posts as JSöN with expressions
 3. **Multi-Tenant**: Per-user documents with isolation
 4. **Collaboration**: Multiple users editing, real-time sync
 5. **Version Control**: Track document versions in metadata
@@ -1148,7 +1148,7 @@ await loader.save('appSettings', settings); // Validated by Zod
 
 ### 3. Large Documents
 
-**Question**: How to handle large JSÖN documents (>100KB)?
+**Question**: How to handle large JSöN documents (>100KB)?
 
 **Options**:
 - **A**: Store as-is (simple, may hit DB limits)

@@ -107,7 +107,7 @@ allowedVariants: {
 
 **Benefits**:
 1. Prevents path traversal attacks
-2. Reduces filesystem scans (only check whitelisted combinations)
+2. Reduces filesystem scans (only check allowed combinations)
 3. Documents expected variants
 4. Type safety for known variants
 
@@ -198,7 +198,7 @@ validateVariants(variants: VariantContext): VariantContext {
     }
   }
 
-  // Custom variants (if whitelisted)
+  // Custom variants (if allowed)
   for (const [key, value] of Object.entries(variants)) {
     if (key === 'lang' || key === 'gender' || key === 'form') continue;
 
@@ -391,7 +391,7 @@ describe('Variant File Loading Integration', () => {
 ```typescript
 describe('Variant File Loading Security', () => {
   test('blocks path traversal in variant values');
-  test('only loads whitelisted variants');
+  test('only loads allowed variants');
   test('sanitizes special characters');
   test('prevents directory escape attempts');
 });

@@ -202,22 +202,44 @@ Every public API MUST have:
 
 ### Naming Conventions
 
-**JSÖN Capitalization** (added 2025-10-06):
+**JSöN Capitalization** (added 2025-10-06):
 
-- **Titles and headings**: Use uppercase acronym format "JSÖN"
-  - ✅ "JSÖN Document Provider"
-  - ✅ "SurrealDB JSÖN Storage"
+- **Titles and headings**: Use uppercase acronym format "JSöN"
+  - ✅ "JSöN Document Provider"
+  - ✅ "SurrealDB JSöN Storage"
   - ❌ "jsön Document Provider"
 
 - **File extensions**: Use lowercase ".jsön"
   - ✅ `strings.jsön`, `config:prod.jsön`
-  - ❌ `strings.JSÖN`
+  - ❌ `strings.JSöN`
 
 - **Code/variables**: Use lowercase when referring to file extensions
   - ✅ `extensions: ['.jsön', '.json']`
-  - ❌ `extensions: ['.JSÖN', '.JSON']`
+  - ❌ `extensions: ['.JSöN', '.JSON']`
 
-**Rationale**: Uppercase "JSÖN" in titles emphasizes the library name as a proper acronym/brand. Lowercase ".jsön" in file extensions follows Unix convention for file extensions (e.g., .json, .yaml, .xml).
+**Rationale**: Uppercase "JSöN" in titles emphasizes the library name as a proper acronym/brand. Lowercase ".jsön" in file extensions follows Unix convention for file extensions (e.g., .json, .yaml, .xml).
+
+**SurrealDB Field Naming** (added 2025-10-08):
+
+- **Metadata fields**: Use underscore prefix for system/meta fields
+  - ✅ `_type`, `_at`, `meta` (short, readable)
+  - ❌ `event_type`, `occurred_at`, `metadata` (verbose)
+
+- **Acronym expansion**: Keep acronyms focused and memorable
+  - **ION**: **I**nteractive **O**bservable **N**ode (not "Object")
+  - **ART**: **A**ctivity **R**esource **T**alent (not "Action")
+  - **COG**: **C**ontextual **O**peration **G**adget (not "Capability")
+  - **DOT**: **D**ated **O**bserved **T**ransaction (not "Operational")
+
+- **Edge metadata**: Use `meta` not `metadata` for consistency
+  - ✅ `RELATE a->has->b SET meta = {...}`
+  - ❌ `RELATE a->has->b SET metadata = {...}`
+
+- **Security terms**: Use "allowed" instead of "whitelisted"
+  - ✅ `allowedVariants`, `allowedDomains`
+  - ❌ `whitelistedVariants`, `whitelistedDomains`
+
+**Rationale**: Shorter field names reduce query verbosity. Underscore prefixes (`_type`, `_at`) clearly distinguish system fields from user data. "Allowed" is more inclusive and modern terminology. Refined acronym definitions improve clarity and memorability.
 
 ### Example Organization (added 2025-10-07)
 

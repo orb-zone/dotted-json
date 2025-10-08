@@ -32,7 +32,7 @@
 ### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.9.2)
 
 #### Storage & Persistence (v0.6.0) ✅
-- [x] **StorageProvider Interface** - Unified API for JSÖN document storage
+- [x] **StorageProvider Interface** - Unified API for JSöN document storage
 - [x] **FileLoader.save/list/delete** - Full CRUD for filesystem storage
 - [x] **Merge Strategies** - Replace, shallow merge, deep merge
 - [x] **Zod Validation** - Optional schema validation on save
@@ -120,7 +120,7 @@
 #### Advanced Features (v0.2.0+)
 - [x] **Variant resolver** - i18n/localization with context-aware variants
 - [x] **Pronouns system** - Gender-aware pronoun resolution (7 forms)
-- [x] **File loader** - Load JSON/JSÖN files from filesystem
+- [x] **File loader** - Load JSON/JSöN files from filesystem
 - [x] **Translation CLI** - Command-line tool for locale file management
 
 #### Plugin Ecosystem (v0.3.0 - v0.5.0)
@@ -468,7 +468,7 @@ The `__DRAFT__` folder contains a **fully designed plugin architecture** (v1.0-v
 - ✅ TypeScript types (type safety)
 - ✅ Resolvers (runtime execution)
 - ✅ Permissions (field-level detection)
-- ✅ Storage (variant-aware JSÖN documents)
+- ✅ Storage (variant-aware JSöN documents)
 
 **Result**: 90% less code, zero type drift, full type safety end-to-end
 
@@ -477,7 +477,7 @@ The `__DRAFT__` folder contains a **fully designed plugin architecture** (v1.0-v
 - [x] **Storage Providers Foundation** (v0.6.0)
   - [x] Define `StorageProvider` interface for unified API
   - [x] Enhance `FileLoader` with save capabilities
-    - [x] `save()` - Write JSÖN documents to filesystem
+    - [x] `save()` - Write JSöN documents to filesystem
     - [x] `list()` - List available documents with variants
     - [x] `delete()` - Remove documents from filesystem
   - [x] Support merge strategies (replace, merge, deep-merge)
@@ -631,7 +631,7 @@ const plugin = await withSurrealDBPinia({
   - `StorageProvider` interface specification
   - `SurrealDBLoader` implementation design
   - `FileLoader` save/list/delete enhancements
-  - Database schema for JSÖN documents
+  - Database schema for JSöN documents
   - Use cases (CMS, i18n editor, config management, user preferences)
   - Migration patterns from filesystem to database
   - Conflict resolution strategies
@@ -672,7 +672,7 @@ Frontend → SurrealDB (business logic in fn::)
 - ✅ Gaming backends (leaderboards, player state)
 - ✅ Collaborative apps (multi-client sync)
 - ✅ E-commerce (product catalogs, cart state)
-- ✅ CMS / Content Management (save/edit JSÖN documents)
+- ✅ CMS / Content Management (save/edit JSöN documents)
 - ✅ i18n Translation Editor (edit translations in real-time)
 - ✅ Configuration Management (app settings, feature flags)
 - ✅ User Preferences (per-user stored documents)

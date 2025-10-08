@@ -282,36 +282,101 @@ app.use(i18n);
 
 ```vue
 <script setup>
-import { dotted } from '@orbzone/dotted-json';
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
 import { ref, computed, onMounted } from 'vue';
 
 const loader = new FileLoader({ baseDir: './locales' });
 const translations = ref(null);
+const error = ref(null);
 
 onMounted(async () => {
-  await loader.init();
-  translations.value = await loader.load('strings', { lang: 'ja' });
+  try {
+    await loader.init();
+    translations.value = await loader.load('strings', { lang: 'ja' });
+  } catch (e) {
+    error.value = e;
+    console.error('Failed to load translations:', e);
+  }
 });
 
-// Create dotted instance once when translations load
-const data = computed(() => {
+// Computed schema with user data and translations
+const schema = computed(() => {
   if (!translations.value) return null;
-  return dotted({
+  return {
     user: { name: 'Alice' },
-    ...translations.value  // Spread translations
-  });
+    ...translations.value  // Spreads loaded translations
+  };
 });
 </script>
 
 <template>
-  <div v-if="data">
-    <p>{{ data.get('hello') }}</p>
-    <p>{{ data.get('named') }}</p>
+  <div v-if="error">
+    <p>Error loading translations: {{ error.message }}</p>
   </div>
-  <div v-else>Loading...</div>
+  <div v-else-if="schema">
+    <!-- Direct access to pre-loaded strings (no async needed) -->
+    <p>{{ schema.hello }}</p>
+    <p>{{ schema.named }}</p>
+  </div>
+  <div v-else>
+    <p>Loading translations...</p>
+  </div>
 </template>
 ```
+
+**Key Points:**
+- ✅ Direct access to translations (no async `.get()` calls in template)
+- ✅ Error handling for failed loads
+- ✅ Efficient reactivity with `computed()`
+- ✅ Loading state with `v-else`
+
+**Advanced: Using Suspense (Vue 3.x+)**
+
+For a more idiomatic Vue 3 approach, use `<Suspense>`:
+
+```vue
+<!-- Child Component (TranslationsView.vue) -->
+<script setup>
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+
+const loader = new FileLoader({ baseDir: './locales' });
+
+// Top-level await requires parent to use <Suspense>
+await loader.init();
+const translations = await loader.load('strings', { lang: 'ja' });
+
+const schema = {
+  user: { name: 'Alice' },
+  ...translations
+};
+</script>
+
+<template>
+  <div>
+    <p>{{ schema.hello }}</p>
+    <p>{{ schema.named }}</p>
+  </div>
+</template>
+```
+
+```vue
+<!-- Parent Component -->
+<template>
+  <Suspense>
+    <template #default>
+      <TranslationsView />
+    </template>
+    <template #fallback>
+      <div>Loading translations...</div>
+    </template>
+  </Suspense>
+</template>
+```
+
+**Benefits:**
+- ✅ Cleaner async handling with top-level await
+- ✅ Better loading states
+- ✅ Easier error boundaries with `onErrorCaptured`
 
 ### Migration Strategy
 
@@ -323,6 +388,227 @@ const data = computed(() => {
 6. **Formality support**: Add formality variants for Japanese (optional)
    - `strings:ja:polite.jsön` - Teineigo (丁寧語)
    - `strings:ja:honorific.jsön` - Keigo (敬語)
+
+### Advanced Vue 3 Patterns
+
+#### With Pinia Colada (Intelligent Caching)
+
+Use the Pinia Colada plugin for automatic caching and real-time updates:
+
+```vue
+<script setup lang="ts">
+import { dotted } from '@orbzone/dotted-json';
+import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { computed } from 'vue';
+
+// Configure Pinia Colada plugin with queries
+const plugin = withPiniaColada({
+  queries: {
+    'loader.getStrings': {
+      key: (lang: string) => ['strings', lang],
+      query: async (lang: string) => {
+        const loader = new FileLoader({ baseDir: './locales' });
+        await loader.init();
+        return await loader.load('strings', { lang });
+      },
+      staleTime: 300_000  // Cache for 5 minutes
+    }
+  }
+});
+
+// Create reactive schema with expressions
+const lang = ref('ja');
+
+const schema = computed(() => dotted({
+  user: { name: 'Alice' },
+  '.strings': `loader.getStrings("${lang.value}")`
+}, {
+  resolvers: plugin.resolvers
+}));
+
+// Evaluated with caching
+const strings = await schema.value.get('strings');
+</script>
+
+<template>
+  <div>
+    <select v-model="lang">
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+      <option value="es">Español</option>
+    </select>
+
+    <div v-if="strings">
+      <p>{{ strings.hello }}</p>
+      <p>{{ strings.named }}</p>
+    </div>
+  </div>
+</template>
+```
+
+**Benefits:**
+- ✅ **Automatic caching** - Queries cached with stale time
+- ✅ **Deduplication** - Multiple components share same query
+- ✅ **Background refetch** - Stale queries refetch in background
+- ✅ **Optimistic updates** - Instant UI updates with rollback
+
+#### With TypeScript (Type Safety)
+
+Add full TypeScript support for translations:
+
+```vue
+<script setup lang="ts">
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { ref, computed, onMounted } from 'vue';
+
+// Define translation schema
+interface Translations {
+  hello: string;
+  named: string;
+  welcome: string;
+  goodbye: string;
+}
+
+// Define user schema
+interface UserSchema {
+  user: { name: string };
+  translations: Translations;
+}
+
+const loader = new FileLoader({ baseDir: './locales' });
+const translations = ref<Translations | null>(null);
+const error = ref<Error | null>(null);
+const loading = ref(true);
+
+onMounted(async () => {
+  try {
+    await loader.init();
+    translations.value = await loader.load<Translations>('strings', {
+      lang: 'ja'
+    });
+  } catch (e) {
+    error.value = e as Error;
+  } finally {
+    loading.value = false;
+  }
+});
+
+// Computed schema with full type inference
+const schema = computed<UserSchema | null>(() => {
+  if (!translations.value) return null;
+  return {
+    user: { name: 'Alice' },
+    translations: translations.value
+  };
+});
+
+// TypeScript knows the exact shape
+const greeting = computed(() => schema.value?.translations.hello ?? '');
+</script>
+
+<template>
+  <div v-if="loading">Loading...</div>
+  <div v-else-if="error">Error: {{ error.message }}</div>
+  <div v-else-if="schema">
+    <!-- TypeScript autocomplete works here -->
+    <p>{{ schema.translations.hello }}</p>
+    <p>{{ schema.translations.named }}</p>
+    <p>{{ greeting }}</p>
+  </div>
+</template>
+```
+
+#### Composable Pattern (Reusable Logic)
+
+Create a reusable composable for translations:
+
+```typescript
+// composables/useTranslations.ts
+import { ref, computed, type Ref } from 'vue';
+import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+
+const loader = new FileLoader({ baseDir: './locales' });
+let initialized = false;
+
+export interface UseTranslationsOptions {
+  lang?: string;
+  autoLoad?: boolean;
+}
+
+export function useTranslations(options: UseTranslationsOptions = {}) {
+  const { lang = 'en', autoLoad = true } = options;
+
+  const translations = ref(null);
+  const loading = ref(false);
+  const error = ref<Error | null>(null);
+
+  const load = async (locale: string = lang) => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      if (!initialized) {
+        await loader.init();
+        initialized = true;
+      }
+
+      translations.value = await loader.load('strings', { lang: locale });
+    } catch (e) {
+      error.value = e as Error;
+      console.error('Failed to load translations:', e);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // Auto-load on creation
+  if (autoLoad) {
+    load();
+  }
+
+  return {
+    translations: computed(() => translations.value),
+    loading: computed(() => loading.value),
+    error: computed(() => error.value),
+    load
+  };
+}
+```
+
+**Usage in components:**
+
+```vue
+<script setup lang="ts">
+import { useTranslations } from '@/composables/useTranslations';
+
+// Simple usage
+const { translations, loading, error } = useTranslations({ lang: 'ja' });
+
+// With dynamic locale switching
+const currentLang = ref('en');
+const { translations, load } = useTranslations({ autoLoad: false });
+
+watch(currentLang, (newLang) => {
+  load(newLang);
+}, { immediate: true });
+</script>
+
+<template>
+  <div v-if="loading">Loading translations...</div>
+  <div v-else-if="error">Error: {{ error.message }}</div>
+  <div v-else-if="translations">
+    <p>{{ translations.hello }}</p>
+    <p>{{ translations.named }}</p>
+  </div>
+</template>
+```
+
+**Benefits:**
+- ✅ **Reusable** - Share logic across components
+- ✅ **Testable** - Easy to unit test
+- ✅ **Type-safe** - Full TypeScript support
+- ✅ **Flexible** - Supports lazy loading and locale switching
 
 ---
 
@@ -352,39 +638,48 @@ client.close();
 
 ### After (jsön)
 
-**Create feature flags in SurrealDB:**
+**Use the production-ready Feature Flag Manager example:**
 
-Use the [feature-flag-manager.ts](../examples/feature-flag-manager.ts) example:
+See [examples/feature-flag-manager.ts](../examples/feature-flag-manager.ts) for complete source code.
 
 ```typescript
 import { FeatureFlagManager } from './examples/feature-flag-manager';
+// Note: Copy this file to your project and customize as needed
 
 const manager = new FeatureFlagManager();
 await manager.init();
 
-// Create flag
+// Create flag with targeting
 await manager.setFlag({
   key: 'new-feature',
   name: 'New Feature',
-  description: 'Enable new dashboard',
+  description: 'Enable new dashboard with real-time analytics',
   enabled: true,
-  rolloutPercentage: 50,  // 50% rollout
-  targetUsers: ['user-123'],
+  rolloutPercentage: 50,  // Gradual rollout to 50% of users
+  targetUsers: ['user-123'],  // Always enabled for these users
+  targetTeams: ['beta-testers'],  // All team members
   environments: ['prod']
 }, 'prod');
 
-// Evaluate flag
+// Evaluate flag (results cached + real-time updates)
 const result = await manager.isEnabled('new-feature', {
   userId: 'user-123',
+  teamId: 'engineering',
   environment: 'prod'
 });
 
-if (result.enabled) {
-  console.log(`Feature enabled (${result.reason})`);
-}
+console.log(`Feature enabled: ${result.enabled} (${result.reason})`);
+// Output: "Feature enabled: true (user-targeted)"
 
 await manager.close();
 ```
+
+**Key Features:**
+- ✅ **Real-time sync** - Changes propagate instantly via LIVE queries
+- ✅ **Intelligent caching** - Pinia Colada caches evaluations
+- ✅ **Consistent rollout** - Same user always gets same result
+- ✅ **Multiple targeting** - Users, teams, percentages, environments
+- ✅ **Analytics** - Track flag evaluations automatically
 
 ### Migration Mapping
 
@@ -404,6 +699,219 @@ await manager.close();
 - **Type-safe**: TypeScript definitions for all flag types
 - **Analytics**: Built-in evaluation tracking
 - **Cost**: Free (no per-seat or MAU charges)
+- **Customizable**: Full control over flag schema and evaluation logic
+
+### Customization Guide
+
+The example provides a starting point for feature flags. Common customizations:
+
+#### 1. Multi-Variate Flags (A/B/C Testing)
+
+Add support for multiple variants with different configurations:
+
+```typescript
+interface FeatureFlag {
+  // ... existing fields ...
+
+  variants?: {
+    name: string;
+    weight: number;  // Percentage allocated to this variant
+    config: Record<string, any>;  // Variant-specific config
+  }[];
+}
+
+// Example: Test 3 checkout flows
+await manager.setFlag({
+  key: 'checkout-experiment',
+  enabled: true,
+  variants: [
+    { name: 'control', weight: 34, config: { flow: 'original' } },
+    { name: 'variant-a', weight: 33, config: { flow: 'single-page' } },
+    { name: 'variant-b', weight: 33, config: { flow: 'progressive' } }
+  ],
+  environments: ['prod']
+}, 'prod');
+
+// Evaluation returns variant assignment
+const result = await manager.getVariant('checkout-experiment', {
+  userId: 'user-123',
+  environment: 'prod'
+});
+
+console.log(result.variant);  // 'variant-a'
+console.log(result.config);   // { flow: 'single-page' }
+```
+
+#### 2. Custom Targeting Rules
+
+Add location, device, or subscription-based targeting:
+
+```typescript
+interface FlagContext {
+  userId?: string;
+  teamId?: string;
+  environment: string;
+
+  // Custom targeting dimensions
+  location?: string;
+  deviceType?: 'mobile' | 'desktop' | 'tablet';
+  subscriptionPlan?: 'free' | 'pro' | 'enterprise';
+  customAttributes?: Record<string, any>;
+}
+
+// Enhanced evaluation logic
+async isEnabled(key: string, context: FlagContext) {
+  const flag = await this.getFlag(key, context.environment);
+
+  // Location-based targeting
+  if (flag.targetLocations?.includes(context.location)) {
+    return { enabled: true, reason: 'location-targeted' };
+  }
+
+  // Subscription plan requirement
+  if (flag.requiresPlan && context.subscriptionPlan !== flag.requiresPlan) {
+    return { enabled: false, reason: 'plan-not-eligible' };
+  }
+
+  // Device-specific flags
+  if (flag.targetDevices?.includes(context.deviceType)) {
+    return { enabled: true, reason: 'device-targeted' };
+  }
+
+  // Continue with standard evaluation...
+}
+```
+
+#### 3. Time-Based Scheduling
+
+Auto-enable/disable flags at specific times:
+
+```typescript
+interface FeatureFlag {
+  // ... existing fields ...
+  schedule?: {
+    startTime?: Date;
+    endTime?: Date;
+  };
+}
+
+// Schedule Halloween feature
+await manager.setFlag({
+  key: 'halloween-theme',
+  enabled: true,
+  schedule: {
+    startTime: new Date('2025-10-25T00:00:00Z'),
+    endTime: new Date('2025-11-01T23:59:59Z')
+  },
+  environments: ['prod']
+}, 'prod');
+
+// Evaluation checks schedule
+async isEnabled(key: string, context: FlagContext) {
+  const flag = await this.getFlag(key, context.environment);
+
+  if (flag.schedule) {
+    const now = new Date();
+    if (flag.schedule.startTime && now < flag.schedule.startTime) {
+      return { enabled: false, reason: 'scheduled-not-started' };
+    }
+    if (flag.schedule.endTime && now > flag.schedule.endTime) {
+      return { enabled: false, reason: 'scheduled-expired' };
+    }
+  }
+
+  // Continue with standard evaluation...
+}
+```
+
+#### 4. Integration with Analytics
+
+Track flag evaluations for conversion analysis:
+
+```typescript
+import { analytics } from './analytics';
+
+async isEnabled(key: string, context: FlagContext) {
+  const result = await super.isEnabled(key, context);
+
+  // Track evaluation event
+  await analytics.track('feature_flag_evaluated', {
+    flagKey: key,
+    enabled: result.enabled,
+    reason: result.reason,
+    userId: context.userId,
+    environment: context.environment,
+    timestamp: new Date()
+  });
+
+  // Track impression for A/B test analysis
+  if (result.enabled && context.userId) {
+    await analytics.track('feature_flag_impression', {
+      flagKey: key,
+      userId: context.userId,
+      variant: result.variant || 'default'
+    });
+  }
+
+  return result;
+}
+```
+
+#### 5. Admin Dashboard UI
+
+Build a Vue/React admin panel to manage flags:
+
+```vue
+<!-- FlagManager.vue -->
+<script setup>
+import { ref, onMounted } from 'vue';
+import { FeatureFlagManager } from './examples/feature-flag-manager';
+
+const manager = new FeatureFlagManager();
+const flags = ref([]);
+const environments = ['dev', 'staging', 'prod'];
+
+onMounted(async () => {
+  await manager.init();
+  flags.value = await manager.listFlags('prod');
+});
+
+const toggleFlag = async (flagKey: string, enabled: boolean) => {
+  await manager.updateFlag(flagKey, { enabled }, 'prod');
+};
+
+const updateRollout = async (flagKey: string, percentage: number) => {
+  await manager.updateFlag(flagKey, { rolloutPercentage: percentage }, 'prod');
+};
+</script>
+
+<template>
+  <div class="flag-manager">
+    <h2>Feature Flags</h2>
+    <div v-for="flag in flags" :key="flag.key" class="flag-card">
+      <div class="flag-header">
+        <h3>{{ flag.name }}</h3>
+        <toggle v-model="flag.enabled" @change="toggleFlag(flag.key, $event)" />
+      </div>
+      <p>{{ flag.description }}</p>
+      <div class="flag-controls">
+        <label>
+          Rollout: {{ flag.rolloutPercentage }}%
+          <input
+            type="range"
+            :value="flag.rolloutPercentage"
+            @input="updateRollout(flag.key, $event.target.value)"
+            min="0"
+            max="100"
+          />
+        </label>
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+**Learn More**: See the complete [Feature Flags Guide](./FEATURE-FLAGS.md) for detailed patterns, troubleshooting, and advanced usage.
 
 ---
 

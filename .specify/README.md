@@ -17,13 +17,13 @@ This is the **@orbzone/dotted-json** library - dynamic JSON data expansion using
 
 **v0.6.0-design** (Current - Design Phase):
 
-1. **Storage Provider System Design**: Unified `StorageProvider` interface for JSÖN document persistence
-2. **SurrealDBLoader Design**: Load/save JSÖN documents from SurrealDB with variant resolution
+1. **Storage Provider System Design**: Unified `StorageProvider` interface for JSöN document persistence
+2. **SurrealDBLoader Design**: Load/save JSöN documents from SurrealDB with variant resolution
 3. **Permission Detection Design**: Table-level and field-level permission pre-flight checks
 4. **Zod Integration Design**: Single source of truth with `z.infer<>` for TypeScript type inference
 5. **SurrealQL to Zod Generator Design**: Auto-generate Zod schemas from `.surql` schema files
 6. **Design Documents**: Created 6 comprehensive design documents (~4,000+ lines total)
-7. **Constitution Update**: Added JSÖN capitalization rules (uppercase in titles, lowercase in extensions)
+7. **Constitution Update**: Added JSöN capitalization rules (uppercase in titles, lowercase in extensions)
 
 **v0.5.0**:
 
@@ -55,7 +55,7 @@ This is the **@orbzone/dotted-json** library - dynamic JSON data expansion using
 
 If starting a new session, read these files in order:
 
-1. **`memory/constitution.md`** - Project principles, constraints (20 kB bundle limit, TDD, JSÖN capitalization)
+1. **`memory/constitution.md`** - Project principles, constraints (20 kB bundle limit, TDD, JSöN capitalization)
 2. **`CHANGELOG.md`** (root) - Full version history including v0.6.0-design
 3. **`ROADMAP.md`** (root) - Current phase (v0.6.0-design) and implementation plan
 
@@ -263,7 +263,7 @@ These files capture **why** decisions were made, not just **what** was implement
 When starting a new AI session, provide this context:
 
 ```
-This is the @orbzone/dotted-json library (JSÖN).
+This is the @orbzone/dotted-json library (JSöN).
 
 Key facts:
 - Version: 0.6.0-design (design phase complete)

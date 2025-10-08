@@ -272,7 +272,7 @@ withFileSystem({
 // Resolves: ./hero.json
 ```
 
-### Preset 2: JSON with JSÖN Fallback
+### Preset 2: JSON with JSöN Fallback
 
 ```typescript
 withFileSystem({

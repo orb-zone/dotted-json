@@ -58,7 +58,7 @@ DEFINE FUNCTION fn::cancelOrder($orderId: string) {
 };
 
 -- ============================================================================
--- JSÖN DOCUMENT STORAGE (Variant-Aware)
+-- JSöN DOCUMENT STORAGE (Variant-Aware)
 -- ============================================================================
 
 DEFINE TABLE jsön_documents SCHEMAFULL;
@@ -183,7 +183,7 @@ const permissions = await plugin.permissions.getFieldPermissions('user');
 
 const loader = plugin.loader;
 
-// Save JSÖN documents with variants (uses array Record IDs)
+// Save JSöN documents with variants (uses array Record IDs)
 await loader.save('greetings', { hello: 'Hello' }, { lang: 'en' });
 // Creates: jsön_documents:['greetings', 'en']
 
@@ -270,7 +270,7 @@ const cancelResult = await userData.get('.cancelFirst');
 // Type: { success: boolean } | null
 ```
 
-### Step 4: Load/Save JSÖN Documents (Variant-Aware)
+### Step 4: Load/Save JSöN Documents (Variant-Aware)
 
 ```typescript
 // i18n translations with variant resolution

@@ -68,7 +68,7 @@ You are assisting with the **@orbzone/web-craft** monorepo, specifically:
 **Schema-driven development** - SurrealDB `.surql` files as single source of truth
 
 ### Key Features Being Built:
-1. **SurrealDBLoader** - Variant-aware JSÖN document storage
+1. **SurrealDBLoader** - Variant-aware JSöN document storage
 2. **Array Record IDs** - 10-100x faster queries using array-based IDs
 3. **Function discovery** - Auto-introspect `fn::` definitions via INFO FOR DATABASE
 4. **Resolver auto-generation** - Generate dotted-json resolvers from functions

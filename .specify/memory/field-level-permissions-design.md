@@ -1,4 +1,4 @@
-# Field-Level Permissions Design for JSÖN Storage
+# Field-Level Permissions Design for JSöN Storage
 
 **Created**: 2025-10-06
 **Status**: Design Phase
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This document designs **field-level permission detection and enforcement** for the SurrealDB JSÖN storage provider, leveraging SurrealDB's powerful field-level PERMISSIONS clauses.
+This document designs **field-level permission detection and enforcement** for the SurrealDB JSöN storage provider, leveraging SurrealDB's powerful field-level PERMISSIONS clauses.
 
 **Key Capability**: Detect which fields a user can read/write **before** attempting operations, enabling:
 - Conditional UI rendering (hide sensitive fields)

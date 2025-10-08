@@ -85,7 +85,7 @@ docs/
 
 **1. Quick Start** (Above the fold):
 ```markdown
-# dotted-json (JSÖN)
+# dotted-json (JSöN)
 
 Dynamic JSON expansion using dot-prefixed expression keys
 
@@ -325,9 +325,9 @@ See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 ## [0.6.0] - 2025-10-XX
 
 ### Added
-- **Storage Providers**: Unified `StorageProvider` interface for JSÖN document persistence
-- **FileLoader.save()**: Write JSÖN documents to filesystem with variant resolution
-- **SurrealDBLoader**: Load/save JSÖN documents from SurrealDB with array Record IDs
+- **Storage Providers**: Unified `StorageProvider` interface for JSöN document persistence
+- **FileLoader.save()**: Write JSöN documents to filesystem with variant resolution
+- **SurrealDBLoader**: Load/save JSöN documents from SurrealDB with array Record IDs
 
 ### Changed
 - **FileLoader**: Now implements `StorageProvider` interface (backward compatible)
@@ -385,7 +385,7 @@ See [migration/v0.5-to-v0.6.md](migration/v0.5-to-v0.6.md) for upgrade instructi
 
 ### Added
 - New `StorageProvider` interface for document persistence
-- FileLoader.save() method for writing JSÖN files
+- FileLoader.save() method for writing JSöN files
 ```
 
 **PATCH** (Bug fixes):

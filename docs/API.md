@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API documentation for `@orbzone/dotted-json` (jsön).
+Complete API documentation for `@orbzone/dotted-json` (JSöN).
 
 ---
 
@@ -8,7 +8,7 @@ Complete API documentation for `@orbzone/dotted-json` (jsön).
 
 - [Core API](#core-api)
   - [dotted()](#dotted)
-  - [DottedJson](#dottedjson)
+  - [DottedJSON](#dottedjson)
 - [Storage Providers](#storage-providers)
   - [FileLoader](#fileloader)
   - [SurrealDBLoader](#surrealdbloader)
@@ -27,7 +27,7 @@ Complete API documentation for `@orbzone/dotted-json` (jsön).
 
 ### dotted()
 
-Create a dotted JSON object with lazy expression evaluation.
+Create a "dotted" JSON object with lazy expression evaluation.
 
 ```typescript
 function dotted(
@@ -81,6 +81,7 @@ const withVariants = await data.get('strings.welcome', {
 ```
 
 **Parameters:**
+
 - `path` `string` - Dot-notation path (e.g., `'user.profile.email'`)
 - `options` `GetOptions` (optional)
   - `variants` `VariantContext` - Variant context for resolution
@@ -100,6 +101,7 @@ data.set('user.age', 30);
 ```
 
 **Parameters:**
+
 - `path` `string` - Dot-notation path
 - `value` `any` - Value to set
 - `options` `SetOptions` (optional)
@@ -117,6 +119,7 @@ if (data.has('user.profile')) {
 ```
 
 **Parameters:**
+
 - `path` `string` - Dot-notation path
 - `options` `HasOptions` (optional)
 
@@ -141,7 +144,7 @@ console.log(JSON.stringify(plain, null, 2));
 
 ### FileLoader
 
-Load JSÖN documents from the filesystem with variant resolution.
+Load JSöN documents from the filesystem with variant resolution.
 
 ```typescript
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
@@ -163,7 +166,7 @@ interface FileLoaderOptions {
   cache?: boolean;              // Enable caching (default: true)
   cacheTTL?: number;           // Cache TTL in ms (default: 60000)
   permissive?: boolean;         // Allow custom variants (default: false)
-  whitelistedVariants?: string[]; // Allowed custom variants
+  allowedVariants?: string[]; // Allowed custom variants
 }
 ```
 
@@ -192,6 +195,7 @@ const strings = await loader.load('strings', {
 ```
 
 **Parameters:**
+
 - `baseName` `string` - Document name without variants/extension
 - `variants` `VariantContext` (optional) - Variant context
 
@@ -209,6 +213,7 @@ await loader.save('config', { theme: 'dark' }, { env: 'prod' });
 ```
 
 **Parameters:**
+
 - `baseName` `string` - Document name
 - `data` `any` - Data to save
 - `variants` `VariantContext` (optional)
@@ -230,6 +235,7 @@ const docs = await loader.list({ baseName: 'strings' });
 ```
 
 **Parameters:**
+
 - `filter` `ListFilter` (optional)
   - `baseName` `string` - Filter by base name
   - `variants` `Partial<VariantContext>` - Filter by variants
@@ -260,7 +266,7 @@ await loader.close();
 
 ### SurrealDBLoader
 
-Load/save JSÖN documents from SurrealDB with variant resolution and real-time updates.
+Load/Save JSöN documents from SurrealDB with variant resolution and real-time updates.
 
 ```typescript
 import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb';
@@ -316,6 +322,7 @@ const config = await loader.load('config', { env: 'prod' });
 ```
 
 **Uses array-based Record IDs for 10-100x faster queries:**
+
 ```
 ion:['config', 'env', 'prod']  // O(log n) range scan
 ```
@@ -350,6 +357,7 @@ await unsubscribe();
 ```
 
 **Parameters:**
+
 - `baseName` `string` - Ion name
 - `variants` `VariantContext | undefined` - Variant filter
 - `callback` `(data: any) => void` - Update handler
@@ -357,6 +365,7 @@ await unsubscribe();
 **Returns:** `Promise<() => void>` - Unsubscribe function
 
 **Features:**
+
 - Uses SurrealDB LIVE queries with DIFF mode
 - Automatic cache invalidation on updates
 - WebSocket-based real-time streaming
@@ -444,6 +453,7 @@ interface WithZodOptions {
 ```
 
 **Modes:**
+
 - `strict` - Throw on validation error
 - `loose` - Log error and continue
 - `off` - Disable validation
@@ -496,12 +506,14 @@ await plugin.disconnect();
 #### Auto-generated Resolvers
 
 For each table, generates:
+
 - `db.{table}.select(id)` - Fetch record by ID
 - `db.{table}.create(data)` - Create new record
 - `db.{table}.update(id, data)` - Update record
 - `db.{table}.delete(id)` - Delete record
 
 For each function:
+
 - `fn.{name}(params)` - Call SurrealDB function with validation
 
 ---
@@ -764,6 +776,7 @@ Variants are resolved using a priority-based scoring system:
 ### Language-specific Formality
 
 **Japanese (keigo 敬語):**
+
 ```typescript
 { lang: 'ja', form: 'casual' }    // Plain form (普通形)
 { lang: 'ja', form: 'polite' }    // Teineigo (丁寧語)
@@ -771,6 +784,7 @@ Variants are resolved using a priority-based scoring system:
 ```
 
 **Korean (jondaemal 존댓말):**
+
 ```typescript
 { lang: 'ko', form: 'casual' }    // Banmal (반말)
 { lang: 'ko', form: 'polite' }    // Jondaemal (존댓말)
@@ -778,12 +792,14 @@ Variants are resolved using a priority-based scoring system:
 ```
 
 **German (Sie/du):**
+
 ```typescript
 { lang: 'de', form: 'informal' }  // Du
 { lang: 'de', form: 'formal' }    // Sie
 ```
 
 **Spanish (tú/usted):**
+
 ```typescript
 { lang: 'es', form: 'informal' }  // Tú
 { lang: 'es', form: 'formal' }    // Usted
@@ -904,7 +920,7 @@ await data.get('strings', {
   variants: { lang: 'es', form: 'formal' }
 });
 
-// Avoid: custom variants should be whitelisted
+// Avoid: custom variants should be allowed
 await data.get('strings', {
   variants: { customVariant: 'value' }  // May cause cache misses
 });
@@ -915,6 +931,7 @@ await data.get('strings', {
 ## Migration Guides
 
 See [MIGRATION.md](./MIGRATION.md) for detailed migration guides from:
+
 - i18next
 - react-intl
 - vue-i18n
@@ -926,6 +943,7 @@ See [MIGRATION.md](./MIGRATION.md) for detailed migration guides from:
 ## Performance Tips
 
 See [PERFORMANCE.md](./PERFORMANCE.md) for:
+
 - Cache optimization strategies
 - Variant resolution performance
 - Bundle size management

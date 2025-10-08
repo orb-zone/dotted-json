@@ -377,10 +377,10 @@ export class FileLoader implements StorageProvider {
   }
 
   /**
-   * Save JSÖN document to filesystem
+   * Save JSöN document to filesystem
    *
    * @param baseName - Base file name (without extension or variants)
-   * @param data - JSÖN document to save
+   * @param data - JSöN document to save
    * @param variants - Variant context for file naming
    * @param options - Save options (merge strategy, validation, etc.)
    *
@@ -472,7 +472,7 @@ export class FileLoader implements StorageProvider {
   }
 
   /**
-   * List available JSÖN documents
+   * List available JSöN documents
    *
    * @param filter - Filter criteria (baseName, variants, metadata)
    * @returns Array of document metadata
@@ -562,7 +562,7 @@ export class FileLoader implements StorageProvider {
   }
 
   /**
-   * Delete JSÖN document from filesystem
+   * Delete JSöN document from filesystem
    *
    * @param baseName - Base file name
    * @param variants - Variant context identifying specific document

@@ -160,7 +160,7 @@ interface CacheEntry {
 }
 
 /**
- * SurrealDB loader for ions (JSÖN documents with variant support)
+ * SurrealDB loader for ions (JSöN documents with variant support)
  *
  * Implements StorageProvider interface with array-based Record IDs
  * for performant variant resolution.

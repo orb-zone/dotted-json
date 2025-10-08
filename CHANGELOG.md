@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.3] - 2025-10-08
+
+### Documentation
+- **Feature Flags Guide** (`docs/FEATURE-FLAGS.md`):
+  - Comprehensive 500+ line guide for production feature flag patterns
+  - Quick start with prerequisites and basic usage
+  - Core concepts: real-time updates, intelligent caching, targeting strategies
+  - Usage patterns: progressive rollout, kill switches, A/B testing, scheduled releases
+  - Customization guide: multi-variate flags, custom targeting, time-based scheduling, analytics integration
+  - Comparison to commercial services (LaunchDarkly, Unleash)
+  - Troubleshooting and best practices
+
+- **Enhanced Examples README** (`examples/README.md`):
+  - Expanded from 100 to 540+ lines with comprehensive example catalog
+  - Categorized examples by use case, complexity, and plugin
+  - Quick start instructions for each example
+  - Customization patterns (authentication, audit logging, webhooks)
+  - Testing examples and troubleshooting section
+  - Contributing guidelines for new examples
+
+- **Vue 3 Integration Improvements** (`docs/MIGRATION.md`):
+  - **Fixed critical bug**: Removed async `.get()` calls in Vue templates
+  - Added Suspense example for modern Vue 3 async handling
+  - Added Pinia Colada integration example with intelligent caching
+  - Added TypeScript integration example with full type inference
+  - Added composable pattern example (`useTranslations()`)
+  - Enhanced feature flags migration section with 5 customization patterns
+
+- **Vue3 Expert Agent** (`.specify/agents/vue3-expert.md`):
+  - New specialized subagent for Vue 3 best practices
+  - Covers Composition API, reactivity optimization, TypeScript integration
+  - Documents common anti-patterns and solutions
+  - Production-ready component examples
+
+### Changed
+- **Constitution Updates** (`.specify/memory/constitution.md`):
+  - Added SurrealDB field naming conventions (`_type`, `_at`, `meta`)
+  - Refined AEON acronym definitions (ION, ART, COG, DOT)
+  - Updated terminology: "allowed" instead of "whitelisted"
+  - Documented JSöN capitalization rules
+
+- **Terminology Consistency**:
+  - Updated all documentation to use `meta` instead of `metadata`
+  - Standardized JSöN capitalization (uppercase in titles, lowercase in extensions)
+  - Updated AEON field names across design documents
+
+### Fixed
+- Vue 3 examples no longer call async methods synchronously in templates
+- Improved error handling in Vue component examples
+- Fixed reactivity patterns to use `computed()` appropriately
+
+---
+
 ## [0.9.2] - 2025-10-07
 
 ### Added
@@ -373,24 +426,24 @@ const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
 ## [0.6.0] - 2025-10-07
 
 ### Added
-- **StorageProvider Interface**: Unified API for JSÖN document persistence across different backends (filesystem, SurrealDB, etc.)
+- **StorageProvider Interface**: Unified API for JSöN document persistence across different backends (filesystem, SurrealDB, etc.)
   - `load()`, `save()`, `list()`, `delete()`, `close()` methods
   - Optional `subscribe()` for real-time providers
   - Comprehensive type definitions in `src/types/storage.ts`
 
-- **FileLoader.save()**: Write JSÖN documents to filesystem with variant resolution
+- **FileLoader.save()**: Write JSöN documents to filesystem with variant resolution
   - Deterministic file naming: `baseName:lang:gender:form.jsön`
   - Merge strategies: `replace` (default), `merge` (shallow), `deep-merge` (recursive)
   - Optional Zod schema validation before saving
   - Pretty-print JSON output (configurable)
   - Upsert support (create if doesn't exist)
 
-- **FileLoader.list()**: List available JSÖN documents with filtering
+- **FileLoader.list()**: List available JSöN documents with filtering
   - Filter by `baseName`, `variants`, or `metadata`
   - Returns file metadata (createdAt, updatedAt, size)
   - Supports partial variant matching
 
-- **FileLoader.delete()**: Remove JSÖN documents from filesystem
+- **FileLoader.delete()**: Remove JSöN documents from filesystem
   - Variant-aware deletion (delete specific language/form/gender combination)
   - Automatic cache invalidation
 
@@ -457,11 +510,11 @@ This release focuses on **comprehensive design documentation** for the next majo
 #### Designed Features
 
 **Storage Providers System**
-- Unified `StorageProvider` interface for JSÖN document persistence
-- `SurrealDBLoader` - Load/save JSÖN documents from SurrealDB with variant resolution
+- Unified `StorageProvider` interface for JSöN document persistence
+- `SurrealDBLoader` - Load/save JSöN documents from SurrealDB with variant resolution
 - Enhanced `FileLoader` - Save/list/delete capabilities for filesystem storage
 - Variant-aware storage (load/save with language, environment, user context)
-- Database schema for JSÖN documents (`jsön_documents` table)
+- Database schema for JSöN documents (`jsön_documents` table)
 - Merge strategies (replace, merge, deep-merge)
 - Zod validation on save
 - Real-time LIVE query support for document subscriptions
@@ -506,12 +559,12 @@ All designs are in `.specify/memory/`:
 
 #### Updated Documentation
 
-- `constitution.md` - Added JSÖN capitalization rules (uppercase in titles, lowercase in extensions)
+- `constitution.md` - Added JSöN capitalization rules (uppercase in titles, lowercase in extensions)
 - `ROADMAP.md` - Updated Phase 6 with 5 sub-phases (v0.6.0-v1.0.0)
 
 #### Use Cases Designed
 
-- CMS / Content Management (save/edit JSÖN documents)
+- CMS / Content Management (save/edit JSöN documents)
 - i18n Translation Editor (real-time translation management)
 - Configuration Management (app settings, feature flags)
 - User Preferences (per-user stored documents)
@@ -524,7 +577,7 @@ All designs are in `.specify/memory/`:
 Frontend → REST API → Business Logic → ORM → Database
 ```
 
-**JSÖN + SurrealDB Stack** (designed):
+**JSöN + SurrealDB Stack** (designed):
 ```
 Frontend → SurrealDB (business logic in fn::)
 ```

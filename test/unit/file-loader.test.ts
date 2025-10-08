@@ -103,7 +103,7 @@ describe('FileLoader', () => {
   });
 
   describe('Security - Variant validation', () => {
-    test('blocks non-whitelisted language', async () => {
+    test('blocks non-allowed language', async () => {
       const data = await loader.load('strings', { lang: 'de' });  // Not in whitelist
       expect(data.welcome).toBe('Welcome');  // Falls back to base
     });

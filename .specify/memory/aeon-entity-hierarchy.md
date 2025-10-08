@@ -19,7 +19,7 @@ The AEON model defines a hierarchical taxonomy of entity types (A-H) built on to
 2. **Numeric Association**: Layers 1-8 for future use (permissions, caching, audit)
 3. **Clean Naming**: Field names use layer type directly (`hub`, `eco`, `bio` - not `belongs_to_hub`)
 4. **ION References**: Variant-aware content via `name = ion:['key', ...]` (not `name_ion`)
-5. **Graph Edges**: Relationships stored as edges with metadata (avoid duplication)
+5. **Graph Edges**: Relationships stored as edges with meta (avoid duplication)
 6. **Inheritance**: Each layer references parent layers, queries fetch inherited context
 
 ---
@@ -28,19 +28,21 @@ The AEON model defines a hierarchical taxonomy of entity types (A-H) built on to
 
 ### Layer 0: ION (Internal Substrate)
 
-**ION** - **I**nteractive **O**bject **N**ode
+**ION** - **I**nteractive **O**bservable **N**ode
 
 **Purpose**: Atomic building blocks for variant-aware content (translations, configs, user preferences)
 
 **Metaphor**: "Stars in the sky that entities absorb their attributes from"
 
 **Characteristics**:
+
 - Internal implementation detail (not user-facing)
 - Variant-aware data storage
 - Referenced by A-H entities for dynamic content
 - Array-based Record IDs: `ion:['baseName', 'lang', 'gender', 'form', ...custom]`
 
 **Examples**:
+
 ```sql
 ion:['dept-name', 'cardiology', 'en']
 ion:['skill-desc', 'echocardiogram', 'es', 'formal']
@@ -52,13 +54,14 @@ ion:['config', 'email-settings', 'prod', 'us-east']
 
 ### Layer 1: ART
 
-**ART** - **A**ction **R**esource **T**alent
+**ART** - **A**ctivity **R**esource **T**alent
 
 **Purpose**: Skills, capabilities, certifications, techniques, permissions
 
 **Examples**: Medical procedures, programming languages, security clearances, tool proficiencies
 
 **Schema**:
+
 ```sql
 DEFINE TABLE art SCHEMAFULL;
 
@@ -71,6 +74,7 @@ DEFINE FIELD layer ON TABLE art VALUE 1;
 ```
 
 **Examples**:
+
 ```sql
 CREATE art:echocardiogram SET
   name = ion:['skill-name', 'echocardiogram'],
@@ -99,6 +103,7 @@ CREATE art:admin-access SET
 **Examples**: Employees, customers, patients, AI assistants, service accounts
 
 **Schema**:
+
 ```sql
 DEFINE TABLE bio SCHEMAFULL;
 
@@ -118,6 +123,7 @@ DEFINE INDEX idx_bio_email ON TABLE bio COLUMNS email UNIQUE;
 ```
 
 **Examples**:
+
 ```sql
 CREATE bio:alice SET
   email = 'alice@acme.com',
@@ -133,6 +139,7 @@ CREATE bio:ai-assistant-beta SET
 ```
 
 **Relationships**:
+
 ```sql
 -- BIO has ART (skills/permissions)
 RELATE bio:alice->has->art:echocardiogram SET
@@ -150,13 +157,14 @@ RELATE bio:alice->uses->cog:scheduler SET
 
 ### Layer 3: COG
 
-**COG** - **C**apability **O**peration **G**adget
+**COG** - **C**ontextual **O**peration **G**adget
 
 **Purpose**: Tools, forms, UI components, interfaces, APIs (things users interact with)
 
 **Examples**: Scheduling interface, report generator, API endpoint, mobile app, dashboard
 
 **Schema**:
+
 ```sql
 DEFINE TABLE cog SCHEMAFULL;
 
@@ -171,6 +179,7 @@ DEFINE FIELD layer ON TABLE cog VALUE 3;
 ```
 
 **Examples**:
+
 ```sql
 CREATE cog:scheduler SET
   name = ion:['tool-name', 'scheduler'],
@@ -193,6 +202,7 @@ CREATE cog:api-v3 SET
 ```
 
 **Relationships**:
+
 ```sql
 -- COG requires ART (permission needed to access tool)
 RELATE cog:scheduler->requires->art:scheduler-access;
@@ -205,43 +215,46 @@ RELATE eco:cardiology->contains->cog:scheduler;
 
 ### Layer 4: DOT
 
-**DOT** - **D**ated **O**perational **T**ransaction
+**DOT** - **D**ated **O**bserved **T**ransaction
 
 **Purpose**: Historical records, audit logs, immutable transactions, time-bound events
 
 **Examples**: Appointments, purchases, login events, audit trails, invoices, completed tasks
 
 **Characteristics**:
+
 - **Immutable**: Created once, never updated (append-only)
-- **Temporal**: Always has `occurred_at` timestamp
+- **Temporal**: Always has `_at` timestamp (readonly)
 - **Audit trail**: Records who did what, when, with what tools
 
 **Schema**:
+
 ```sql
 DEFINE TABLE dot SCHEMAFULL
   PERMISSIONS FOR create WHERE $auth != NONE
   PERMISSIONS FOR update NONE   -- Immutable!
   PERMISSIONS FOR delete WHERE $auth.role = 'admin';
 
-DEFINE FIELD event_type ON TABLE dot TYPE string
+DEFINE FIELD _type ON TABLE dot TYPE string
   ASSERT $value INSIDE ['appointment', 'purchase', 'login', 'logout', 'update', 'delete', 'create'];
-DEFINE FIELD occurred_at ON TABLE dot TYPE datetime VALUE time::now();
-DEFINE FIELD metadata ON TABLE dot TYPE option<object>;
+DEFINE FIELD at ON TABLE dot TYPE datetime VALUE time::now();
+DEFINE FIELD meta ON TABLE dot TYPE option<object>;
 DEFINE FIELD eco ON TABLE dot TYPE option<record<eco>>;
 DEFINE FIELD hub ON TABLE dot TYPE record<hub>;
 DEFINE FIELD created_at ON TABLE dot TYPE datetime VALUE time::now();
 DEFINE FIELD layer ON TABLE dot VALUE 4;
 
-DEFINE INDEX idx_dot_occurred ON TABLE dot COLUMNS occurred_at;
-DEFINE INDEX idx_dot_hub_type ON TABLE dot COLUMNS hub, event_type;
+DEFINE INDEX idx_dot_occurred ON TABLE dot COLUMNS at;
+DEFINE INDEX idx_dot_hub_type ON TABLE dot COLUMNS hub, _type;
 ```
 
 **Examples**:
+
 ```sql
 CREATE dot:appointment-20241007-1430 SET
-  event_type = 'appointment',
-  occurred_at = '2024-10-07T14:30:00Z',
-  metadata = {
+  _at = '2024-10-07T14:30:00Z',
+  _type = 'appointment',
+  meta = {
     patient_id: 'patient-12345',
     duration_minutes: 30,
     status: 'completed'
@@ -250,9 +263,9 @@ CREATE dot:appointment-20241007-1430 SET
   hub = hub:acme;
 
 CREATE dot:login-alice-20241007-143256 SET
-  event_type = 'login',
-  occurred_at = '2024-10-07T14:32:56Z',
-  metadata = {
+  _at = '2024-10-07T14:32:56Z',
+  _type = 'login',
+  meta = {
     ip_address: '192.168.1.100',
     user_agent: 'Mozilla/5.0...'
   },
@@ -260,6 +273,7 @@ CREATE dot:login-alice-20241007-143256 SET
 ```
 
 **Relationships**:
+
 ```sql
 -- DOT involves BIO (participants in event)
 RELATE dot:appointment-20241007-1430->involves->bio:alice SET role = 'provider';
@@ -287,11 +301,13 @@ RELATE bio:alice->created->dot:appointment-20241007-1430 SET
 **Examples**: Cardiology department, sales team west, Building A Floor 3, project groups
 
 **Characteristics**:
+
 - Hierarchical (can nest via `parent` field)
 - Multi-membership (BIO can belong to multiple ECOs)
 - Scopes access to COGs and ARTs
 
 **Schema**:
+
 ```sql
 DEFINE TABLE eco SCHEMAFULL;
 
@@ -304,6 +320,7 @@ DEFINE FIELD layer ON TABLE eco VALUE 5;
 ```
 
 **Examples**:
+
 ```sql
 -- Top-level department
 CREATE eco:medical SET
@@ -335,6 +352,7 @@ CREATE eco:sales-team-west SET
 ```
 
 **Relationships**:
+
 ```sql
 -- ECO contains COG (tools available)
 RELATE eco:cardiology->contains->cog:scheduler;
@@ -357,11 +375,13 @@ RELATE eco:cardiology->employs->bio:alice SET
 **Examples**: Healthcare, e-commerce, education, finance, manufacturing, SaaS
 
 **Characteristics**:
+
 - Defines business context
 - Scopes regulatory compliance
 - Groups related ECOs
 
 **Schema**:
+
 ```sql
 DEFINE TABLE fad SCHEMAFULL;
 
@@ -375,6 +395,7 @@ DEFINE FIELD layer ON TABLE fad VALUE 6;
 ```
 
 **Examples**:
+
 ```sql
 CREATE fad:healthcare SET
   name = ion:['industry-name', 'healthcare'],
@@ -396,6 +417,7 @@ CREATE fad:education SET
 ```
 
 **Relationships**:
+
 ```sql
 -- FAD requires ART (industry-specific certifications)
 RELATE fad:healthcare->requires->art:hipaa-certification;
@@ -413,11 +435,13 @@ RELATE fad:healthcare->requires->art:medical-license;
 **Examples**: API v3, beta release, 2024-Q4-release, feature-flag-new-ui
 
 **Characteristics**:
+
 - Enables versioned deployments
 - Allows gradual rollouts
 - Isolates breaking changes
 
 **Schema**:
+
 ```sql
 DEFINE TABLE gen SCHEMAFULL;
 
@@ -433,6 +457,7 @@ DEFINE INDEX idx_gen_version ON TABLE gen COLUMNS hub, version UNIQUE;
 ```
 
 **Examples**:
+
 ```sql
 CREATE gen:v2 SET
   version = '2.0.0',
@@ -456,6 +481,7 @@ CREATE gen:beta SET
 ```
 
 **Usage**:
+
 ```sql
 -- HUB tracks active version
 CREATE hub:acme SET
@@ -480,12 +506,14 @@ CREATE fad:healthcare SET
 **Examples**: Customer subdomains, demo environments, staging vs production
 
 **Characteristics**:
+
 - Top-level isolation (multi-tenancy)
 - Security boundary
 - Billing/subscription unit
 - DNS entry point
 
 **Schema**:
+
 ```sql
 DEFINE TABLE hub SCHEMAFULL;
 
@@ -502,6 +530,7 @@ DEFINE INDEX idx_hub_subdomain ON TABLE hub COLUMNS subdomain UNIQUE;
 ```
 
 **Examples**:
+
 ```sql
 CREATE hub:acme SET
   subdomain = 'acme',
@@ -553,6 +582,7 @@ RELATE hub:acme->has->gen:v3 SET
 ### Common Edge Types
 
 **Ownership/Possession**:
+
 ```sql
 bio:alice->has->art:skill
 eco:dept->has->cog:tool
@@ -560,6 +590,7 @@ hub:tenant->has->gen:version
 ```
 
 **Usage/Interaction**:
+
 ```sql
 bio:alice->uses->cog:scheduler
 bio:alice->created->dot:appointment
@@ -567,6 +598,7 @@ dot:event->used->art:procedure
 ```
 
 **Containment/Membership**:
+
 ```sql
 eco:cardiology->contains->cog:scheduler
 eco:cardiology->employs->bio:alice
@@ -574,6 +606,7 @@ fad:healthcare->contains->eco:cardiology
 ```
 
 **Requirements/Dependencies**:
+
 ```sql
 cog:scheduler->requires->art:permission
 fad:healthcare->requires->art:certification
@@ -581,6 +614,7 @@ art:advanced-skill->requires->art:basic-skill
 ```
 
 **Participation/Involvement**:
+
 ```sql
 dot:appointment->involves->bio:patient
 dot:appointment->involves->bio:provider
@@ -588,12 +622,13 @@ dot:transaction->involves->bio:buyer
 ```
 
 **Hierarchy/Nesting**:
+
 ```sql
 eco:cardiology->parent_of->eco:interventional-cardiology
 eco:medical->parent_of->eco:cardiology
 ```
 
-### Edge Metadata
+### Edge meta
 
 Edges can store relationship-specific data:
 
@@ -694,9 +729,9 @@ const context = parseAeonUrl('https://echo.alice.scheduler.appt123.cardio.health
 const data = await db.query(`
   SELECT
     id,
-    occurred_at,
+    at,
     ->involves->bio.email AS participants,
-    ->used->art.name.data AS procedures
+    ->used->art.name AS procedures
   FROM $dot
   WHERE hub = $hub
     AND eco = $eco
@@ -739,7 +774,7 @@ SELECT
     certification_level
   } AS skills,
 
-  -- Edge metadata
+  -- Edge meta
   ->has.{
     acquired,
     proficiency,
@@ -800,7 +835,7 @@ CREATE bio:alice SET
 
 ### ❌ Storing Edge Data in Entity Fields
 
-**Don't embed relationship metadata in entity records**:
+**Don't embed relationship meta in entity records**:
 
 ```sql
 -- BAD: Storing skill details in BIO
@@ -809,16 +844,16 @@ CREATE bio:alice SET
   skills = [
     {
       skill: 'echocardiogram',           -- ❌ Should be edge
-      acquired: '2020-06-15',            -- ❌ Should be edge metadata
-      proficiency: 'expert'              -- ❌ Should be edge metadata
+      acquired: '2020-06-15',            -- ❌ Should be edge meta
+      proficiency: 'expert'              -- ❌ Should be edge meta
     }
   ];
 
 -- GOOD: Use graph edge
 CREATE bio:alice SET email = 'alice@acme.com';
 RELATE bio:alice->has->art:echocardiogram SET
-  acquired = '2020-06-15',               -- ✅ Edge metadata
-  proficiency = 'expert';                -- ✅ Edge metadata
+  acquired = '2020-06-15',               -- ✅ Edge meta
+  proficiency = 'expert';                -- ✅ Edge meta
 ```
 
 ### ❌ Updating DOT Records
@@ -832,9 +867,9 @@ UPDATE dot:appointment-20241007-1430 SET
 
 -- GOOD: Create new DOT for state change
 CREATE dot:appointment-20241007-1430-cancelled SET
-  event_type = 'appointment_cancelled',
-  occurred_at = time::now(),
-  metadata = {
+  _at = time::now(),
+  _type = 'appointment_cancelled',
+  meta = {
     original_appointment: 'dot:appointment-20241007-1430',
     reason: 'Patient requested reschedule'
   };
@@ -890,15 +925,15 @@ SELECT * FROM fad WHERE gen = $context.gen;
 ```sql
 -- User logs in
 CREATE dot:login-alice-20241007-143000 SET
-  event_type = 'login',
-  occurred_at = '2024-10-07T14:30:00Z',
+  _at = '2024-10-07T14:30:00Z',
+  _type = 'login',
   hub = hub:acme;
 RELATE bio:alice->created->dot:login-alice-20241007-143000;
 
 -- User schedules appointment
 CREATE dot:appointment-20241007-1430 SET
-  event_type = 'appointment',
-  occurred_at = '2024-10-07T14:30:00Z',
+  _at = '2024-10-07T14:30:00Z',
+  _type = 'appointment',
   eco = eco:cardiology,
   hub = hub:acme;
 RELATE bio:alice->created->dot:appointment-20241007-1430;
@@ -907,29 +942,29 @@ RELATE dot:appointment-20241007-1430->used->art:echocardiogram;
 
 -- Query: Audit trail for Alice
 SELECT
-  ->created->dot.event_type,
-  ->created->dot.occurred_at,
-  ->created->dot->via->cog.name.data AS tool_used
+  ->created->dot._type,
+  ->created->dot._at,
+  ->created->dot->via->cog.name AS tool_used
 FROM bio:alice
-ORDER BY ->created->dot.occurred_at DESC;
+ORDER BY ->created->dot._at DESC;
 ```
 
 ---
 
 ## Next Steps
 
-1. **Finalize acronym definitions** (especially DOT, FAD, ECO edge cases)
-2. **Define permission patterns** (how layers enforce access control)
-3. **Design caching strategy** (which layers cache longer, which refresh frequently)
-4. **Build subdomain router** (TypeScript library for parsing AEON URLs)
-5. **Create migration tools** (convert flat IONs to AEON hierarchy)
-6. **Implement in `surrounded` package** (SurrealDB schema generator)
-7. **Build `aeonic` CLI** (scaffolding tool for generating entities)
+1. **Define permission patterns** (how layers enforce access control)
+2. **Design caching strategy** (which layers cache longer, which refresh frequently)
+3. **Build subdomain router** (TypeScript library for parsing AEON URLs)
+4. **Create migration tools** (convert flat IONs to AEON hierarchy)
+5. **Implement in `surrounded` package** (SurrealDB schema generator)
+6. **Build `aeonic` CLI** (scaffolding tool for generating entities)
 
 ---
 
 **Status**: Design specification - Ready for implementation in v2.0.0 monorepo
 
 **Related Documents**:
+
 - [aeonic-vision.md](.specify/memory/aeonic-vision.md) - Framework overview
 - [constitution.md](.specify/memory/constitution.md) - Design principles

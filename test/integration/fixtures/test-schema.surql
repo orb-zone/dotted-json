@@ -1,5 +1,5 @@
 -- ============================================================================
--- JSÖN Test Schema for Integration Tests
+-- JSöN Test Schema for Integration Tests
 -- ============================================================================
 -- This schema defines tables for testing storage providers, permissions,
 -- and schema-driven Zod generation workflows.
@@ -11,9 +11,9 @@
 --   running on 127.0.0.1:9000
 
 -- ============================================================================
--- JSÖN Documents Storage Table
+-- JSöN Documents Storage Table
 -- ============================================================================
--- This table stores JSÖN expansion documents with variant resolution support
+-- This table stores JSöN expansion documents with variant resolution support
 
 DEFINE TABLE jsön_documents SCHEMAFULL;
 
@@ -243,7 +243,7 @@ CREATE app_config:default CONTENT {
   created_at: time::now()
 };
 
--- Create sample JSÖN documents with variants
+-- Create sample JSöN documents with variants
 CREATE jsön_documents CONTENT {
   base_name: 'greetings',
   variants: { lang: 'en' },

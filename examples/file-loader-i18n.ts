@@ -90,10 +90,10 @@ console.log('Cache entries after clear:', stats2.size);
 
 console.log('\n═══ Example 5: Security - Whitelist Protection ═══\n');
 
-// Non-whitelisted language is filtered out, falls back to base
+// Non-allowed language is filtered out, falls back to base
 const ruStrings = await loader.load('strings', { lang: 'ru' });
-console.log('Russian (not whitelisted, uses base):', ruStrings.greeting);
-console.log('✅ Non-whitelisted language safely filtered');
+console.log('Russian (not allowed, uses base):', ruStrings.greeting);
+console.log('✅ Non-allowed language safely filtered');
 
 // Path traversal attempt is filtered out, falls back to base
 const attackStrings = await loader.load('strings', { lang: '../../../etc/passwd' });

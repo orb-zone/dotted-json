@@ -164,7 +164,7 @@ export async function waitFor(
 /**
  * Test fixture loader
  *
- * Loads JSÖN fixture files from test/fixtures directory
+ * Loads JSöN fixture files from test/fixtures directory
  *
  * @param fixtureName - Name of fixture file (without .jsön extension)
  * @returns Parsed JSON data
@@ -188,7 +188,7 @@ export function loadFixture(fixtureName: string): any {
 }
 
 /**
- * Creates a mock JSÖN document for testing
+ * Creates a mock JSöN document for testing
  *
  * @param baseName - Base name of the document
  * @param data - Document data

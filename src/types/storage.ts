@@ -1,5 +1,5 @@
 /**
- * Storage provider types for JSÖN document persistence
+ * Storage provider types for JSöN document persistence
  *
  * @module @orbzone/dotted-json/types/storage
  */
@@ -16,7 +16,7 @@ type ZodType = any;
 export type MergeStrategy = 'replace' | 'merge' | 'deep-merge';
 
 /**
- * Storage provider interface for JSÖN documents
+ * Storage provider interface for JSöN documents
  *
  * All storage backends (filesystem, SurrealDB, etc.) implement this interface
  * for consistent load/save operations with variant resolution.
@@ -28,11 +28,11 @@ export interface StorageProvider {
   init(): Promise<void>;
 
   /**
-   * Load JSÖN document with variant resolution
+   * Load JSöN document with variant resolution
    *
    * @param baseName - Document identifier (e.g., 'app-settings', 'strings')
    * @param variants - Variant context for resolution (lang, env, userId, etc.)
-   * @returns Parsed JSÖN document
+   * @returns Parsed JSöN document
    *
    * @example
    * ```typescript
@@ -43,10 +43,10 @@ export interface StorageProvider {
   load(baseName: string, variants?: VariantContext): Promise<any>;
 
   /**
-   * Save JSÖN document
+   * Save JSöN document
    *
    * @param baseName - Document identifier
-   * @param data - JSÖN document to save
+   * @param data - JSöN document to save
    * @param variants - Variant context for storage
    * @param options - Provider-specific save options
    *
