@@ -71,6 +71,7 @@
     "db:test": "surreal start --user root --pass root --bind 127.0.0.1:9000 memory",
     "lint": "eslint . --ext .js,.ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
+    "prepare": "bunx lefthook install",
     "prepublishOnly": "bun run build && bun test"
   },
   "keywords": [
@@ -110,11 +111,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/orbzone/dotted-json.git"
+    "url": "git+https://github.com/orbzone/json.git"
   },
-  "homepage": "https://github.com/orbzone/dotted-json#readme",
+  "homepage": "https://github.com/orbzone/json#readme",
   "bugs": {
-    "url": "https://github.com/orbzone/dotted-json/issues"
+    "url": "https://github.com/orbzone/json/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "peerDependencies": {
     "zod": "^3.0.0",
@@ -185,6 +190,7 @@
     "dot-prop": "^8.0.2"
   },
   "devDependencies": {
+    "@evilmartians/lefthook": "^1.9.8",
     "@types/bun": "latest",
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0",

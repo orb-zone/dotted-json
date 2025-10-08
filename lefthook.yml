@@ -1,0 +1,122 @@
+# Lefthook configuration for git hooks
+# Install: bun add -d @evilmartians/lefthook
+# Setup: bunx lefthook install
+
+# Pre-commit hooks
+pre-commit:
+  parallel: true
+  commands:
+    # Ensure all tests pass before committing
+    tests:
+      glob: "*.{js,ts,tsx}"
+      run: bun test
+
+    # Type checking
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: bun run typecheck
+
+    # Build to ensure no breaking changes
+    build:
+      glob: "src/**/*.{ts,tsx}"
+      run: bun run build
+
+# Commit message validation
+commit-msg:
+  commands:
+    # Enforce conventional commits
+    conventional-commit:
+      run: |
+        MSG_FILE=$1
+        COMMIT_MSG=$(cat "$MSG_FILE")
+
+        # Allow merge commits
+        if echo "$COMMIT_MSG" | grep -qE "^Merge (branch|pull request)"; then
+          exit 0
+        fi
+
+        # Validate conventional commit format
+        if ! echo "$COMMIT_MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|chore|revert|build|ci)(\(.+\))?: .+"; then
+          echo "❌ Commit message must follow conventional commits format:"
+          echo "   <type>(<scope>): <subject>"
+          echo ""
+          echo "Types: feat, fix, docs, style, refactor, perf, test, chore, revert, build, ci"
+          echo ""
+          echo "Examples:"
+          echo "  feat(api): add new endpoint for user profiles"
+          echo "  fix(auth): resolve login timeout issue"
+          echo "  docs: update README with new examples"
+          exit 1
+        fi
+
+    # Ensure commit message not too long
+    message-length:
+      run: |
+        MSG_FILE=$1
+        FIRST_LINE=$(head -n 1 "$MSG_FILE")
+        LENGTH=${#FIRST_LINE}
+
+        if [ $LENGTH -gt 100 ]; then
+          echo "❌ Commit message first line too long ($LENGTH > 100 chars)"
+          echo "   Keep it under 100 characters"
+          exit 1
+        fi
+
+# Pre-push hooks
+pre-push:
+  commands:
+    # Ensure all tests pass before pushing
+    tests:
+      run: bun test
+
+    # Protected branch check
+    protected-branch:
+      run: |
+        BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        PROTECTED_BRANCHES="main master production"
+
+        for protected in $PROTECTED_BRANCHES; do
+          if [ "$BRANCH" = "$protected" ]; then
+            echo "❌ Direct push to $BRANCH is not allowed"
+            echo "   Please create a pull request instead"
+            exit 1
+          fi
+        done
+
+    # Check for large files
+    large-files:
+      run: |
+        MAX_SIZE=1048576  # 1MB in bytes
+
+        for file in $(git diff --cached --name-only); do
+          if [ -f "$file" ]; then
+            SIZE=$(wc -c < "$file")
+            if [ $SIZE -gt $MAX_SIZE ]; then
+              echo "❌ File too large: $file ($(numfmt --to=iec-i --suffix=B $SIZE))"
+              echo "   Maximum size: 1MB"
+              echo "   Consider using Git LFS for large files"
+              exit 1
+            fi
+          fi
+        done
+
+# Post-checkout hook
+post-checkout:
+  commands:
+    # Remind to install dependencies if package.json changed
+    deps-check:
+      run: |
+        if git diff --name-only HEAD@{1} HEAD | grep -q "package.json"; then
+          echo "📦 package.json changed - you may need to run: bun install"
+        fi
+
+# Post-merge hook
+post-merge:
+  commands:
+    # Auto-install dependencies after merge
+    deps-install:
+      run: |
+        if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -q "package.json"; then
+          echo "📦 Installing dependencies..."
+          bun install
+        fi

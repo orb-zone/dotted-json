@@ -7,6 +7,7 @@
         "dot-prop": "^8.0.2",
       },
       "devDependencies": {
+        "@evilmartians/lefthook": "^1.9.8",
         "@types/bun": "latest",
         "@types/node": "^22.0.0",
         "@typescript-eslint/eslint-plugin": "^8.0.0",
@@ -16,24 +17,14 @@
       },
       "peerDependencies": {
         "@pinia/colada": "^0.7.0",
-        "@tanstack/react-query": ">=5.0.0",
-        "@tanstack/solid-query": ">=5.0.0",
-        "@tanstack/svelte-query": ">=5.0.0",
-        "@tanstack/vue-query": ">=5.0.0",
         "pinia": "^2.0.0",
-        "react": ">=18.0.0",
-        "surrealdb": "^1.0.0",
+        "surrealdb": "^1.0.0 || ^2.0.0",
         "vue": "^3.0.0",
         "zod": "^3.0.0",
       },
       "optionalPeers": [
         "@pinia/colada",
-        "@tanstack/react-query",
-        "@tanstack/solid-query",
-        "@tanstack/svelte-query",
-        "@tanstack/vue-query",
         "pinia",
-        "react",
         "surrealdb",
         "vue",
         "zod",
@@ -61,6 +52,8 @@
     "@eslint/object-schema": ["@eslint/object-schema@2.1.6", "", {}, "sha512-RBMg5FRL0I0gs51M/guSAj5/e14VQ4tpZnQNWwuDT66P14I43ItmPfIZRhO9fUVIPOAQXU47atlywZ/czoqFPA=="],
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.0", "", { "dependencies": { "@eslint/core": "^0.16.0", "levn": "^0.4.1" } }, "sha512-sB5uyeq+dwCWyPi31B2gQlVlo+j5brPlWx4yZBrEaRo/nhdDE8Xke1gsGgtiBdaBTxuTkceLVuVt/pclrasb0A=="],
+
+    "@evilmartians/lefthook": ["@evilmartians/lefthook@1.13.6", "", { "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "ia32", "arm64", ], "bin": { "lefthook": "bin/index.js" } }, "sha512-79vplrUBWL4Fkt59YkEBdSpqBVhNrY8t5+jEp+wX5QbsmbQLcSULqwS7FmbNRyECa2LWMrUWpe6ENIfNwB4jiw=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

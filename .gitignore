@@ -56,3 +56,19 @@ bun.lockb
 # OS
 Thumbs.db
 Desktop.ini
+
+# Secrets and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Test databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Claude Code
+.claude_history
