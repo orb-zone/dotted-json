@@ -7,6 +7,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-10-07
+
+### Added
+- **Connection Retry Logic**: Robust connection handling with exponential backoff
+  - Configurable retry parameters (maxAttempts, initialDelay, maxDelay, backoffMultiplier)
+  - Default: 3 attempts with 1s-10s delay range, 2x backoff multiplier
+  - Smart error detection (don't retry on auth errors or missing dependencies)
+  - Clear retry logging with attempt counter and delay information
+  - Zero-config defaults for production readiness
+
+- **Performance Metrics Collection**: Optional operation timing and monitoring
+  - `PerformanceMetrics` interface with operation type, duration, cache hits
+  - `metrics` option to enable collection (disabled by default)
+  - `onMetrics` callback for custom metric handling
+  - Track init(), load(), save(), delete(), list(), subscribe() operations
+  - Zero overhead when disabled
+  - Cache hit/miss tracking for optimization insights
+  - Candidate count tracking for variant resolution analysis
+
+### Changed
+- **Enhanced Error Messages**: Production-grade error handling
+  - load() errors include searched table and actionable suggestions
+  - delete() errors show Record ID for debugging
+  - init() errors provide troubleshooting steps for connection failures
+  - Authentication errors detect and suggest credential checks
+  - Clear distinction between retryable and non-retryable errors
+
+### Performance
+- Zero overhead for metrics when disabled
+- Connection retry adds resilience without affecting happy path
+- All operations maintain sub-millisecond timing in tests
+
+### Testing
+- **All 226 tests passing** across 12 test files
+- Type-safe metric collection
+- Bundle size maintained at 18.18 kB (within 20 kB limit)
+
+### Documentation
+- JSDoc for new PerformanceMetrics interface
+- Retry configuration examples
+- Metrics collection usage patterns
+
+### Migration Guide
+No breaking changes. All new features are opt-in.
+
+**Connection Retry (automatic, zero-config):**
+```typescript
+const loader = new SurrealDBLoader({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  // Retry enabled by default with sensible defaults
+});
+```
+
+**Custom Retry Configuration:**
+```typescript
+const loader = new SurrealDBLoader({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  retry: {
+    maxAttempts: 5,
+    initialDelay: 2000,
+    maxDelay: 30000,
+    backoffMultiplier: 3
+  }
+});
+```
+
+**Performance Metrics:**
+```typescript
+const loader = new SurrealDBLoader({
+  url: 'ws://localhost:8000/rpc',
+  namespace: 'app',
+  database: 'main',
+  metrics: true,
+  onMetrics: (metrics) => {
+    console.log(`${metrics.operation}: ${metrics.duration}ms`);
+    if (metrics.cacheHit) {
+      console.log('✓ Cache hit');
+    } else if (metrics.candidateCount) {
+      console.log(`Evaluated ${metrics.candidateCount} candidates`);
+    }
+
+    // Send to monitoring service
+    monitoringService.track(metrics);
+  }
+});
+```
+
+---
+
 ## [0.8.0] - 2025-10-07
 
 ### Added

@@ -1,12 +1,12 @@
 # dotted-json (jsön) - Product Roadmap
 
-**Current Version**: v0.8.0
+**Current Version**: v0.9.0
 **Last Updated**: 2025-10-07
-**Status**: Phase 6C complete - Real-time LIVE queries with Pinia Colada integration
+**Status**: Production polish complete - Retry logic, error handling, performance metrics
 
 ---
 
-## 📍 Current State (v0.8.0)
+## 📍 Current State (v0.9.0)
 
 ### ✅ AEON/ION Architecture Design Complete
 
@@ -29,7 +29,7 @@
 
 ---
 
-### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.8.0)
+### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.9.0)
 
 #### Storage & Persistence (v0.6.0) ✅
 - [x] **StorageProvider Interface** - Unified API for JSÖN document storage
@@ -53,6 +53,13 @@
 - [x] **Unified withSurrealDBPinia plugin** - SurrealDB + Pinia Colada
 - [x] **Auto-generated resolvers** - db.loadIon(baseName, variants)
 - [x] **Production example** - Real-time config manager
+
+#### Production Polish (v0.9.0) ✅
+- [x] **Connection Retry Logic** - Exponential backoff with smart error detection
+- [x] **Enhanced Error Messages** - Actionable troubleshooting and context
+- [x] **Performance Metrics** - Optional operation timing and monitoring
+- [x] **Zero-config defaults** - Production-ready out of the box
+- [x] **Resilient connections** - Auto-retry with configurable backoff
 
 #### TypeScript Codegen (v0.7.0) ✅
 - [x] **surql-to-ts CLI** - Generate types from schemas
