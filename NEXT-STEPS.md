@@ -363,6 +363,19 @@ git commit -m "build: update bundle size limit to 20 kB"
 
 ## 💡 Recommendations
 
+### Post-Publication: Documentation Review
+
+**IMPORTANT**: Before wider promotion, start a fresh session with specialized coding subagents to audit all documentation and example code for:
+
+- **Outdated patterns**: Ensure all examples use current best practices
+- **Redundant custom resolvers**: Look for places where built-in functionality is being reimplemented
+- **Inconsistent code style**: Standardize across all docs and examples
+- **Missing optimizations**: Check for performance anti-patterns (like the Vue issue we just fixed)
+- **Variant resolution**: Ensure FileLoader variant features are showcased properly
+- **Expression syntax**: Confirm all dot-prefixed key examples are idiomatic
+
+**Suggested approach**: Use multiple specialist subagents in parallel to review different sections (React patterns, Vue patterns, SurrealDB examples, etc.) and consolidate findings.
+
 ### Optional Enhancements
 
 1. **Add badges to README**:

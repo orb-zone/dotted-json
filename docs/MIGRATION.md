@@ -612,19 +612,15 @@ import { FileLoader } from '@orbzone/dotted-json/loaders/file';
 const loader = new FileLoader({ baseDir: './config' });
 await loader.init();
 
-const data = dotted({
-  '.config': 'extends("config")'
-}, {
-  resolvers: {
-    extends: async (baseName: string) => {
-      return await loader.load(baseName, {
-        env: process.env.NODE_ENV || 'development'
-      });
-    }
-  }
+// FileLoader automatically resolves variants (env:prod, env:dev, etc.)
+const config = await loader.load('config', {
+  env: process.env.NODE_ENV || 'development'
 });
 
-const config = await data.get('config');
+// Use directly or spread into dotted schema
+const data = dotted({
+  ...config
+});
 ```
 
 ---
