@@ -284,7 +284,7 @@ app.use(i18n);
 <script setup>
 import { dotted } from '@orbzone/dotted-json';
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const loader = new FileLoader({ baseDir: './locales' });
 const translations = ref(null);
@@ -294,20 +294,20 @@ onMounted(async () => {
   translations.value = await loader.load('strings', { lang: 'ja' });
 });
 
-// Create data once translations are loaded
-const getData = () => {
+// Create dotted instance once when translations load
+const data = computed(() => {
   if (!translations.value) return null;
   return dotted({
     user: { name: 'Alice' },
     ...translations.value  // Spread translations
   });
-};
+});
 </script>
 
 <template>
-  <div v-if="translations">
-    <p>{{ getData().get('hello') }}</p>
-    <p>{{ getData().get('named') }}</p>
+  <div v-if="data">
+    <p>{{ data.get('hello') }}</p>
+    <p>{{ data.get('named') }}</p>
   </div>
   <div v-else>Loading...</div>
 </template>
