@@ -41,8 +41,8 @@ Complete this checklist before publishing to @orbzone organization and public re
 
 - [x] README.md with quick start examples
 - [x] API reference (docs/API.md)
-- [x] Migration guide (docs/MIGRATION.md)
-- [x] Performance guide (docs/PERFORMANCE.md)
+- [x] Migration guide (docs/migration.md)
+- [x] Performance guide (docs/performance.md)
 - [x] CHANGELOG.md up to date
 - [x] CONTRIBUTING.md with standards
 - [x] LICENSE file present

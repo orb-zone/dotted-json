@@ -151,8 +151,8 @@ All resolvers MUST validate inputs. We **strongly recommend** using the **Zod pl
 ## 📚 Additional Resources
 
 - [API Reference](docs/API.md)
-- [Migration Guide](docs/MIGRATION.md)
-- [Performance Guide](docs/PERFORMANCE.md)
+- [Migration Guide](docs/migration.md)
+- [Performance Guide](docs/performance.md)
 - [Project Constitution](.specify/memory/constitution.md)
 - [Roadmap](ROADMAP.md)
 

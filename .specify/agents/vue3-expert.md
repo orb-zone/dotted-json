@@ -655,6 +655,6 @@ export function useSurrounded<T = any>(
 Task({
   subagent_type: "vue3-expert",
   description: "Review Vue examples for best practices",
-  prompt: "Review all Vue code examples in docs/ and examples/ for anti-patterns, inefficient reactivity, and opportunities to use computed(). Focus on the MIGRATION.md Vue component examples and ensure they demonstrate production-ready patterns with proper TypeScript inference."
+  prompt: "Review all Vue code examples in docs/ and examples/ for anti-patterns, inefficient reactivity, and opportunities to use computed(). Focus on the migration.md Vue component examples and ensure they demonstrate production-ready patterns with proper TypeScript inference."
 });
 ```

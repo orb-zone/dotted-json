@@ -64,7 +64,7 @@
 #### Documentation & Examples (v0.9.1) ✅
 - [x] **i18n Translation Editor Example** - Real-time collaborative translation management
 - [x] **Integration Test Utilities** - Helper functions reduce test boilerplate by 80%
-- [x] **Performance Guide** - Comprehensive optimization and best practices (docs/PERFORMANCE.md)
+- [x] **Performance Guide** - Comprehensive optimization and best practices (docs/performance.md)
 - [x] **Production Patterns** - Cache strategies, variant optimization, benchmarking
 
 #### Comprehensive Documentation (v0.9.2) ✅

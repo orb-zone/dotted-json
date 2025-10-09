@@ -911,7 +911,7 @@ const updateRollout = async (flagKey: string, percentage: number) => {
 </template>
 ```
 
-**Learn More**: See the complete [Feature Flags Guide](./FEATURE-FLAGS.md) for detailed patterns, troubleshooting, and advanced usage.
+**Learn More**: See the complete [Feature Flags Guide](./feature-flags.md) for detailed patterns, troubleshooting, and advanced usage.
 
 ---
 
@@ -1232,7 +1232,7 @@ const strings = await data.get('strings');
 
 - [Examples](../examples/) - See working examples
 - [API Reference](./API.md) - Complete API documentation
-- [Performance Guide](./PERFORMANCE.md) - Optimization tips
+- [Performance Guide](./performance.md) - Optimization tips
 - [GitHub Issues](https://github.com/orbzone/dotted-json/issues) - Ask questions
 
 ---

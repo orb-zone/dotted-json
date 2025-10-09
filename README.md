@@ -844,8 +844,8 @@ MIT © [orb.zone](https://orb.zone)
 ## Documentation
 
 - 📚 [API Reference](docs/API.md) - Complete API documentation
-- 🔄 [Migration Guide](docs/MIGRATION.md) - Migrate from i18next, react-intl, LaunchDarkly, etc.
-- ⚡ [Performance Guide](docs/PERFORMANCE.md) - Optimization tips and best practices
+- 🔄 [Migration Guide](docs/migration.md) - Migrate from i18next, react-intl, LaunchDarkly, etc.
+- ⚡ [Performance Guide](docs/performance.md) - Optimization tips and best practices
 - 📝 [Examples](examples/) - Production-ready examples:
   - [Feature Flag Manager](examples/feature-flag-manager.ts)
   - [i18n Translation Editor](examples/i18n-translation-editor.ts)

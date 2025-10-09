@@ -147,7 +147,7 @@ bun add @orbzone/dotted-json surrealdb @pinia/colada pinia vue
 bun run examples/feature-flag-manager.ts
 ```
 
-**Learn More**: [Feature Flags Guide](../docs/FEATURE-FLAGS.md)
+**Learn More**: [Feature Flags Guide](../docs/feature-flags.md)
 
 **Common Customizations**:
 - Multi-variate flags (A/B/C testing)
@@ -516,9 +516,9 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for full guidelines.
 
 - [Main README](../README.md) - Library overview and installation
 - [API Documentation](../docs/API.md) - Complete API reference
-- [Migration Guide](../docs/MIGRATION.md) - Migrating from other libraries
-- [Feature Flags Guide](../docs/FEATURE-FLAGS.md) - In-depth feature flag patterns
-- [Performance Guide](../docs/PERFORMANCE.md) - Optimization strategies
+- [Migration Guide](../docs/migration.md) - Migrating from other libraries
+- [Feature Flags Guide](../docs/feature-flags.md) - In-depth feature flag patterns
+- [Performance Guide](../docs/performance.md) - Optimization strategies
 
 ---
 
@@ -527,7 +527,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for full guidelines.
 1. **Try basic examples** - Start with [basic-usage.ts](./basic-usage.ts)
 2. **Explore your use case** - Find relevant example above
 3. **Copy and customize** - Adapt example to your needs
-4. **Read the docs** - Deep dive into [API](../docs/API.md) and [patterns](../docs/MIGRATION.md)
+4. **Read the docs** - Deep dive into [API](../docs/API.md) and [patterns](../docs/migration.md)
 5. **Build something awesome** - Share your creation!
 
 ---

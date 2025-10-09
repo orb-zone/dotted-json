@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.3] - 2025-10-08
 
 ### Documentation
-- **Feature Flags Guide** (`docs/FEATURE-FLAGS.md`):
+- **Feature Flags Guide** (`docs/feature-flags.md`):
   - Comprehensive 500+ line guide for production feature flag patterns
   - Quick start with prerequisites and basic usage
   - Core concepts: real-time updates, intelligent caching, targeting strategies
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Testing examples and troubleshooting section
   - Contributing guidelines for new examples
 
-- **Vue 3 Integration Improvements** (`docs/MIGRATION.md`):
+- **Vue 3 Integration Improvements** (`docs/migration.md`):
   - **Fixed critical bug**: Removed async `.get()` calls in Vue templates
   - Added Suspense example for modern Vue 3 async handling
   - Added Pinia Colada integration example with intelligent caching
@@ -113,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `generateTranslationBundle()` - Mock data generators
   - Sample fixtures: `SAMPLE_TRANSLATIONS`, `SAMPLE_CONFIGS`
 
-- **Performance Optimization Guide** (`docs/PERFORMANCE.md`):
+- **Performance Optimization Guide** (`docs/performance.md`):
   - Cache strategy best practices
   - Variant resolution optimization
   - SurrealDB query optimization

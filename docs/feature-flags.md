@@ -771,7 +771,7 @@ isEnabled('flag', { userId: 'user-123' });
 
 ## Related Documentation
 
-- [Migration Guide](./MIGRATION.md#from-launchdarkly-feature-flags) - Migrating from other flag services
+- [Migration Guide](./migration.md#from-launchdarkly-feature-flags) - Migrating from other flag services
 - [SurrealDB Plugin](../src/plugins/surrealdb-pinia.ts) - Real-time database integration
 - [Pinia Colada Plugin](../src/plugins/pinia-colada.ts) - Caching and state management
 - [Production Examples](../examples/README.md) - More real-world patterns

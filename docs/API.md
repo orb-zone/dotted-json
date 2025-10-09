@@ -930,7 +930,7 @@ await data.get('strings', {
 
 ## Migration Guides
 
-See [MIGRATION.md](./MIGRATION.md) for detailed migration guides from:
+See [migration.md](./migration.md) for detailed migration guides from:
 
 - i18next
 - react-intl
@@ -942,7 +942,7 @@ See [MIGRATION.md](./MIGRATION.md) for detailed migration guides from:
 
 ## Performance Tips
 
-See [PERFORMANCE.md](./PERFORMANCE.md) for:
+See [performance.md](./performance.md) for:
 
 - Cache optimization strategies
 - Variant resolution performance

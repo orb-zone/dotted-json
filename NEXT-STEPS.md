@@ -260,8 +260,8 @@ dotted-json/
 │   └── PRE_RELEASE_CHECKLIST.md      # ← Publication checklist
 ├── docs/
 │   ├── API.md                        # Complete API reference
-│   ├── MIGRATION.md                  # Migration guides
-│   └── PERFORMANCE.md                # Optimization guide
+│   ├── migration.md                  # Migration guides
+│   └── performance.md                # Optimization guide
 ├── examples/
 │   ├── feature-flag-manager.ts       # Production example
 │   ├── i18n-translation-editor.ts    # Production example
