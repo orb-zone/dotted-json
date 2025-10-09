@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.4] - 2025-10-08
+
+### Added
+- **Getting Started Guide** (`docs/getting-started.md`):
+  - Comprehensive 400-line beginner-to-expert tutorial
+  - Progressive learning path from simple to advanced
+  - Practical examples building on each other
+  - Core concepts explained with working code
+  - Clear pathways to advanced features
+
+### Changed
+- **README Restructured** (860 → 459 lines):
+  - Added "Why dotted-json?" section with problem/solution framing
+  - Streamlined to focus on value proposition and quick wins
+  - Replaced 4 competing examples with focused real-world use cases
+  - Improved documentation navigation with categorized sections
+  - Better first-time user experience with progressive disclosure
+  - All variant/file-loader/CLI details moved to getting-started guide
+
+- **Documentation File Naming**:
+  - Renamed `docs/MIGRATION.md` → `docs/migration.md`
+  - Renamed `docs/PERFORMANCE.md` → `docs/performance.md`
+  - Renamed `docs/FEATURE-FLAGS.md` → `docs/feature-flags.md`
+  - Kept `docs/API.md` uppercase (acronym exception)
+  - Updated 23 internal links across 11 files
+
+- **Agent Consolidation**:
+  - Moved all agent definitions to `.specify/agents/`
+  - Removed duplicate `surrealdb-expert.md` from `.claude/agents/`
+  - Added navigation README in `.claude/agents/` pointing to `.specify/`
+
+### Fixed
+- Markdown linting issues in README (blank lines, code fences)
+
 ## [0.9.3] - 2025-10-08
 
 ### Documentation
