@@ -9,6 +9,7 @@
 
 **The Problem**: Modern applications need dynamic data that adapts to user context (language, permissions, feature flags), but traditional approaches create messy code:
 
+
 ```typescript
 // ❌ Traditional approach: Hard-coded, brittle, no caching
 const greeting = user.lang === 'es'
@@ -39,6 +40,7 @@ await data.get('.profile');   // Automatic caching
 **Core Benefits**:
 
 - **Lazy Evaluation**: Expressions only run when accessed
+
 - **Intelligent Caching**: Results cached automatically, invalidate on demand
 - **Variant System**: Multi-dimensional content (language, gender, formality, custom dimensions)
 - **Framework-Agnostic**: Works with React, Vue, Node, Deno, Bun
@@ -48,6 +50,7 @@ await data.get('.profile');   // Automatic caching
 ## Installation
 
 ```bash
+
 # Using bun (recommended)
 bun add @orbzone/dotted-json
 
@@ -63,6 +66,7 @@ yarn add @orbzone/dotted-json
 ### 30-Second Example
 
 ```typescript
+
 import { dotted } from '@orbzone/dotted-json';
 
 const data = dotted({
@@ -84,6 +88,7 @@ await data.get('user.greeting');  // "Hello, Alice!"
 Multi-language support with automatic variant resolution:
 
 ```typescript
+
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './locales' });
@@ -115,6 +120,7 @@ locales/
 Real-time feature management with database sync:
 
 ```typescript
+
 import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
 
 const plugin = await withSurrealDBPinia({
@@ -142,6 +148,7 @@ if (flags.newFeature?.enabled) {
 Type-safe database access with automatic caching:
 
 ```typescript
+
 import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
 
 const plugin = await withSurrealDB({
@@ -170,6 +177,7 @@ const posts = await data.get('user.posts');      // Cached
 Environment-aware config with variant support:
 
 ```typescript
+
 import { FileLoader } from '@orbzone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './config' });
@@ -193,6 +201,7 @@ console.log(config.timeout);  // Auto-cached
 Property keys starting with `.` contain expressions evaluated on access:
 
 ```typescript
+
 const data = dotted({
   user: { id: 123, name: 'Alice' },
   '.profile': 'api.getProfile(${user.id})',        // API call
@@ -206,6 +215,7 @@ const data = dotted({
 Multi-dimensional content adaptation (language, gender, formality, custom):
 
 ```typescript
+
 const data = dotted({
   '.title': 'Author',
   '.title:es': 'Autor',
@@ -225,6 +235,7 @@ await data.get('.title');  // "Autora" (auto-selected best match)
 Results cached until explicitly invalidated:
 
 ```typescript
+
 await data.get('user.profile');  // Evaluates expression, caches result
 await data.get('user.profile');  // Returns cached value
 await data.get('user.profile', { ignoreCache: true });  // Force re-evaluation
@@ -233,14 +244,18 @@ await data.get('user.profile', { ignoreCache: true });  // Force re-evaluation
 ### Framework Integration
 
 **Vue 3**:
+
 ```typescript
+
 import { useDottedJSON } from '@orbzone/dotted-json/vue';
 
 const { data, isLoading } = useDottedJSON(schema, { resolvers });
 ```
 
 **React**:
+
 ```typescript
+
 import { useTanstackDottedJSON } from '@orbzone/dotted-json/react';
 
 const { data, isLoading } = useTanstackDottedJSON(schema);
@@ -256,6 +271,7 @@ This library uses `new Function()` for expression evaluation. **Only use with tr
 
 ✅ **Safe**:
 
+
 - Application code and config files you control
 - Server-side schemas built by your backend
 - Version-controlled configuration
@@ -263,6 +279,7 @@ This library uses `new Function()` for expression evaluation. **Only use with tr
 ❌ **Unsafe**:
 
 - User-submitted JSON from forms
+
 - External APIs you don't control
 - Any untrusted third-party input
 
@@ -271,6 +288,7 @@ This library uses `new Function()` for expression evaluation. **Only use with tr
 Use the Zod plugin for runtime validation:
 
 ```typescript
+
 import { withZod } from '@orbzone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
@@ -303,6 +321,7 @@ const data = dotted(schema, {
 ### Core Methods
 
 ```typescript
+
 // Get value (evaluates expressions, caches results)
 await data.get('user.profile.email');
 
@@ -319,6 +338,7 @@ await data.get('user.profile', { ignoreCache: true });
 ### Constructor Options
 
 ```typescript
+
 interface DottedOptions {
   initial?: object;                 // Initial data to merge
   default?: any;                    // Default for missing values
@@ -338,6 +358,7 @@ All plugins are optional peer dependencies:
 ### Zod - Runtime Validation
 
 ```bash
+
 bun add zod
 ```
 
@@ -346,6 +367,7 @@ Automatic input/output validation for resolvers
 ### Vue - Reactive Integration
 
 ```bash
+
 bun add vue
 ```
 
@@ -354,6 +376,7 @@ Vue 3 composables with reactive data
 ### React - Hook Integration
 
 ```bash
+
 bun add react @tanstack/react-query
 ```
 
@@ -362,6 +385,7 @@ React hooks with TanStack Query
 ### SurrealDB - Database Integration
 
 ```bash
+
 bun add surrealdb
 ```
 
@@ -370,6 +394,7 @@ Real-time database queries with LIVE updates
 ### Pinia Colada - Intelligent Caching
 
 ```bash
+
 bun add @pinia/colada pinia vue
 ```
 
@@ -380,6 +405,7 @@ Advanced caching with stale-while-revalidate
 ## Performance
 
 - **Bundle Size**: Core < 20 kB minified (plugins optional)
+
 - **Lazy Evaluation**: Expressions only run when accessed
 - **Intelligent Caching**: Results cached automatically
 - **Memory Efficient**: Only caches accessed values
@@ -391,6 +417,7 @@ Advanced caching with stale-while-revalidate
 Generate translated variant files using local Ollama (privacy-friendly, no external APIs):
 
 ```bash
+
 # Install globally
 bun install -g @orbzone/dotted-json
 
@@ -410,18 +437,21 @@ All translations happen **locally** on your machine. No data sent to external se
 ### Getting Started
 
 - **[📚 Getting Started Guide](docs/getting-started.md)** - Complete beginner-to-expert tutorial
+
 - **[🔄 Migration Guide](docs/migration.md)** - Migrate from i18next, react-intl, LaunchDarkly
 - **[📖 API Reference](docs/API.md)** - Complete API documentation
 
 ### Advanced Topics
 
 - **[⚡ Performance Guide](docs/performance.md)** - Optimization tips and benchmarks
+
 - **[🚩 Feature Flags Guide](docs/feature-flags.md)** - Production feature flag patterns
 - **[💡 Examples](examples/)** - Production-ready code examples
 
 ### Project Info
 
 - **[📋 Changelog](CHANGELOG.md)** - Version history
+
 - **[🗺️ Roadmap](ROADMAP.md)** - Future features
 - **[⚖️ Constitution](.specify/memory/constitution.md)** - Core principles
 - **[🤝 Contributing](CONTRIBUTING.md)** - Development guidelines
@@ -431,6 +461,7 @@ All translations happen **locally** on your machine. No data sent to external se
 Production-ready examples you can copy and adapt:
 
 - **[Feature Flag Manager](examples/feature-flag-manager.ts)** - Real-time flags with targeting
+
 - **[i18n Translation Editor](examples/i18n-translation-editor.ts)** - Live translation management
 - **[Realtime Config Manager](examples/realtime-config-manager.ts)** - Environment-aware config
 - **[Complete Workflow](examples/complete-workflow.ts)** - End-to-end integration
@@ -442,6 +473,7 @@ Production-ready examples you can copy and adapt:
 Full TypeScript support with generic schema typing:
 
 ```typescript
+
 interface UserSchema {
   user: {
     id: number;
@@ -459,6 +491,7 @@ const data = dotted<UserSchema>(schema, options);
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 - Development setup
+
 - Test-first development (TDD) workflow
 - Code style guidelines
 - Pull request process
@@ -472,5 +505,6 @@ MIT © [orb.zone](https://orb.zone)
 ## Links
 
 - **[GitHub Repository](https://github.com/orbzone/dotted-json)**
+
 - **[Issue Tracker](https://github.com/orbzone/dotted-json/issues)**
 - **[NPM Package](https://www.npmjs.com/package/@orbzone/dotted-json)**

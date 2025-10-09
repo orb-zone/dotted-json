@@ -5,10 +5,11 @@
 Your `dotted-json` (jsön) project is now **production-ready** for publication to @orbzone organization!
 
 ### Repository Status
+
 - **Name**: `dotted-json` ✅ (ASCII-friendly, per constitution)
 - **Fun Name**: `jsön` (umlaut for branding/docs)
 - **Package**: `@orbzone/dotted-json`
-- **Version**: v0.9.2
+- **Version**: v0.9.5
 - **License**: MIT
 - **Tests**: 226/226 passing (100%)
 - **Bundle Size**: 18.18 kB / 20 kB limit (91% utilization)
@@ -157,18 +158,19 @@ git push --tags
 3. Review CI checks (must pass)
 4. Merge PR to `main`
 5. Checkout main: `git checkout main && git pull`
-6. Tag release: `git tag v0.9.2 && git push origin v0.9.2`
+6. Tag release: `git tag v0.9.5 && git push origin v0.9.5`
 7. GitHub Actions will automatically:
    - Create GitHub Release
    - Publish to NPM
    - Publish to JSR
 
 **Option B: Direct Tag Push (if main already exists)**
+
 ```bash
 git checkout main
 git pull
-git tag v0.9.2
-git push origin v0.9.2
+git tag v0.9.5
+git push origin v0.9.5
 ```
 
 ---
@@ -354,7 +356,7 @@ git commit -m "build: update bundle size limit to 20 kB"
 2. **Add secrets** (NPM_TOKEN, JSR_TOKEN)
 3. **Push code** (branch + tags)
 4. **Create PR** to main branch
-5. **Tag v0.9.2** after merge
+5. **Tag v0.9.5** after merge
 6. **Watch CI/CD** auto-publish
 7. **Verify** on NPM and JSR
 8. **Celebrate!** 🎉
@@ -420,7 +422,7 @@ Your project is **publication-ready** with:
 *Most time spent on GitHub setup and secret configuration*
 
 **Last Updated**: 2025-10-08
-**Version**: v0.9.2
+**Version**: v0.9.5
 **Status**: 🟢 Ready for Publication
 
 ---

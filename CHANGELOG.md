@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.5] - 2025-10-08
+
+### Fixed
+
+- **Markdown Linting**: All documentation files now comply with markdownlint rules
+  - Added blank lines after headings before content (MD022)
+  - Added blank lines around code fences (MD031)
+  - Ensured all code fences specify language (MD040 - typescript, bash, json, text)
+  - Added blank lines around lists (MD032)
+  - Consistent list markers throughout (MD004)
+
+### Changed
+
+- **Constitution**: Added comprehensive markdown linting standards to Documentation Requirements
+  - Codified 5 critical markdownlint rules with examples
+  - Enforcement mandate for all documentation-generating agents
+  - Rationale and best practices documented
+
+- **Documentation Curator Agent**: Enhanced with markdown linting enforcement section
+  - Pre-flight checklist for markdown generation
+  - Common violations with before/after examples
+  - Integration with constitutional standards
+
+- **NEXT-STEPS.md**: Updated all version references from v0.9.2 to v0.9.5
+
+### Documentation
+
+- **README.md**: Applied markdown linting fixes (30+ violations corrected)
+- All markdown files audited and verified compliant with linting standards
+- IDE markdown warnings eliminated across all project documentation
+
 ## [0.9.4] - 2025-10-08
 
 ### Added
