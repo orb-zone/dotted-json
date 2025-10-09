@@ -1,12 +1,12 @@
 # dotted-json (jsön) - Product Roadmap
 
-**Current Version**: v0.9.2
+**Current Version**: v0.9.5
 **Last Updated**: 2025-10-08
-**Status**: Documentation complete - Ready for publication
+**Status**: Production-ready - All 226 tests passing, ready for publication
 
 ---
 
-## 📍 Current State (v0.9.2)
+## 📍 Current State (v0.9.5)
 
 ### ✅ AEON/ION Architecture Design Complete
 
@@ -30,56 +30,22 @@
 
 ---
 
-### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.9.2)
+### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.9.5)
 
-#### Storage & Persistence (v0.6.0) ✅
+#### Core Features ✅
 
-- [x] **StorageProvider Interface** - Unified API for JSöN document storage
-- [x] **FileLoader.save/list/delete** - Full CRUD for filesystem storage
-- [x] **Merge Strategies** - Replace, shallow merge, deep merge
-- [x] **Zod Validation** - Optional schema validation on save
-- [x] **Cache management** - TTL-based caching with auto-invalidation
+- [x] **Storage & Persistence** (v0.6.0) - StorageProvider interface, FileLoader CRUD, merge strategies, Zod validation
+- [x] **SurrealDB Storage** (v0.7.0) - Array Record IDs (10-100x faster), variant-aware resolution, all auth types, ION naming
+- [x] **Real-time Integration** (v0.8.0) - LIVE SELECT queries, auto-cache invalidation, withSurrealDBPinia plugin
+- [x] **Production Polish** (v0.9.0) - Connection retry logic, enhanced error messages, performance metrics
 
-#### SurrealDB Storage (v0.7.0) ✅
+#### Documentation ✅
 
-- [x] **SurrealDBLoader** - Full CRUD with array Record IDs (10-100x faster)
-- [x] **Array Record ID Strategy** - O(log n) queries vs O(n) table scans
-- [x] **Variant-aware resolution** - Load correct i18n document by context
-- [x] **All auth types** - Root, namespace, database, scope
-- [x] **Ion naming convention** - Aligned with AEON model
-
-#### Real-time Integration (v0.8.0) ✅
-
-- [x] **LIVE SELECT queries** - WebSocket subscriptions with DIFF mode
-- [x] **subscribe() method** - Watch ion changes in real-time
-- [x] **Automatic cache invalidation** - Instant updates on LIVE events
-- [x] **onLiveUpdate callback** - Global change notifications
-- [x] **Unified withSurrealDBPinia plugin** - SurrealDB + Pinia Colada
-- [x] **Auto-generated resolvers** - db.loadIon(baseName, variants)
-- [x] **Production example** - Real-time config manager
-
-#### Production Polish (v0.9.0) ✅
-
-- [x] **Connection Retry Logic** - Exponential backoff with smart error detection
-- [x] **Enhanced Error Messages** - Actionable troubleshooting and context
-- [x] **Performance Metrics** - Optional operation timing and monitoring
-- [x] **Zero-config defaults** - Production-ready out of the box
-- [x] **Resilient connections** - Auto-retry with configurable backoff
-
-#### Documentation & Examples (v0.9.1) ✅
-
-- [x] **i18n Translation Editor Example** - Real-time collaborative translation management
-- [x] **Integration Test Utilities** - Helper functions reduce test boilerplate by 80%
-- [x] **Performance Guide** - Comprehensive optimization and best practices (docs/performance.md)
-- [x] **Production Patterns** - Cache strategies, variant optimization, benchmarking
-
-#### Comprehensive Documentation (v0.9.2) ✅
-
-- [x] **API Reference** - Complete API documentation (docs/API.md)
-- [x] **Migration Guides** - From i18next, react-intl, vue-i18n, LaunchDarkly, Unleash
-- [x] **Feature Flag Manager Example** - Production-ready feature flag system
-- [x] **Enhanced README** - 30-second quick start + common use cases
-- [x] **JSDoc Improvements** - Comprehensive inline documentation
+- [x] **v0.9.1** - i18n Translation Editor, integration test utilities, performance guide
+- [x] **v0.9.2** - API reference, migration guides (i18next/react-intl/vue-i18n/LaunchDarkly/Unleash), feature flags example
+- [x] **v0.9.3** - Feature Flags Guide (500+ lines), Enhanced Examples README (540+ lines), Vue 3 computed fixes
+- [x] **v0.9.4** - Getting Started Guide (400+ lines), README restructure (860→459 lines), file naming standardization
+- [x] **v0.9.5** - Markdown linting compliance (MD022/MD031/MD040/MD032), constitutional documentation standards
 
 #### TypeScript Codegen (v0.7.0) ✅
 
@@ -102,14 +68,14 @@
 - [x] `surql-to-zod-inference.md` - 800+ lines
 - [x] `surrealdb-vue-vision.md` - 450+ lines
 
-#### Implementation Stats (v0.9.2)
+#### Implementation Stats (v0.9.5)
 
 - **Lines of Code**: 3,500+ (loaders, plugins, LIVE queries, type generation)
 - **Test Coverage**: 226/226 tests passing ✅
 - **Bundle Size**: 18.18 kB / 20.00 kB (91% utilization) ✅
 - **CLI Tools**: 2 (json-translate, surql-to-ts)
 - **Production Examples**: 3 (config manager, translation editor, feature flags)
-- **Documentation**: Complete (API, Migration, Performance, 3 examples)
+- **Documentation**: Complete (API, Migration, Performance, Getting Started, Feature Flags Guide)
 
 ---
 
@@ -456,7 +422,7 @@ The `__DRAFT__` folder contains a **fully designed plugin architecture** (v1.0-v
 
 **Goal**: Production-ready with core plugin ecosystem
 
-**Current Status (v0.5.0)**: Ready for v1.0.0 release!
+**Current Status (v0.9.5)**: Ready for v1.0.0 release!
 
 **Criteria**:
 

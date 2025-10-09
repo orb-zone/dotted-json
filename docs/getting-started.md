@@ -31,6 +31,7 @@ Modern applications often struggle with:
 ### Why Choose dotted-json?
 
 **Lazy Evaluation**
+
 ```typescript
 // Only evaluates when accessed - no wasted work
 const data = dotted({
@@ -42,6 +43,7 @@ await data.get('profile');  // NOW it evaluates and caches
 ```
 
 **Automatic Caching**
+
 ```typescript
 // First call: fetches data
 await data.get('user.profile');
@@ -54,6 +56,7 @@ await data.get('user.profile', { ignoreCache: true });
 ```
 
 **Framework-Agnostic**
+
 ```typescript
 // Works everywhere: Node.js, Bun, Deno, browser
 // Integrates with: React, Vue, vanilla JS
@@ -61,6 +64,7 @@ await data.get('user.profile', { ignoreCache: true });
 ```
 
 **Type-Safe**
+
 ```typescript
 // Full TypeScript support with schema inference
 const data = dotted<UserSchema>(schema);
@@ -145,6 +149,7 @@ console.log(await data.get('user.greeting'));   // "Hello, Alice Johnson!"
 ```
 
 **Notice**:
+
 - You can nest expressions inside objects
 - Expressions can reference other expressions (`.fullName`)
 - Access nested paths with dot notation (`user.fullName`)
@@ -178,6 +183,7 @@ console.log(profile.bio);  // "Software developer"
 ```
 
 **Key concepts**:
+
 - **resolvers** is a registry of functions expressions can call
 - Functions can be async (great for API calls, database queries)
 - Arguments are interpolated from the schema using `${...}`
@@ -213,6 +219,7 @@ await data.get('user.profile');
 ```
 
 **Notice**:
+
 - `${config.apiUrl}` accesses a different part of the schema
 - Resolvers can be nested objects (`api.get`)
 - All dependencies resolve automatically
@@ -229,6 +236,7 @@ await data.get('user.profile');
 ```
 
 **Rules**:
+
 1. **Dot prefix** (`.`) marks a key as an expression
 2. **Template syntax** (`${...}`) interpolates values from the schema
 3. **Lazy evaluation** - expressions don't run until accessed
@@ -308,6 +316,7 @@ const data = dotted({
 ```
 
 **Best practices**:
+
 - **Namespace resolvers** by domain (`db`, `api`, `math`, `helpers`)
 - **Keep resolvers pure** when possible (same input → same output)
 - **Handle errors gracefully** with try/catch or `errorDefault`
@@ -377,6 +386,7 @@ console.log(greeting);  // "Hello, Alice Johnson! You have 5 unread messages."
 ```
 
 **Output**:
+
 ```
 User ID: 123
 Full Name: Alice Johnson
@@ -386,6 +396,7 @@ Hello, Alice Johnson! You have 5 unread messages.
 ```
 
 **What happened?**:
+
 1. Accessing `user.id` returns the static value immediately
 2. Accessing `user.fullName` evaluates the expression and caches the result
 3. Accessing `user.profile` triggers the API call and caches the response
@@ -433,6 +444,7 @@ console.log('DB Name:', await config.get('database.name'));  // "myapp_developme
 ```
 
 **Key concepts introduced**:
+
 - Expressions can use JavaScript operators (`===`, `?:`)
 - Environment detection with resolvers
 - Computed configuration based on environment
@@ -515,6 +527,7 @@ console.log('Recommendations:', recommendations);
 ```
 
 **Key concepts introduced**:
+
 - User-specific data fetching
 - Conditional logic based on user attributes
 - Personalized UI content
@@ -592,12 +605,14 @@ if (await app.get('features.newDashboard.isEnabled')) {
 ```
 
 **Key concepts introduced**:
+
 - Feature flag patterns
 - Percentage-based rollouts with consistent hashing
 - User allowlists for beta testing
 - Boolean flags for simple on/off toggles
 
 **Why this works**:
+
 - **Consistent hashing** ensures same user always gets same result
 - **Lazy evaluation** means flags only check when accessed
 - **Caching** prevents repeated hash calculations
@@ -628,6 +643,7 @@ await data.get('profile');
 ```
 
 **Benefits**:
+
 - No wasted work for unused data
 - Faster initial load times
 - Pay-per-use evaluation model
@@ -646,6 +662,7 @@ const fresh = await data.get('user.profile', { ignoreCache: true });  // API cal
 ```
 
 **Cache invalidation**:
+
 - Use `ignoreCache: true` option to bypass cache
 - Cache clears when you `.set()` a dependency
 - External plugins (Pinia Colada, SurrealDB) provide advanced cache strategies
@@ -665,11 +682,13 @@ const data = dotted({
 ```
 
 **Dependency resolution is automatic**:
+
 - The library tracks which paths an expression depends on
 - When a dependency changes, dependent expressions re-evaluate
 - No manual dependency arrays or effect hooks needed
 
 **Context isolation**:
+
 ```typescript
 // Each evaluation gets its own context
 const data = dotted({
@@ -701,11 +720,13 @@ try {
 ```
 
 **Protection mechanisms**:
+
 - Maximum evaluation depth (default: 100)
 - Cycle detection in dependency graph
 - Clear error messages when cycles occur
 
 **Configure max depth**:
+
 ```typescript
 const data = dotted(schema, {
   maxEvaluationDepth: 50  // Lower limit for faster cycle detection
@@ -719,12 +740,14 @@ const data = dotted(schema, {
 **Trust boundary**:
 
 ✅ **SAFE** - Schemas from trusted sources:
+
 - Your application code
 - Configuration files in version control
 - Server-side data your backend creates
 - Files you control on disk
 
 ❌ **UNSAFE** - Never use with:
+
 - User-submitted JSON from web forms
 - Data from untrusted third-party APIs
 - Any externally-sourced schemas
@@ -775,6 +798,7 @@ const data = dotted(schema, {
 ```
 
 **Why this model?**:
+
 - Enables powerful expression syntax without a custom parser
 - Performance: native JavaScript evaluation is fast
 - Flexibility: full JavaScript expression support
@@ -787,6 +811,7 @@ const data = dotted(schema, {
 ### Advanced Features
 
 **Variant System** - Multi-dimensional content adaptation:
+
 - Language variants (`lang: 'es'`, `lang: 'ja'`)
 - Gender-aware text with pronouns (`gender: 'f'`)
 - Formality levels (`form: 'polite'`, `form: 'formal'`)
@@ -795,6 +820,7 @@ const data = dotted(schema, {
 Learn more: [Variant System in README](../README.md#variant-system)
 
 **File Loader** - Load JSON from filesystem with variant resolution:
+
 - Automatic file discovery and caching
 - Variant-aware file naming (`strings:es:formal.jsön`)
 - i18n workflows without external services
@@ -802,6 +828,7 @@ Learn more: [Variant System in README](../README.md#variant-system)
 Learn more: [File Loader in README](../README.md#file-loader)
 
 **SurrealDB Integration** - Real-time database with LIVE queries:
+
 - Zero-boilerplate database integration
 - Real-time updates with WebSocket subscriptions
 - Automatic cache invalidation on changes
@@ -809,6 +836,7 @@ Learn more: [File Loader in README](../README.md#file-loader)
 Learn more: [SurrealDB Plugin in README](../README.md#surrealdb-integration)
 
 **Zod Validation** - Type-safe runtime validation:
+
 - Automatic input/output validation for resolvers
 - Path-based schema validation
 - Strict or loose modes
@@ -816,6 +844,7 @@ Learn more: [SurrealDB Plugin in README](../README.md#surrealdb-integration)
 Learn more: [Zod Plugin in README](../README.md#zod-integration)
 
 **Framework Integrations**:
+
 - React with TanStack Query
 - Vue 3 with Pinia Colada
 - Vanilla JavaScript
@@ -825,6 +854,7 @@ Learn more: [Vue Integration](../docs/migration.md#from-vue-i18n), [React Integr
 ### API Reference
 
 Complete documentation of all APIs:
+
 - [`dotted()` constructor](../docs/API.md#dotted)
 - [`DottedJson` methods](../docs/API.md#dottedjson)
 - [Storage providers](../docs/API.md#storage-providers)
@@ -836,6 +866,7 @@ Read: [API Reference](../docs/API.md)
 ### Migration Guides
 
 Switching from another library? We have detailed migration guides:
+
 - [From i18next](../docs/migration.md#from-i18next)
 - [From react-intl](../docs/migration.md#from-react-intl)
 - [From vue-i18n](../docs/migration.md#from-vue-i18n)
@@ -850,6 +881,7 @@ Read: [Migration Guide](../docs/migration.md)
 Real-world examples you can copy and adapt:
 
 **Feature Flag Manager** - LaunchDarkly/Unleash replacement:
+
 - Real-time flag updates
 - Percentage rollouts with consistent hashing
 - User/team targeting
@@ -858,6 +890,7 @@ Real-world examples you can copy and adapt:
 See: [examples/feature-flag-manager.ts](../examples/feature-flag-manager.ts)
 
 **i18n Translation Editor** - Live translation management:
+
 - Multi-language support
 - Real-time updates
 - Translation versioning
@@ -866,6 +899,7 @@ See: [examples/feature-flag-manager.ts](../examples/feature-flag-manager.ts)
 See: [examples/i18n-translation-editor.ts](../examples/i18n-translation-editor.ts)
 
 **Real-time Config Manager** - Live configuration:
+
 - Environment-based config
 - Instant updates without restart
 - Configuration versioning
@@ -877,24 +911,28 @@ Browse all: [Examples Directory](../examples/)
 ### Learning Path
 
 **Beginner** (you are here):
+
 1. ✅ Read this Getting Started guide
 2. Try [examples/basic-usage.ts](../examples/basic-usage.ts)
 3. Build a simple config system for your app
 4. Explore [examples/with-zod-validation.ts](../examples/with-zod-validation.ts)
 
 **Intermediate**:
+
 1. Learn the [Variant System](../README.md#variant-system)
 2. Try [examples/file-loader-i18n.ts](../examples/file-loader-i18n.ts)
 3. Integrate with your framework (Vue/React)
 4. Add validation with Zod plugin
 
 **Advanced**:
+
 1. Set up [SurrealDB integration](../README.md#surrealdb-integration)
 2. Build a feature flag system with [examples/feature-flag-manager.ts](../examples/feature-flag-manager.ts)
 3. Implement real-time updates
 4. Study [complete-workflow.ts](../examples/complete-workflow.ts)
 
 **Expert**:
+
 1. Read [architecture documents](./../.specify/memory/)
 2. Contribute to the library
 3. Build custom plugins
@@ -907,6 +945,7 @@ Browse all: [Examples Directory](../examples/)
 ### Common Patterns
 
 **Config management**:
+
 ```typescript
 const config = dotted({
   '.env': 'getEnv()',
@@ -915,6 +954,7 @@ const config = dotted({
 ```
 
 **API calls**:
+
 ```typescript
 const data = dotted({
   userId: 123,
@@ -923,6 +963,7 @@ const data = dotted({
 ```
 
 **Computed values**:
+
 ```typescript
 const data = dotted({
   items: [1, 2, 3],
@@ -931,6 +972,7 @@ const data = dotted({
 ```
 
 **Conditional logic**:
+
 ```typescript
 const data = dotted({
   tier: 'premium',
@@ -939,6 +981,7 @@ const data = dotted({
 ```
 
 **Error handling**:
+
 ```typescript
 const data = dotted({
   '.risky': 'mightFail()'
@@ -961,6 +1004,7 @@ This is a library, not a UI tool. But here are mental shortcuts:
 ### Common Gotchas
 
 **1. Forgetting `await`**:
+
 ```typescript
 // ❌ Wrong - returns a Promise
 const name = data.get('user.name');
@@ -970,6 +1014,7 @@ const name = await data.get('user.name');
 ```
 
 **2. Using `get()` instead of accessing path**:
+
 ```typescript
 // ❌ Wrong - .get() is a method, not in schema
 data.get('user.get.name');
@@ -979,6 +1024,7 @@ data.get('user.name');
 ```
 
 **3. Circular dependencies**:
+
 ```typescript
 // ❌ Wrong - infinite loop
 const data = dotted({
@@ -995,6 +1041,7 @@ const data = dotted({
 ```
 
 **4. Untrusted schemas**:
+
 ```typescript
 // ❌ DANGEROUS - user input
 const schema = JSON.parse(req.body);
