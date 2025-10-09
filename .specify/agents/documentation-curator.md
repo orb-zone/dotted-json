@@ -24,6 +24,13 @@ This agent specializes in:
 - Migration guide if deprecating existing API
 - Breaking changes documented in CHANGELOG.md
 
+**Markdown Linting Standards** (Constitution §Documentation Requirements):
+- **Blank lines after headings**: Required before lists, paragraphs, or code blocks
+- **Blank lines around code blocks**: Required before and after fenced code
+- **Code fence language**: Always specify (typescript, bash, json, text)
+- **Blank lines around lists**: Required before first and after last item
+- **Consistent list markers**: Use `-` for unordered, `1.` for ordered
+
 **Example Organization** (Constitution):
 - Official examples in `/examples` only
 - Examples MUST be runnable without modification
@@ -84,16 +91,17 @@ docs/
 ### Essential Sections
 
 **1. Quick Start** (Above the fold):
+
 ```markdown
 # dotted-json (JSöN)
 
 Dynamic JSON expansion using dot-prefixed expression keys
 
-```bash
+` ``bash
 bun add @orbzone/dotted-json
-```
+` ``
 
-```typescript
+` ``typescript
 import { dotted } from '@orbzone/dotted-json';
 
 const doc = dotted({
@@ -106,12 +114,15 @@ const doc = dotted({
 });
 
 await doc.get('greeting');  // "Hello, Alice!"
-```
+` ``
 
 **Security**: Schemas must come from trusted sources (not user input).
 ```
 
+**NOTE**: Always include blank line after heading before code blocks or paragraphs.
+
 **2. Features** (Bullet points, scannable):
+
 ```markdown
 ## Features
 
@@ -123,11 +134,14 @@ await doc.get('greeting');  // "Hello, Alice!"
 - ✅ **Minimal** - < 20 kB core bundle
 ```
 
+**NOTE**: Blank line required after `## Features` heading before list.
+
 **3. Installation**:
+
 ```markdown
 ## Installation
 
-```bash
+` ``bash
 # Core library
 bun add @orbzone/dotted-json
 
@@ -135,8 +149,10 @@ bun add @orbzone/dotted-json
 bun add zod  # For Zod validation plugin
 bun add surrealdb  # For SurrealDB plugin
 bun add @pinia/colada pinia vue  # For Pinia Colada plugin
+` ``
 ```
-```
+
+**NOTE**: Blank line after heading, language specified for code fence.
 
 **4. Usage Examples** (Progressive complexity):
 ```markdown
@@ -457,23 +473,118 @@ console.log(await strings.get('farewell'));  // "Adiós"
 - `test.ts` - Confusing (sounds like test file)
 - `demo_advanced_features_and_patterns.ts` - Too long
 
+## Markdown Linting Enforcement
+
+### Critical Rules (From Constitution)
+
+**ALWAYS enforce these markdownlint rules when generating documentation**:
+
+1. **MD022 - Blank lines around headings**:
+   - ✅ `### Heading\n\n- List item`
+   - ❌ `### Heading\n- List item` (missing blank line)
+
+2. **MD031 - Blank lines around fenced code**:
+   - ✅ `paragraph\n\n```code```\n\nparagraph`
+   - ❌ `paragraph\n```code```\nparagraph`
+
+3. **MD040 - Code fence language**:
+   - ✅ ` ```typescript`, ` ```bash`, ` ```json`, ` ```text`
+   - ❌ ` ``` ` (no language)
+
+4. **MD032 - Blank lines around lists**:
+   - ✅ `paragraph\n\n- item\n\nparagraph`
+   - ❌ `paragraph\n- item\nparagraph`
+
+5. **MD004 - Consistent list style**:
+   - ✅ Use `-` for all unordered lists
+   - ❌ Mix `- ` and `* `
+
+### Pre-Flight Checklist
+
+Before outputting any markdown content, verify:
+
+- [ ] Blank line after every heading (##, ###, ####)
+- [ ] Blank line before and after every code fence
+- [ ] Language specified for every code fence (```typescript, not just ```)
+- [ ] Blank line before first list item
+- [ ] Blank line after last list item
+- [ ] Consistent `-` marker for all unordered lists
+
+### Common Violations to Avoid
+
+**❌ Heading directly followed by list**:
+```markdown
+### Added
+- Feature 1
+- Feature 2
+```
+
+**✅ Correct (blank line after heading)**:
+```markdown
+### Added
+
+- Feature 1
+- Feature 2
+```
+
+**❌ Code fence without language**:
+```markdown
+` ``
+const x = 5;
+` ``
+```
+
+**✅ Correct (language specified)**:
+```markdown
+` ``typescript
+const x = 5;
+` ``
+```
+
+**❌ List without surrounding blank lines**:
+```markdown
+Some text
+- Item 1
+- Item 2
+More text
+```
+
+**✅ Correct (blank lines before and after)**:
+```markdown
+Some text
+
+- Item 1
+- Item 2
+
+More text
+```
+
 ## Common Pitfalls
 
 ### ❌ Missing Security Warnings
+
 **Problem**: Users use library with untrusted input
 **Solution**: Add security section in README, highlight in Quick Start
 
 ### ❌ Outdated Examples
+
 **Problem**: Examples don't work with current API
 **Solution**: CI job runs all examples, fails if any break
 
 ### ❌ Breaking Changes Without Migration Guide
+
 **Problem**: Users can't upgrade without guesswork
 **Solution**: Always provide before/after code in CHANGELOG
 
 ### ❌ Missing JSDoc Examples
+
 **Problem**: Users don't understand how to use API
 **Solution**: Every public method has JSDoc `@example` section
+
+### ❌ Markdown Linting Violations
+
+**Problem**: Generated markdown fails markdownlint checks in IDE
+**Solution**: Follow markdown linting rules above, always verify blank lines
 
 ## Documentation Checklist
 

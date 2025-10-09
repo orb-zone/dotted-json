@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.4] - 2025-10-08
 
 ### Added
+
 - **Getting Started Guide** (`docs/getting-started.md`):
   - Comprehensive 400-line beginner-to-expert tutorial
   - Progressive learning path from simple to advanced
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Clear pathways to advanced features
 
 ### Changed
+
 - **README Restructured** (860 → 459 lines):
   - Added "Why dotted-json?" section with problem/solution framing
   - Streamlined to focus on value proposition and quick wins
@@ -39,11 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added navigation README in `.claude/agents/` pointing to `.specify/`
 
 ### Fixed
+
 - Markdown linting issues in README (blank lines, code fences)
 
 ## [0.9.3] - 2025-10-08
 
 ### Documentation
+
 - **Feature Flags Guide** (`docs/feature-flags.md`):
   - Comprehensive 500+ line guide for production feature flag patterns
   - Quick start with prerequisites and basic usage
@@ -76,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Production-ready component examples
 
 ### Changed
+
 - **Constitution Updates** (`.specify/memory/constitution.md`):
   - Added SurrealDB field naming conventions (`_type`, `_at`, `meta`)
   - Refined AEON acronym definitions (ION, ART, COG, DOT)
@@ -88,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated AEON field names across design documents
 
 ### Fixed
+
 - Vue 3 examples no longer call async methods synchronously in templates
 - Improved error handling in Vue component examples
 - Fixed reactivity patterns to use `computed()` appropriately
@@ -97,6 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.2] - 2025-10-07
 
 ### Added
+
 - **Feature Flag Manager Example** (`examples/feature-flag-manager.ts`):
   - Production-ready feature flag system with environment-based configuration
   - User and team-based targeting for precise feature rollouts
@@ -114,12 +121,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Environment isolation (dev/staging/prod)
 
 ### Documentation
+
 - Complete feature flag example with real-world patterns
 - Demonstrates LIVE query integration for instant flag propagation
 - Shows percentage rollout with stable user bucketing (consistent hashing)
 - Production-ready implementation ready to adapt
 
 ### Developer Experience
+
 - Feature flag best practices demonstrated
 - Clear separation of concerns (storage, evaluation, analytics)
 - Type-safe flag evaluation with detailed results
@@ -129,6 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.1] - 2025-10-07
 
 ### Added
+
 - **Production Examples**:
   - `examples/i18n-translation-editor.ts` - Real-time collaborative translation management
     - Multi-language support with variant resolution
@@ -158,19 +168,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Benchmarking guidelines
 
 ### Documentation
+
 - Comprehensive performance guide with real-world patterns
 - Complete test utility documentation
 - Production-ready i18n example with step-by-step walkthrough
 
 ### Developer Experience
+
 - Helper functions reduce integration test boilerplate by 80%
 - Clear performance targets and benchmarking tools
 - Real-world examples demonstrate best practices
 
 ### Migration Guide
+
 No breaking changes. All additions are new files/utilities.
 
 **Using Test Utilities:**
+
 ```typescript
 import { withTestLoader, assertIonData } from '../test/helpers/surrealdb-test-utils.js';
 
@@ -181,6 +195,7 @@ await withTestLoader(async (loader) => {
 ```
 
 **Performance Monitoring:**
+
 ```typescript
 import { benchmark } from '../test/helpers/surrealdb-test-utils.js';
 
@@ -196,6 +211,7 @@ await benchmark(
 ## [0.9.0] - 2025-10-07
 
 ### Added
+
 - **Connection Retry Logic**: Robust connection handling with exponential backoff
   - Configurable retry parameters (maxAttempts, initialDelay, maxDelay, backoffMultiplier)
   - Default: 3 attempts with 1s-10s delay range, 2x backoff multiplier
@@ -213,6 +229,7 @@ await benchmark(
   - Candidate count tracking for variant resolution analysis
 
 ### Changed
+
 - **Enhanced Error Messages**: Production-grade error handling
   - load() errors include searched table and actionable suggestions
   - delete() errors show Record ID for debugging
@@ -221,24 +238,29 @@ await benchmark(
   - Clear distinction between retryable and non-retryable errors
 
 ### Performance
+
 - Zero overhead for metrics when disabled
 - Connection retry adds resilience without affecting happy path
 - All operations maintain sub-millisecond timing in tests
 
 ### Testing
+
 - **All 226 tests passing** across 12 test files
 - Type-safe metric collection
 - Bundle size maintained at 18.18 kB (within 20 kB limit)
 
 ### Documentation
+
 - JSDoc for new PerformanceMetrics interface
 - Retry configuration examples
 - Metrics collection usage patterns
 
 ### Migration Guide
+
 No breaking changes. All new features are opt-in.
 
 **Connection Retry (automatic, zero-config):**
+
 ```typescript
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',
@@ -249,6 +271,7 @@ const loader = new SurrealDBLoader({
 ```
 
 **Custom Retry Configuration:**
+
 ```typescript
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',
@@ -264,6 +287,7 @@ const loader = new SurrealDBLoader({
 ```
 
 **Performance Metrics:**
+
 ```typescript
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',
@@ -289,6 +313,7 @@ const loader = new SurrealDBLoader({
 ## [0.8.0] - 2025-10-07
 
 ### Added
+
 - **SurrealDB LIVE Queries**: Real-time document synchronization with automatic cache invalidation
   - `subscribe()` method in SurrealDBLoader for watching ion changes
   - Supports watching specific variants or all variants of a baseName
@@ -311,35 +336,42 @@ const loader = new SurrealDBLoader({
   - Full TypeScript support for callbacks
 
 ### Changed
+
 - SurrealDBLoader now implements optional `subscribe()` from StorageProvider interface
 - Enhanced close() method to kill all active LIVE queries before disconnecting
 - Added liveQueries tracking map for proper cleanup
 
 ### Performance
+
 - LIVE queries use SurrealDB's native WebSocket streaming (DIFF mode)
 - Cache invalidation is instant (no polling)
 - Zero overhead when LIVE queries are not enabled
 
 ### Examples
+
 - **Real-time Config Manager** (`examples/realtime-config-manager.ts`)
   - Multi-environment configuration with instant propagation
   - Demonstrates LIVE query + cache invalidation workflow
   - Production-ready implementation pattern
 
 ### Testing
+
 - **All 226 tests passing** (including 17 new LIVE query type tests)
 - Type-safe test coverage for LiveUpdateEvent, LiveAction, plugin interfaces
 - Integration test patterns documented for real SurrealDB instances
 
 ### Documentation
+
 - LIVE query API documented with JSDoc and usage examples
 - withSurrealDBPinia plugin configuration guide
 - Real-time sync patterns documented in example
 
 ### Migration Guide
+
 No breaking changes. LIVE queries are an optional feature.
 
 To use LIVE queries with SurrealDBLoader:
+
 ```typescript
 import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
 
@@ -364,6 +396,7 @@ await unsubscribe()
 ```
 
 To use unified SurrealDB + Pinia plugin:
+
 ```typescript
 import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia'
 
@@ -395,6 +428,7 @@ const config = await data.get('config')
 ## [0.7.0] - 2025-10-07
 
 ### Added
+
 - **SurrealDBLoader**: High-performance SurrealDB storage provider for ions (variant documents)
   - Array-based Record IDs: `ion:['baseName', 'lang', 'gender', 'form']`
   - **10-100x performance improvement** over WHERE clause queries via range scans
@@ -411,31 +445,39 @@ const config = await data.get('config')
   - Building block entities within the Aeonic platform
 
 ### Changed
+
 - **Loaders now use separate export paths** to keep core bundle small:
+
   ```typescript
   import { FileLoader } from '@orbzone/dotted-json/loaders/file'
   import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
   ```
+
 - Core bundle remains at **18.18 kB** (within 20 kB constitution limit)
 
 ### Performance
+
 - SurrealDB range queries vs WHERE clauses: **10-100x faster** for variant resolution
 - Deterministic Record ID sorting enables efficient hierarchical queries
 - Zero bundle size impact (dynamic imports for optional loaders)
 
 ### Testing
+
 - **All 209 tests passing** (including FileLoader CRUD and SurrealDB integration tests)
 - SurrealDB tests use mock implementation (peer dependency optional)
 
 ### Documentation
+
 - SurrealDBLoader fully documented with JSDoc examples
 - Ion naming convention documented in codebase
 - Array Record ID format documented with performance rationale
 
 ### Migration Guide
+
 No breaking changes. SurrealDBLoader is a new feature.
 
 To use SurrealDBLoader:
+
 ```typescript
 import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
 
@@ -460,6 +502,7 @@ const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
 ## [0.6.0] - 2025-10-07
 
 ### Added
+
 - **StorageProvider Interface**: Unified API for JSöN document persistence across different backends (filesystem, SurrealDB, etc.)
   - `load()`, `save()`, `list()`, `delete()`, `close()` methods
   - Optional `subscribe()` for real-time providers
@@ -492,15 +535,18 @@ const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
   - Ensures order-independent, reproducible file names
 
 ### Changed
+
 - **FileLoader** now implements `StorageProvider` interface
   - Backward compatible: All existing `load()` functionality preserved
   - No breaking changes to public API
 
 ### Performance
+
 - Bundle size unchanged: **18.18 kB** (within 20 kB constitution limit)
 - FileLoader caching improved: save() updates both file and content caches
 
 ### Testing
+
 - **25 new tests** for FileLoader CRUD operations (all passing)
 - **Total: 209 tests** passing across entire test suite
 - Test coverage for:
@@ -511,14 +557,17 @@ const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
   - Zod validation integration (optional)
 
 ### Documentation
+
 - Updated FileLoader JSDoc with save/list/delete examples
 - StorageProvider interface fully documented
 - Added comprehensive test examples in `test/unit/file-loader-crud.test.ts`
 
 ### Migration Guide
+
 No breaking changes. Existing FileLoader code continues to work without modification.
 
 To use new save() functionality:
+
 ```typescript
 const loader = new FileLoader({ baseDir: './data' });
 await loader.init();
@@ -544,6 +593,7 @@ This release focuses on **comprehensive design documentation** for the next majo
 #### Designed Features
 
 **Storage Providers System**
+
 - Unified `StorageProvider` interface for JSöN document persistence
 - `SurrealDBLoader` - Load/save JSöN documents from SurrealDB with variant resolution
 - Enhanced `FileLoader` - Save/list/delete capabilities for filesystem storage
@@ -554,6 +604,7 @@ This release focuses on **comprehensive design documentation** for the next majo
 - Real-time LIVE query support for document subscriptions
 
 **Permission Detection System**
+
 - Pre-flight permission checks (know before attempting operations)
 - Table-level permissions (select/create/update/delete)
 - **Field-level permissions** (per-field read/write granularity)
@@ -564,6 +615,7 @@ This release focuses on **comprehensive design documentation** for the next majo
 - UI hints: show/hide fields based on permissions
 
 **Zod Integration & Type Safety**
+
 - Single source of truth: Zod schemas for both validation and types
 - `z.infer<>` for automatic TypeScript type inference
 - Zero type drift (impossible for types to diverge from schemas)
@@ -572,6 +624,7 @@ This release focuses on **comprehensive design documentation** for the next majo
 - Type-safe `load()` and `save()` methods with generic constraints
 
 **SurrealQL to Zod Schema Generation**
+
 - `surql-to-zod` CLI tool (designed, not yet implemented)
 - Parse `.surql` files to auto-generate Zod schemas
 - Database introspection via `INFO FOR TABLE STRUCTURE`
@@ -584,6 +637,7 @@ This release focuses on **comprehensive design documentation** for the next majo
 #### Design Documents
 
 All designs are in `.specify/memory/`:
+
 - `storage-providers-design.md` - StorageProvider interface, SurrealDBLoader, FileLoader
 - `permissions-and-zod-integration.md` - Table-level permissions, Zod integration
 - `field-level-permissions-design.md` - Field-level permission detection (SurrealDB killer feature!)
@@ -607,16 +661,19 @@ All designs are in `.specify/memory/`:
 #### Architecture Benefits
 
 **Traditional Stack**:
+
 ```
 Frontend → REST API → Business Logic → ORM → Database
 ```
 
 **JSöN + SurrealDB Stack** (designed):
+
 ```
 Frontend → SurrealDB (business logic in fn::)
 ```
 
 Benefits:
+
 - No custom backend needed
 - Type safety end-to-end (Zod + TypeScript)
 - Real-time by default (LIVE queries)
@@ -627,6 +684,7 @@ Benefits:
 #### Next Steps
 
 Implementation phases (v0.6.0-v1.0.0):
+
 - v0.6.0: Storage provider foundation (FileLoader save/list/delete)
 - v0.7.0: SurrealDBLoader implementation + permission detection
 - v0.8.0: LIVE query integration + real-time sync
@@ -640,6 +698,7 @@ See `ROADMAP.md` for complete implementation plan.
 ## [0.5.0] - 2025-10-06
 
 ### Added
+
 - **Pinia Colada Plugin** - Vue 3 data fetching with caching
   - `withPiniaColada()` plugin factory for query/mutation resolvers
   - Auto-generated query resolvers with intelligent caching
@@ -654,6 +713,7 @@ See `ROADMAP.md` for complete implementation plan.
 - **Test suite** - 12 comprehensive tests covering caching, mutations, hooks
 
 ### Technical Details
+
 - Plugin is 451 lines of production-ready code
 - Pinia Colada, Pinia, and Vue are optional peer dependencies
 - Zero breaking changes - all existing code continues to work
@@ -661,6 +721,7 @@ See `ROADMAP.md` for complete implementation plan.
 - Test coverage: 210 passing tests (+12 new Pinia Colada tests)
 
 ### Usage Example
+
 ```typescript
 import { dotted } from '@orbzone/dotted-json';
 import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
@@ -712,6 +773,7 @@ plugin.clearCache();
 ```
 
 ### Note
+
 - Works standalone or with @pinia/colada in Vue components
 - Vue composables (`useDottedJSON`) planned for future release
 - See ROADMAP.md Phase 4 for full design documentation
@@ -719,6 +781,7 @@ plugin.clearCache();
 ## [0.4.0] - 2025-10-06
 
 ### Added
+
 - **SurrealDB Plugin** - Zero-boilerplate database integration
   - `withSurrealDB()` async plugin factory for automatic resolver generation
   - Auto-generated CRUD resolvers for tables (`db.user.select`, `create`, `update`, `delete`)
@@ -732,12 +795,14 @@ plugin.clearCache();
 - **Dynamic imports** - SurrealDB is loaded only when plugin is used
 
 ### Technical Details
+
 - Plugin is 518 lines of production-ready code
 - SurrealDB is an optional peer dependency (supports v1.x and v2.x)
 - Zero breaking changes - all existing code continues to work
 - Bundle size: 18.18 kB (unchanged, plugins are separate imports)
 
 ### Usage Example
+
 ```typescript
 import { dotted } from '@orbzone/dotted-json';
 import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
@@ -769,6 +834,7 @@ await plugin.disconnect();
 ```
 
 ### Note
+
 - Comprehensive testing requires a running SurrealDB instance
 - Plugin architecture validated, ready for production use
 - See ROADMAP.md Phase 3 for full design documentation
@@ -776,6 +842,7 @@ await plugin.disconnect();
 ## [0.3.0] - 2025-10-06
 
 ### Added
+
 - **Zod Plugin** - Runtime type validation integration
   - `withZod()` plugin factory for creating validation options
   - Path-based validation (`schemas.paths`) for validating specific data paths
@@ -792,17 +859,20 @@ await plugin.disconnect();
 - **ROADMAP.md** - Complete product roadmap documenting plugin ecosystem phases
 
 ### Changed
+
 - **Core types** - Added optional `validation` field to `DottedOptions`
 - **DottedJson class** - Integrated validation calls in `get()` method
 - **Bundle size** - Increased from 18.02 kB to 18.18 kB (+160 bytes for validation support)
 
 ### Technical Details
+
 - Plugin architecture established for future plugins (SurrealDB, Pinia Colada, TanStack)
 - Zod is an optional peer dependency (install only when using the plugin)
 - Zero breaking changes - all existing code continues to work
 - Test coverage: 198 passing tests (+8 new Zod tests)
 
 ### Migration Guide
+
 ```typescript
 // Before (v0.2.x)
 const data = dotted(schema, { resolvers });
@@ -843,6 +913,7 @@ const data = dotted(schema, {
 ### Added
 
 #### Core Library
+
 - **Dotted-json core**: Dynamic JSON with dot-prefixed expression evaluation
 - **Expression system**: Template literal syntax with `${}` interpolation
 - **Resolver functions**: Nested namespaces for custom data fetching
@@ -852,6 +923,7 @@ const data = dotted(schema, {
 - **Depth limiting**: `maxEvaluationDepth` protection (default: 100)
 
 #### Variant System
+
 - **Language variants**: `lang` property with 1000-point priority
 - **Gender variants**: `gender` property (m/f/x) with 100-point priority
 - **Formality variants**: NEW `form` property with 50-point priority
@@ -867,6 +939,7 @@ const data = dotted(schema, {
 - **Pronoun helpers**: Automatic gender-aware pronoun resolution (`${:subject}`, `${:possessive}`, etc.)
 
 #### File Loader
+
 - **FileLoader class**: Variant-aware filesystem loading
 - **Automatic resolution**: Best-match file selection based on variant context
 - **Security**: Whitelist validation and path traversal prevention
@@ -878,6 +951,7 @@ const data = dotted(schema, {
 - **Export path**: `@orbzone/dotted-json/loaders/file`
 
 #### Translation CLI
+
 - **`json-translate` command**: Local LLM-powered translation tool
 - **Ollama integration**: Privacy-friendly local translations (no external APIs)
 - **Batch translation**: Efficient multi-string processing
@@ -889,6 +963,7 @@ const data = dotted(schema, {
 - **Global installation**: `npm install -g @orbzone/dotted-json`
 
 ### Documentation
+
 - Comprehensive README with examples for all features
 - Security warnings and trust model
 - Variant system documentation with real-world examples
@@ -902,6 +977,7 @@ const data = dotted(schema, {
   - `examples/with-zod-validation.ts`
 
 ### Technical
+
 - **Bundle size**: 18.02 kB (within 20 kB constitution limit)
 - **Test coverage**: 190 tests passing (26 file loader tests)
 - **TypeScript**: Full type definitions
@@ -909,6 +985,7 @@ const data = dotted(schema, {
 - **Memory design docs**: `.specify/memory/variant-aware-file-loading.md`
 
 ### Security
+
 - Expression evaluation trust model documented
 - Variant whitelist validation (prevents path traversal)
 - Sanitization for permissive mode (regex: `/^[a-zA-Z0-9_-]+$/`)
@@ -918,6 +995,7 @@ const data = dotted(schema, {
 ## [0.1.0] - 2025-10-05
 
 ### Added
+
 - Initial project setup with bun package manager
 - Project constitution (v1.0.0) establishing core principles
 - Security documentation and trust model

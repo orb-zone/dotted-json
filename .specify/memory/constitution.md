@@ -200,6 +200,34 @@ Every public API MUST have:
 - Entry in README.md or plugin-specific doc (e.g., ZOD-INTEGRATION.md)
 - Migration guide if deprecating existing API
 
+**Markdown Linting Standards** (added 2025-10-08):
+
+All markdown documentation MUST adhere to markdownlint rules:
+
+- **Blank lines after headings**: Required before lists, paragraphs, or code blocks
+  - ✅ `### Heading\n\n- List item`
+  - ❌ `### Heading\n- List item`
+
+- **Blank lines around code blocks**: Required before and after fenced code
+  - ✅ `paragraph\n\n```code```\n\nparagraph`
+  - ❌ `paragraph\n```code```\nparagraph`
+
+- **Code fence language**: Always specify language for syntax highlighting
+  - ✅ ` ```typescript`, ` ```bash`, ` ```json`, ` ```text`
+  - ❌ ` ``` ` (no language specified)
+
+- **Blank lines around lists**: Required before first item and after last item
+  - ✅ `paragraph\n\n- item\n- item\n\nparagraph`
+  - ❌ `paragraph\n- item\n- item\nparagraph`
+
+- **Consistent list markers**: Use `-` for unordered lists, `1.` for ordered
+  - ✅ `- Item one\n- Item two`
+  - ❌ `- Item one\n* Item two`
+
+**Rationale**: Consistent markdown formatting improves readability in both rendered and source forms. Markdownlint rules ensure documentation renders correctly across GitHub, NPM, VSCode, and other markdown viewers. Blank lines improve visual scanning and prevent rendering issues.
+
+**Enforcement**: All documentation-generating agents (documentation-curator, vue3-expert, etc.) MUST follow these rules when creating or updating markdown files.
+
 ### Naming Conventions
 
 **JSöN Capitalization** (added 2025-10-06):
