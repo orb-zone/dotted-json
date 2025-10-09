@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.6] - 2025-10-08
+
+### Changed
+
+- **ROADMAP.md**: Updated to reflect current state v0.9.5
+  - Updated all version references from v0.9.2 → v0.9.5
+  - Condensed Phase 6 section (50+ bullets → 9 concise summaries)
+  - Added documentation achievements for v0.9.3-v0.9.5
+  - Changed status from "Documentation complete" → "Production-ready"
+  - Preserved future plans (v1.0.0, v2.0.0 monorepo)
+
+### Documentation
+
+- **getting-started.md**: Applied markdown linting fixes for bold text headings
+  - Added blank lines after bold headings ("**Lazy Evaluation**", etc.)
+  - Improved visual scanning and readability
+  - Full MD022 compliance
+
 ## [0.9.5] - 2025-10-08
 
 ### Fixed
