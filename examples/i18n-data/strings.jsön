@@ -1,0 +1,7 @@
+{
+  "app.name": "My App",
+  "greeting": "Hello",
+  "farewell": "Goodbye",
+  "welcome": "Welcome",
+  "thank_you": "Thank you"
+}

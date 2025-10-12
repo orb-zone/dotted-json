@@ -23,8 +23,8 @@ Users shouldn't have to write verbose paths with `./` prefixes and `.json` exten
 ### Configuration API
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withFileSystem } from '@orbzone/dotted-json/plugins/filesystem';
+import { dotted } from '@orb-zone/dotted-json';
+import { withFileSystem } from '@orb-zone/dotted-json/plugins/filesystem';
 
 const data = dotted(schema, {
   ...withFileSystem({
@@ -272,7 +272,7 @@ withFileSystem({
 // Resolves: ./hero.json
 ```
 
-### Preset 2: JSON with JSÖN Fallback
+### Preset 2: JSON with JSöN Fallback
 
 ```typescript
 withFileSystem({
@@ -346,7 +346,7 @@ withFileSystem({
 ## Helper Function: `withFileSystemPreset()`
 
 ```typescript
-import { withFileSystemPreset } from '@orbzone/dotted-json/plugins/filesystem';
+import { withFileSystemPreset } from '@orb-zone/dotted-json/plugins/filesystem';
 
 const data = dotted(schema, {
   ...withFileSystemPreset('json-only', {

@@ -5,8 +5,8 @@
  * for automatic input/output validation of resolver functions.
  */
 
-import { dotted } from '@orbzone/dotted-json';
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { dotted } from '@orb-zone/dotted-json';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 // Example 1: Basic resolver validation

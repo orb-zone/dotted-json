@@ -25,7 +25,7 @@ assignees: ''
 <!-- Show what the API might look like -->
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 // Example usage of your proposed feature
 ```

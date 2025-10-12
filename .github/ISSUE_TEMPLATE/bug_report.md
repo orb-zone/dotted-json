@@ -29,7 +29,7 @@ assignees: ''
 <!-- Please provide a minimal code example that reproduces the issue -->
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 // Your code here
 ```

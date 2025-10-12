@@ -1,0 +1,32 @@
+{
+  "name": "@orb-zone/dotted-json",
+  "version": "0.9.7",
+  "exports": {
+    ".": "./src/index.ts",
+    "./loaders/file": "./src/loaders/file.ts",
+    "./loaders/surrealdb": "./src/loaders/surrealdb.ts",
+    "./plugins/zod": "./src/plugins/zod.ts",
+    "./plugins/surrealdb": "./src/plugins/surrealdb.ts",
+    "./plugins/pinia-colada": "./src/plugins/pinia-colada.ts",
+    "./plugins/surrealdb-pinia": "./src/plugins/surrealdb-pinia.ts",
+    "./plugins/tanstack": "./src/plugins/tanstack.ts",
+    "./vue": "./src/vue/useTanstackDottedJSON.ts",
+    "./react": "./src/react/useTanstackDottedJSON.ts"
+  },
+  "publish": {
+    "include": [
+      "src/**/*.ts",
+      "README.md",
+      "LICENSE",
+      "CHANGELOG.md"
+    ],
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      "test/**",
+      "examples/**",
+      "tools/**",
+      ".specify/**"
+    ]
+  }
+}

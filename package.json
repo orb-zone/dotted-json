@@ -1,15 +1,27 @@
 {
-  "name": "@orbzone/dotted-json",
-  "version": "0.1.0",
+  "name": "@orb-zone/dotted-json",
+  "version": "0.9.7",
   "description": "Dynamic JSON data expansion using dot-prefixed property keys as expression triggers",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "json-translate": "./tools/translate/index.ts",
+    "surql-to-ts": "./tools/surql-to-ts/index.ts"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./loaders/file": {
+      "import": "./dist/loaders/file.js",
+      "types": "./dist/loaders/file.d.ts"
+    },
+    "./loaders/surrealdb": {
+      "import": "./dist/loaders/surrealdb.js",
+      "types": "./dist/loaders/surrealdb.d.ts"
     },
     "./plugins/zod": {
       "import": "./dist/plugins/zod.js",
@@ -22,6 +34,10 @@
     "./plugins/pinia-colada": {
       "import": "./dist/plugins/pinia-colada.js",
       "types": "./dist/plugins/pinia-colada.d.ts"
+    },
+    "./plugins/surrealdb-pinia": {
+      "import": "./dist/plugins/surrealdb-pinia.js",
+      "types": "./dist/plugins/surrealdb-pinia.d.ts"
     },
     "./plugins/tanstack": {
       "import": "./dist/plugins/tanstack.js",
@@ -38,6 +54,7 @@
   },
   "files": [
     "dist",
+    "tools",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -46,10 +63,15 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build.ts",
     "test": "bun test",
+    "test:unit": "bun test test/unit",
+    "test:integration": "bun test test/integration",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
+    "db:start": "surreal start --user root --pass root memory",
+    "db:test": "surreal start --user root --pass root --bind 127.0.0.1:9000 memory",
     "lint": "eslint . --ext .js,.ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
+    "prepare": "bunx lefthook install",
     "prepublishOnly": "bun run build && bun test"
   },
   "keywords": [
@@ -65,9 +87,18 @@
     "lazy-loading",
     "resolver",
     "validation",
+    "i18n",
+    "localization",
+    "translation",
+    "variants",
+    "pronouns",
+    "gender-aware",
     "zod",
     "surrealdb",
     "database",
+    "realtime",
+    "live-queries",
+    "websocket",
     "vue",
     "react",
     "tanstack",
@@ -80,14 +111,42 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/orbzone/dotted-json.git"
+    "url": "git+https://github.com/orb-zone/dotted-json.git"
   },
-  "homepage": "https://github.com/orbzone/dotted-json#readme",
+  "homepage": "https://github.com/orb-zone/dotted-json#readme",
   "bugs": {
-    "url": "https://github.com/orbzone/dotted-json/issues"
+    "url": "https://github.com/orb-zone/dotted-json/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "peerDependencies": {
     "zod": "^3.0.0",
+    "surrealdb": "^1.0.0 || ^2.0.0",
+    "@pinia/colada": "^0.7.0",
+    "pinia": "^2.0.0",
+    "vue": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    },
+    "surrealdb": {
+      "optional": true
+    },
+    "@pinia/colada": {
+      "optional": true
+    },
+    "pinia": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "peerDependenciesArchived": {
+    "comment": "Future plugins - not yet implemented",
     "surrealdb": "^1.0.0",
     "@pinia/colada": "^0.7.0",
     "pinia": "^2.0.0",
@@ -98,10 +157,7 @@
     "@tanstack/svelte-query": ">=5.0.0",
     "@tanstack/solid-query": ">=5.0.0"
   },
-  "peerDependenciesMeta": {
-    "zod": {
-      "optional": true
-    },
+  "peerDependenciesMetaArchived": {
     "surrealdb": {
       "optional": true
     },
@@ -134,6 +190,7 @@
     "dot-prop": "^8.0.2"
   },
   "devDependencies": {
+    "@evilmartians/lefthook": "^1.9.8",
     "@types/bun": "latest",
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0",

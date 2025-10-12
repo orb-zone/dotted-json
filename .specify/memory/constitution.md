@@ -32,11 +32,19 @@ Follow-up TODOs: None
 The core library MUST remain lightweight and dependency-free (except essential utilities
 like dot-prop). All framework integrations (Zod, SurrealDB, TanStack, Pinia Colada,
 Vue/React) MUST be implemented as optional peer dependencies that users explicitly
-install. The core library MUST NOT exceed 15 kB minified bundle size.
+install. The core library MUST NOT exceed 20 kB minified bundle size.
+
+**Core features** (included in bundle limit):
+- Expression evaluation with lazy loading
+- Variant resolution (localization, gender, custom dimensions)
+- Pronoun placeholders for i18n
+- Cycle detection and depth limiting
+- Error handling and caching
 
 **Rationale**: Users adopting dotted-json should not pay the bundle cost for features
 they don't use. A minimal core ensures maximum flexibility and broad adoption across
-different tech stacks.
+different tech stacks. The 20 kB limit accommodates essential i18n/variant features
+while remaining lightweight.
 
 ### II. Security Through Transparency (NON-NEGOTIABLE)
 
@@ -160,7 +168,7 @@ without bloating the core.
    - [ ] Tests added for new functionality
    - [ ] Breaking changes documented in CHANGELOG.md
    - [ ] Security implications reviewed (if touching expression evaluator)
-   - [ ] Bundle size impact checked (core must stay under 15 kB)
+   - [ ] Bundle size impact checked (core must stay under 20 kB)
    - [ ] TypeScript types updated (no `any` without justification)
 
 ### Release Process
@@ -191,6 +199,163 @@ Every public API MUST have:
 - JSDoc comments with examples
 - Entry in README.md or plugin-specific doc (e.g., ZOD-INTEGRATION.md)
 - Migration guide if deprecating existing API
+
+**Markdown Linting Standards** (added 2025-10-08):
+
+All markdown documentation MUST adhere to markdownlint rules:
+
+- **Blank lines after headings**: Required before lists, paragraphs, or code blocks
+  - ✅ `### Heading\n\n- List item`
+  - ❌ `### Heading\n- List item`
+
+- **Blank lines around code blocks**: Required before and after fenced code
+  - ✅ `paragraph\n\n```code```\n\nparagraph`
+  - ❌ `paragraph\n```code```\nparagraph`
+
+- **Code fence language**: Always specify language for syntax highlighting
+  - ✅ ` ```typescript`, ` ```bash`, ` ```json`, ` ```text`
+  - ❌ ` ``` ` (no language specified)
+
+- **Blank lines around lists**: Required before first item and after last item
+  - ✅ `paragraph\n\n- item\n- item\n\nparagraph`
+  - ❌ `paragraph\n- item\n- item\nparagraph`
+
+- **Consistent list markers**: Use `-` for unordered lists, `1.` for ordered
+  - ✅ `- Item one\n- Item two`
+  - ❌ `- Item one\n* Item two`
+
+**Rationale**: Consistent markdown formatting improves readability in both rendered and source forms. Markdownlint rules ensure documentation renders correctly across GitHub, NPM, VSCode, and other markdown viewers. Blank lines improve visual scanning and prevent rendering issues.
+
+**Enforcement**: All documentation-generating agents (documentation-curator, vue3-expert, etc.) MUST follow these rules when creating or updating markdown files.
+
+### Naming Conventions
+
+**JSöN Capitalization** (added 2025-10-06):
+
+- **Titles and headings**: Use uppercase acronym format "JSöN"
+  - ✅ "JSöN Document Provider"
+  - ✅ "SurrealDB JSöN Storage"
+  - ❌ "jsön Document Provider"
+
+- **File extensions**: Use lowercase ".jsön"
+  - ✅ `strings.jsön`, `config:prod.jsön`
+  - ❌ `strings.JSöN`
+
+- **Code/variables**: Use lowercase when referring to file extensions
+  - ✅ `extensions: ['.jsön', '.json']`
+  - ❌ `extensions: ['.JSöN', '.JSON']`
+
+**Rationale**: Uppercase "JSöN" in titles emphasizes the library name as a proper acronym/brand. Lowercase ".jsön" in file extensions follows Unix convention for file extensions (e.g., .json, .yaml, .xml).
+
+**SurrealDB Field Naming** (added 2025-10-08):
+
+- **Metadata fields**: Use underscore prefix for system/meta fields
+  - ✅ `_type`, `_at`, `meta` (short, readable)
+  - ❌ `event_type`, `occurred_at`, `metadata` (verbose)
+
+- **Acronym expansion**: Keep acronyms focused and memorable
+  - **ION**: **I**nteractive **O**bservable **N**ode (not "Object")
+  - **ART**: **A**ctivity **R**esource **T**alent (not "Action")
+  - **COG**: **C**ontextual **O**peration **G**adget (not "Capability")
+  - **DOT**: **D**ated **O**bserved **T**ransaction (not "Operational")
+
+- **Edge metadata**: Use `meta` not `metadata` for consistency
+  - ✅ `RELATE a->has->b SET meta = {...}`
+  - ❌ `RELATE a->has->b SET metadata = {...}`
+
+- **Security terms**: Use "allowed" instead of "whitelisted"
+  - ✅ `allowedVariants`, `allowedDomains`
+  - ❌ `whitelistedVariants`, `whitelistedDomains`
+
+**Rationale**: Shorter field names reduce query verbosity. Underscore prefixes (`_type`, `_at`) clearly distinguish system fields from user data. "Allowed" is more inclusive and modern terminology. Refined acronym definitions improve clarity and memorability.
+
+**"dotted" as Adjective** (added 2025-10-08):
+
+Treat "dotted" as a **descriptive adjective** that enhances things, not as a noun:
+
+- **Hooks and Composables**: Use `useDotted[Thing]` pattern
+  - ✅ `useDottedTanstack` - "use the dotted version of TanStack"
+  - ✅ `useDottedPinia` - "use the dotted version of Pinia"
+  - ❌ `useTanstackDottedJSON` - "use TanStack's dotted JSON" (backwards)
+
+- **Plugin Factories**: Use `with[Thing]` pattern (brings external library INTO dotted context)
+  - ✅ `withZod` - Brings Zod validation into dotted context
+  - ✅ `withSurrealDB` - Brings SurrealDB into dotted context
+  - ✅ `withPiniaColada` - Brings Pinia Colada caching into dotted context
+  - ✅ `withSurrealDBPinia` - Brings SurrealDB+Pinia combo into dotted context
+  - ✅ `withFileSystem` - Brings filesystem loading into dotted context
+  - Note: Plugin itself isn't "dotted", it provides integration WITH dotted-json
+
+- **Rationale**: "Dotted" describes HOW the library works (with dot-prefixed keys), so it naturally functions as an adjective. This pattern is more intuitive: "use the dotted version of X" rather than "use X's dotted JSON". Keeps API surface consistent and predictable.
+
+### Example Organization (added 2025-10-07)
+
+**Official Examples Directory**: All production-ready examples MUST live in `/examples`
+
+- ✅ `examples/basic-usage.ts` - Core functionality demonstrations
+- ✅ `examples/with-zod-validation.ts` - Plugin integrations
+- ✅ `examples/file-loader-i18n.ts` - Advanced patterns
+- ✅ `examples/data/` - Example data files
+
+**Rules**:
+1. New examples MUST be added to `/examples` only
+2. Examples MUST be runnable without modification
+3. Examples MUST include comments explaining key concepts
+4. Examples MUST demonstrate production-ready patterns
+5. Experimental/WIP code should use branch-specific naming, NOT a DRAFT folder
+
+**Rationale**:
+- Single source of truth for examples
+- Easier discoverability for users
+- Reduces maintenance burden
+- Prevents stale draft code accumulation
+- Git branches are better for WIP/experimental work
+
+### Documentation Standards (added 2025-10-08)
+
+**Documentation Accuracy** (NON-NEGOTIABLE):
+
+Documentation MUST accurately reflect implementation. Never document unimplemented features without clear warnings.
+
+**Rules**:
+1. All documented APIs MUST be implemented and tested
+2. All implemented public APIs MUST be documented
+3. Status fields in memory files MUST match reality
+4. Unimplemented features MUST use "🚧 Coming Soon" warnings or be omitted
+5. Breaking changes MUST be documented in migration guide
+
+**API Documentation Requirements**:
+
+Every public method/function MUST document:
+1. **Purpose** - One-line description
+2. **Parameters** - Type and description for each
+3. **Returns** - Return type and description
+4. **Throws** - Error conditions and exception types
+5. **Example** - Working, copy-paste ready code snippet
+
+**Memory File Status Standards**:
+
+```markdown
+**Status**: Design Phase              # Not yet implemented
+**Status**: In Progress (v0.10.0)     # Actively coding
+**Status**: Implemented (v0.9.6)      # Shipped in version
+**Status**: Deprecated (v2.0.0)       # Marked for removal
+```
+
+When status is "Implemented", MUST include:
+- **Implementation**: `src/path/to/file.ts`
+- **Tests**: `test/path/to/test.ts`
+
+**Maintenance**:
+- Run documentation audit before every major release
+- See `.specify/memory/maintenance-log.md` for checklist
+- Update status fields in same PR that implements feature
+
+**Rationale**:
+- Prevents user frustration from following broken examples
+- Ensures documentation stays synchronized with code
+- Provides clear expectations for feature availability
+- Maintains trust and professional quality standards
 
 ## Governance
 

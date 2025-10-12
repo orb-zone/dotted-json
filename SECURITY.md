@@ -60,7 +60,7 @@ You should receive a response within **48 hours**. We will:
 **Recommended**: Use the Zod plugin for automatic validation
 
 ```typescript
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const data = dotted(schema, {
@@ -199,7 +199,7 @@ This project follows the [OpenSSF Best Practices](https://bestpractices.coreinfr
 
 For security concerns: **security@orb.zone**
 
-For general questions: [GitHub Discussions](https://github.com/orbzone/dotted-json/discussions)
+For general questions: [GitHub Discussions](https://github.com/orb-zone/dotted-json/discussions)
 
 ---
 
