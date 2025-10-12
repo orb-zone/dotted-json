@@ -1,6 +1,6 @@
 # SurrealDB Record ID Variants Design
 
-**Status**: Design (v0.6.0+)
+**Status**: Implemented (v0.9.6)
 **Related**: `storage-providers-design.md`, `surrealdb-vue-vision.md`
 **Created**: 2025-10-06
 **Author**: Design phase (implementation pending)

@@ -18,7 +18,7 @@ import type { VariantContext } from '../types.js';
 import type { StorageProvider, SaveOptions, DocumentInfo, ListFilter } from '../types/storage.js';
 
 /**
- * Variant whitelist configuration
+ * Allowed variants configuration
  *
  * Security: Prevents path traversal attacks via malicious variant values
  * Performance: Reduces unnecessary file system scans
@@ -43,9 +43,9 @@ export interface FileLoaderOptions {
   extensions?: string[];
 
   /**
-   * Variant whitelist for security and performance
+   * Allowed variants for security and performance
    *
-   * - Object: Whitelist specific values per variant dimension
+   * - Object: Allow specific values per variant dimension
    * - `true`: Allow any variant (sanitized for path safety)
    * - `undefined`: No variants allowed (base files only)
    *
@@ -193,7 +193,7 @@ export class FileLoader implements StorageProvider {
       await this.init();
     }
 
-    // 1. Validate variants against whitelist
+    // 1. Validate variants against allowed list
     const validatedVariants = this.validateVariants(variants);
 
     // 2. Check cache
@@ -267,7 +267,7 @@ export class FileLoader implements StorageProvider {
   }
 
   /**
-   * Validate variants against whitelist
+   * Validate variants against allowed list
    *
    * Security: Prevents path traversal like { lang: '../../../etc/passwd' }
    */

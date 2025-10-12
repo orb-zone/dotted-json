@@ -269,6 +269,25 @@ All markdown documentation MUST adhere to markdownlint rules:
 
 **Rationale**: Shorter field names reduce query verbosity. Underscore prefixes (`_type`, `_at`) clearly distinguish system fields from user data. "Allowed" is more inclusive and modern terminology. Refined acronym definitions improve clarity and memorability.
 
+**"dotted" as Adjective** (added 2025-10-08):
+
+Treat "dotted" as a **descriptive adjective** that enhances things, not as a noun:
+
+- **Hooks and Composables**: Use `useDotted[Thing]` pattern
+  - ✅ `useDottedTanstack` - "use the dotted version of TanStack"
+  - ✅ `useDottedPinia` - "use the dotted version of Pinia"
+  - ❌ `useTanstackDottedJSON` - "use TanStack's dotted JSON" (backwards)
+
+- **Plugin Factories**: Use `with[Thing]` pattern (brings external library INTO dotted context)
+  - ✅ `withZod` - Brings Zod validation into dotted context
+  - ✅ `withSurrealDB` - Brings SurrealDB into dotted context
+  - ✅ `withPiniaColada` - Brings Pinia Colada caching into dotted context
+  - ✅ `withSurrealDBPinia` - Brings SurrealDB+Pinia combo into dotted context
+  - ✅ `withFileSystem` - Brings filesystem loading into dotted context
+  - Note: Plugin itself isn't "dotted", it provides integration WITH dotted-json
+
+- **Rationale**: "Dotted" describes HOW the library works (with dot-prefixed keys), so it naturally functions as an adjective. This pattern is more intuitive: "use the dotted version of X" rather than "use X's dotted JSON". Keeps API surface consistent and predictable.
+
 ### Example Organization (added 2025-10-07)
 
 **Official Examples Directory**: All production-ready examples MUST live in `/examples`
@@ -291,6 +310,52 @@ All markdown documentation MUST adhere to markdownlint rules:
 - Reduces maintenance burden
 - Prevents stale draft code accumulation
 - Git branches are better for WIP/experimental work
+
+### Documentation Standards (added 2025-10-08)
+
+**Documentation Accuracy** (NON-NEGOTIABLE):
+
+Documentation MUST accurately reflect implementation. Never document unimplemented features without clear warnings.
+
+**Rules**:
+1. All documented APIs MUST be implemented and tested
+2. All implemented public APIs MUST be documented
+3. Status fields in memory files MUST match reality
+4. Unimplemented features MUST use "🚧 Coming Soon" warnings or be omitted
+5. Breaking changes MUST be documented in migration guide
+
+**API Documentation Requirements**:
+
+Every public method/function MUST document:
+1. **Purpose** - One-line description
+2. **Parameters** - Type and description for each
+3. **Returns** - Return type and description
+4. **Throws** - Error conditions and exception types
+5. **Example** - Working, copy-paste ready code snippet
+
+**Memory File Status Standards**:
+
+```markdown
+**Status**: Design Phase              # Not yet implemented
+**Status**: In Progress (v0.10.0)     # Actively coding
+**Status**: Implemented (v0.9.6)      # Shipped in version
+**Status**: Deprecated (v2.0.0)       # Marked for removal
+```
+
+When status is "Implemented", MUST include:
+- **Implementation**: `src/path/to/file.ts`
+- **Tests**: `test/path/to/test.ts`
+
+**Maintenance**:
+- Run documentation audit before every major release
+- See `.specify/memory/maintenance-log.md` for checklist
+- Update status fields in same PR that implements feature
+
+**Rationale**:
+- Prevents user frustration from following broken examples
+- Ensures documentation stays synchronized with code
+- Provides clear expectations for feature availability
+- Maintains trust and professional quality standards
 
 ## Governance
 

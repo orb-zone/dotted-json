@@ -1,7 +1,7 @@
 # Storage Providers Design: JSöN Document Persistence
 
 **Created**: 2025-10-06
-**Status**: Design Phase
+**Status**: Implemented (v0.9.6)
 **Target**: v0.6.0+ (alongside real-time integration)
 
 ---

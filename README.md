@@ -241,28 +241,6 @@ await data.get('user.profile');  // Returns cached value
 await data.get('user.profile', { ignoreCache: true });  // Force re-evaluation
 ```
 
-### Framework Integration
-
-**Vue 3**:
-
-```typescript
-
-import { useDottedJSON } from '@orbzone/dotted-json/vue';
-
-const { data, isLoading } = useDottedJSON(schema, { resolvers });
-```
-
-**React**:
-
-```typescript
-
-import { useTanstackDottedJSON } from '@orbzone/dotted-json/react';
-
-const { data, isLoading } = useTanstackDottedJSON(schema);
-```
-
-**[📖 Migration guide](docs/migration.md)** for framework-specific patterns
-
 ## Security
 
 ### Trust Model
@@ -363,24 +341,6 @@ bun add zod
 ```
 
 Automatic input/output validation for resolvers
-
-### Vue - Reactive Integration
-
-```bash
-
-bun add vue
-```
-
-Vue 3 composables with reactive data
-
-### React - Hook Integration
-
-```bash
-
-bun add react @tanstack/react-query
-```
-
-React hooks with TanStack Query
 
 ### SurrealDB - Database Integration
 

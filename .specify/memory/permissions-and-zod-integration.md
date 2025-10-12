@@ -6,7 +6,7 @@
 # Permissions & Zod Integration Design
 
 **Created**: 2025-10-06
-**Status**: Design Phase
+**Status**: Implemented (v0.9.6)
 **Target**: v0.7.0 (SurrealDB Storage Provider)
 
 ---

@@ -13,6 +13,7 @@ Complete API documentation for `@orbzone/dotted-json` (JSöN).
   - [FileLoader](#fileloader)
   - [SurrealDBLoader](#surrealdbloader)
 - [Plugins](#plugins)
+  - [withFileSystem()](#withfilesystem)
   - [withZod()](#withzod)
   - [withSurrealDB()](#withsurrealdb)
   - [withPiniaColada()](#withpiniacolada)
@@ -127,19 +128,6 @@ if (data.has('user.profile')) {
 
 ---
 
-##### `toJSON(): any`
-
-Export the entire schema as plain JSON (expressions remain unevaluated).
-
-```typescript
-const plain = data.toJSON();
-console.log(JSON.stringify(plain, null, 2));
-```
-
-**Returns:** `any` - Plain JSON object
-
----
-
 ## Storage Providers
 
 ### FileLoader
@@ -165,8 +153,7 @@ interface FileLoaderOptions {
   extensions?: string[];        // File extensions (default: ['.jsön', '.json'])
   cache?: boolean;              // Enable caching (default: true)
   cacheTTL?: number;           // Cache TTL in ms (default: 60000)
-  permissive?: boolean;         // Allow custom variants (default: false)
-  allowedVariants?: string[]; // Allowed custom variants
+  allowedVariants?: string[];   // Allowed custom variants (default: none, use '*' for all)
 }
 ```
 
@@ -403,6 +390,62 @@ await loader.close();
 ---
 
 ## Plugins
+
+### withFileSystem()
+
+File system integration with variant-aware loading.
+
+```typescript
+import { withFileSystem } from '@orbzone/dotted-json/loaders/file';
+
+const data = dotted(
+  {
+    user: {
+      '.profile': 'extends("user-profile")'  // Loads from filesystem
+    }
+  },
+  {
+    variants: { lang: 'es' },
+    ...withFileSystem({
+      baseDir: './data',
+      extensions: ['.jsön', '.json'],
+      allowedVariants: {
+        lang: ['en', 'es', 'fr'],
+        form: ['casual', 'formal']
+      },
+      cache: true,
+      cacheTTL: 60000
+    })
+  }
+);
+
+await data.get('user.profile');  // Loads data/user-profile:es.jsön
+```
+
+#### Options
+
+```typescript
+interface FileLoaderOptions {
+  baseDir: string;                  // Base directory for files
+  extensions?: string[];            // File extensions (default: ['.jsön', '.json'])
+  cache?: boolean;                  // Enable caching (default: true)
+  cacheTTL?: number;               // Cache TTL in ms (default: 60000)
+  allowedVariants?: AllowedVariants | true;  // Allowed custom variants
+}
+```
+
+**Returns:**
+
+- `resolvers.extends(baseName)` - Resolver function for loading files
+- `__loader` - Direct access to FileLoader instance
+
+**Security:**
+
+- `allowedVariants` - Restrict which variant values are accepted (prevents path traversal)
+- `true` - Allow any variant (with sanitization)
+- `undefined` - No variants allowed (base files only)
+
+---
 
 ### withZod()
 

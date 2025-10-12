@@ -20,7 +20,7 @@ Extend the filesystem plugin to automatically resolve variant files using the sa
 
 1. **Reuse Existing Variant Resolver** - Don't reimplement scoring logic
 2. **Pre-Scanning for Performance** - Scan directory once, not per `extends()` call
-3. **Security Through Whitelisting** - Prevent path traversal via variant validation
+3. **Security Through Allowed Variants** - Prevent path traversal via variant validation
 4. **Smart Caching** - Cache by `baseName + variants` key
 5. **Order Independence** - `hero:es:f.jsön` === `hero:f:es.jsön` (same scoring)
 
@@ -72,7 +72,7 @@ const i18nData = dotted(
       baseDir: './i18n',
       extensions: ['.jsön', '.json'],
 
-      // NEW: Variant whitelist (security + performance)
+      // NEW: Allowed variants (security + performance)
       allowedVariants: {
         lang: ['en', 'es', 'fr', 'de', 'ja', 'ko'],
         gender: ['m', 'f', 'x'],
@@ -89,7 +89,7 @@ const i18nData = dotted(
 await i18nData.get('welcomeMessage');
 ```
 
-### Security: Whitelist Mode
+### Security: Allowed Variants Mode
 
 **Problem**: User-supplied variants could be malicious
 ```typescript
@@ -97,7 +97,7 @@ await i18nData.get('welcomeMessage');
 { lang: '../../../etc/passwd' }
 ```
 
-**Solution**: Whitelist allowed values per variant dimension
+**Solution**: Allow only specific values per variant dimension
 ```typescript
 allowedVariants: {
   lang: ['en', 'es', 'fr'],  // Only these values allowed
@@ -364,7 +364,7 @@ describe('Variant-Aware File Loading', () => {
   test('resolves best matching variant file');
   test('falls back to base when no variant matches');
   test('handles order-independent filenames');
-  test('validates variants against whitelist');
+  test('validates variants against allowed list');
   test('sanitizes variants in permissive mode');
   test('prevents path traversal attacks');
   test('caches by baseName + variants');
@@ -428,7 +428,7 @@ i18n/
 | Principle | Compliance |
 |-----------|-----------|
 | I. Minimal Core | ✅ Optional plugin, not in core bundle |
-| II. Security | ✅ Whitelist by default, sanitization, no path traversal |
+| II. Security | ✅ Allowed variants by default, sanitization, no path traversal |
 | III. Test-First | ✅ Comprehensive test suite required |
 | V. Plugin Architecture | ✅ Extends filesystem plugin cleanly |
 | VI. Cycle Detection | ✅ Inherits from filesystem plugin |
@@ -486,7 +486,7 @@ pages/index.ja.js       // Japanese
 |------|----------|-----------|
 | 2025-10-05 | Reuse variant resolver | Avoid duplicating scoring logic |
 | 2025-10-05 | Pre-scan by default | O(n) once vs O(variants) per load |
-| 2025-10-05 | Whitelist variants | Prevent attacks, document expectations |
+| 2025-10-05 | Allowed variants | Prevent attacks, document expectations |
 | 2025-10-05 | Order-independent filenames | User convenience, matches in-memory |
 | 2025-10-05 | Cache by baseName+variants | Different variants cache separately |
 
