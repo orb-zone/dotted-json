@@ -9,12 +9,12 @@
  * @requires @pinia/colada ^0.7.0 (optional peer dependency)
  * @requires pinia ^2.0.0 (optional peer dependency)
  * @requires vue ^3.0.0 (optional peer dependency)
- * @module @orbzone/dotted-json/plugins/surrealdb-pinia
+ * @module @orb-zone/dotted-json/plugins/surrealdb-pinia
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia';
  *
  * const plugin = await withSurrealDBPinia({
  *   // SurrealDB connection

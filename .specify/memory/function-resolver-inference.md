@@ -334,7 +334,7 @@ DEFINE FUNCTION fn::getUserStats($userId: string) {
 ### Step 2: Plugin Configuration
 
 ```typescript
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 const plugin = await withSurrealDB({
   url: 'ws://localhost:8000/rpc',
@@ -373,7 +373,7 @@ const plugin = await withSurrealDB({
 ### Step 3: Usage with Full Type Safety
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 const data = dotted({
   userId: 'user:alice',

@@ -5,8 +5,8 @@
  * file-based schema inheritance and composition.
  */
 
-import { dotted } from '@orbzone/dotted-json';
-import { withFileSystem } from '@orbzone/dotted-json/plugins/filesystem';
+import { dotted } from '@orb-zone/dotted-json';
+import { withFileSystem } from '@orb-zone/dotted-json/plugins/filesystem';
 
 // Example 1: Basic file inheritance with self-reference
 const heroCard = dotted(

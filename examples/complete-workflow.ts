@@ -1,7 +1,7 @@
 /**
  * Complete Schema-Driven Workflow Example
  *
- * Demonstrates the full power of @orbzone/dotted-json with SurrealDB:
+ * Demonstrates the full power of @orb-zone/dotted-json with SurrealDB:
  * 1. Define functions once in .surql schema
  * 2. Auto-generate TypeScript types with surql-to-ts
  * 3. Auto-generate resolvers with withSurrealDB
@@ -10,8 +10,8 @@
  * Result: 90% less code, zero type drift, single source of truth
  */
 
-import { dotted } from '@orbzone/dotted-json';
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { dotted } from '@orb-zone/dotted-json';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 // Import generated types (from: bun surql-to-ts --schema schema-example.surql)
 import type {

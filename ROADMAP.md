@@ -159,7 +159,7 @@ The `__DRAFT__` folder contains a **fully designed plugin architecture** (v1.0-v
 
 #### Developer Experience
 
-- [ ] **Plugin installation** as simple as `bun add @orbzone/dotted-json`
+- [ ] **Plugin installation** as simple as `bun add @orb-zone/dotted-json`
 - [ ] **Optional peer dependencies** (install only what you need)
 - [ ] **Clear migration paths** between plugins (Pinia Colada ↔ TanStack)
 - [ ] **Production examples** for all frameworks
@@ -958,27 +958,27 @@ Transform single package into Bun workspace monorepo:
 
 ```
 packages/
-├── dotted/              # @orbzone/dotted-json (core engine)
-├── surrounded/          # @orbzone/surrounded (SurrealDB framework wrapper)
-└── aeonic/              # @orbzone/aeonic (opinionated schema framework)
+├── dotted/              # @orb-zone/dotted-json (core engine)
+├── surrounded/          # @orb-zone/surrounded (SurrealDB framework wrapper)
+└── aeonic/              # @orb-zone/aeonic (opinionated schema framework)
 ```
 
 **Package Descriptions**:
 
-1. **@orbzone/dotted-json** (`packages/dotted/`)
+1. **@orb-zone/dotted-json** (`packages/dotted/`)
    - Core "dotted" expression engine (current codebase)
    - Maintains backward compatibility with v1.x API
    - Bundle: 18-25 kB (minimal core + plugins)
    - Focus: General-purpose JSON expansion with variants, i18n, lazy evaluation
 
-2. **@orbzone/surrounded** (`packages/surrounded/`)
+2. **@orb-zone/surrounded** (`packages/surrounded/`)
    - "Surrounded" SurrealDB-focused framework layer
    - Wraps dotted-json with opinionated SurrealDB integrations
    - Storage providers, LIVE queries, permission detection, Zod integration
    - Bundle: +30-50 kB (framework overhead)
    - Focus: Zero-config SurrealDB + Vue fullstack development
 
-3. **@orbzone/aeonic** (`packages/aeonic/`)
+3. **@orb-zone/aeonic** (`packages/aeonic/`)
    - "Aeonic" opinionated framework with schema conventions
    - **AEON** = **A**daptive **E**ntity **O**bjective **N**etwork
    - Built on top of `surrounded` with predefined patterns
@@ -991,7 +991,7 @@ packages/
 **v1.0.0 Milestone First**:
 
 - ✅ Complete Phase 6 implementation (v0.6.0-v0.9.0)
-- ✅ Release stable v1.0.0 of `@orbzone/dotted-json`
+- ✅ Release stable v1.0.0 of `@orb-zone/dotted-json`
 - ✅ Gather production feedback and stabilize API
 - ✅ Ensure 100% backward compatibility guarantee
 
@@ -999,18 +999,18 @@ packages/
 
 ```typescript
 // v1.x.x (current single package)
-import { dotted } from '@orbzone/dotted-json';
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { dotted } from '@orb-zone/dotted-json';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 // v2.0.0+ (monorepo packages)
 // Core users (minimal footprint)
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 // SurrealDB framework users
-import { useSurrounded } from '@orbzone/surrounded';
+import { useSurrounded } from '@orb-zone/surrounded';
 
 // Opinionated fullstack users
-import { createAeonicApp } from '@orbzone/aeonic';
+import { createAeonicApp } from '@orb-zone/aeonic';
 ```
 
 **Package Independence**:
@@ -1047,13 +1047,13 @@ import { createAeonicApp } from '@orbzone/aeonic';
 
 ```
 packages/
-├── dotted/              @orbzone/dotted-json
-├── surrounded/          @orbzone/surrounded
-├── aeonic/              @orbzone/aeonic
-└── flow/                @orbzone/flow (Flöw app layer)
+├── dotted/              @orb-zone/dotted-json
+├── surrounded/          @orb-zone/surrounded
+├── aeonic/              @orb-zone/aeonic
+└── flow/                @orb-zone/flow (Flöw app layer)
 ```
 
-**Flöw** (`@orbzone/flow-app`, `apps/flow`):
+**Flöw** (`@orb-zone/flow-app`, `apps/flow`):
 
 - User-facing application layer built on AEON/ION architecture
 - Multi-tenant SaaS reference implementation
@@ -1118,7 +1118,7 @@ packages/
 ---
 
 **Maintained by**: @OZ
-**Repository**: <https://github.com/orbzone/dotted-json>
+**Repository**: <https://github.com/orb-zone/dotted-json>
 **Status**: 🚧 In Active Development
 
 *Last Reviewed: 2025-10-07*

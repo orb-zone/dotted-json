@@ -7,7 +7,7 @@
  * - Gender: profile:f.jsön, profile:m.jsön
  * - Custom: strings:aws.jsön, strings:gcp.jsön
  *
- * @module @orbzone/dotted-json/loaders/file
+ * @module @orb-zone/dotted-json/loaders/file
  */
 
 import { readFile, readdir, writeFile, unlink, stat } from 'fs/promises';
@@ -649,8 +649,8 @@ export class FileLoader implements StorageProvider {
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withFileSystem } from '@orbzone/dotted-json/loaders/file';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withFileSystem } from '@orb-zone/dotted-json/loaders/file';
  *
  * const data = dotted(
  *   {

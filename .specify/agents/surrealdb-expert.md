@@ -92,8 +92,8 @@ export async function withSurrealDB(options: SurrealDBOptions) {
 
 **Basic CRUD**:
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { dotted } from '@orb-zone/dotted-json';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 const { resolvers } = await withSurrealDB({
   url: 'ws://localhost:8000/rpc',
@@ -168,7 +168,7 @@ See `.specify/memory/record-id-variants-design.md` (600+ lines) for full design.
 **Architecture**:
 ```typescript
 // SurrealDBLoader with LIVE query support
-import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb';
+import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb';
 
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',

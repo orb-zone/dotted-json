@@ -51,13 +51,13 @@ The **AEON model** is a graph-based architecture where entities form an adaptive
 
 ## Web-Craft Ecosystem: AEON/ION Across the Monorepo
 
-The AEON/ION model provides a unified mental framework across all `@orbzone` packages in the future monorepo.
+The AEON/ION model provides a unified mental framework across all `@orb-zone` packages in the future monorepo.
 
 ### Package Relationships
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    @orbzone/aeonic                          │
+│                    @orb-zone/aeonic                          │
 │         (Opinionated fullstack framework)                   │
 │  - Scaffolding CLI                                          │
 │  - Predefined entities (User, Role, Team)                   │
@@ -66,7 +66,7 @@ The AEON/ION model provides a unified mental framework across all `@orbzone` pac
 └────────────────────┬────────────────────────────────────────┘
                      │ depends on
 ┌────────────────────▼────────────────────────────────────────┐
-│                  @orbzone/surrounded                        │
+│                  @orb-zone/surrounded                        │
 │         (SurrealDB integration layer)                       │
 │  - LIVE query subscriptions                                 │
 │  - Real-time data sync                                      │
@@ -76,7 +76,7 @@ The AEON/ION model provides a unified mental framework across all `@orbzone` pac
 └────────────────────┬────────────────────────────────────────┘
                      │ depends on
 ┌────────────────────▼────────────────────────────────────────┐
-│                @orbzone/dotted-json                         │
+│                @orb-zone/dotted-json                         │
 │         (Core expression engine + ION foundation)           │
 │  - Expression evaluation (.property syntax)                 │
 │  - Variant resolution system                                │
@@ -107,7 +107,7 @@ The AEON/ION model provides a unified mental framework across all `@orbzone` pac
 
 2. **ION stored in SurrealDB** (via `surrounded`):
    ```typescript
-   import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+   import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
 
    const loader = new SurrealDBLoader({ /* config */ })
    await loader.save('welcome',
@@ -120,7 +120,7 @@ The AEON/ION model provides a unified mental framework across all `@orbzone` pac
 3. **ION resolved in Vue app** (via `aeonic` composable):
    ```vue
    <script setup>
-   import { useIon } from '@orbzone/aeonic'
+   import { useIon } from '@orb-zone/aeonic'
 
    const { user } = useAeonicAuth()
    const welcome = useIon('welcome', {
@@ -291,7 +291,7 @@ const posts = await traverse('$auth.id')
 
 ## Executive Summary
 
-**Aeonic** is an opinionated fullstack framework built on top of `@orbzone/surrounded`, providing predefined schema conventions, entity patterns, and rapid scaffolding for SurrealDB + Vue applications.
+**Aeonic** is an opinionated fullstack framework built on top of `@orb-zone/surrounded`, providing predefined schema conventions, entity patterns, and rapid scaffolding for SurrealDB + Vue applications.
 
 **Market Position**: Rails for SurrealDB + Vue
 **Foundation**: Built on AEON/ION architecture for adaptive, graph-based applications
@@ -389,7 +389,7 @@ packages/aeonic/
 │   │   ├── package.json
 │   │   └── vite.config.ts
 │   └── minimal/                    # Minimal template (opt-out entities)
-└── package.json                    # @orbzone/aeonic
+└── package.json                    # @orb-zone/aeonic
 ```
 
 ---
@@ -849,7 +849,7 @@ bun aeonic migrate
 ### `aeonic.config.ts`
 
 ```typescript
-import { defineAeonicConfig } from '@orbzone/aeonic';
+import { defineAeonicConfig } from '@orb-zone/aeonic';
 
 export default defineAeonicConfig({
   // SurrealDB connection
@@ -912,7 +912,7 @@ export default defineAeonicConfig({
 ### `useAeonicAuth()`
 
 ```typescript
-import { useAeonicAuth } from '@orbzone/aeonic';
+import { useAeonicAuth } from '@orb-zone/aeonic';
 
 const {
   user,           // Ref<User | null>
@@ -938,7 +938,7 @@ async function handleLogin() {
 ### `useAeonicEntity()`
 
 ```typescript
-import { useAeonicEntity } from '@orbzone/aeonic';
+import { useAeonicEntity } from '@orb-zone/aeonic';
 import { UserSchema } from '@/generated/schemas.zod';
 
 const {
@@ -969,7 +969,7 @@ async function createUser() {
 
 ## Comparison: Aeonic vs Surrounded vs Dotted
 
-| Feature | @orbzone/dotted-json | @orbzone/surrounded | @orbzone/aeonic |
+| Feature | @orb-zone/dotted-json | @orb-zone/surrounded | @orb-zone/aeonic |
 |---------|---------------------|---------------------|----------------|
 | **Core** | Expression engine, variants, i18n | + SurrealDB, LIVE queries, storage | + Predefined entities, scaffolding |
 | **Bundle** | 18-25 kB | +30-50 kB | +20-40 kB |
@@ -989,12 +989,12 @@ async function createUser() {
 When you outgrow core features and need SurrealDB:
 
 ```typescript
-// Before: @orbzone/dotted-json
-import { dotted } from '@orbzone/dotted-json';
+// Before: @orb-zone/dotted-json
+import { dotted } from '@orb-zone/dotted-json';
 const doc = dotted({ user: '.fetchUser()' }, { resolvers });
 
-// After: @orbzone/surrounded
-import { useSurrounded } from '@orbzone/surrounded';
+// After: @orb-zone/surrounded
+import { useSurrounded } from '@orb-zone/surrounded';
 const { query } = useSurrounded({ url: '...' });
 const user = await query('user:alice');
 ```

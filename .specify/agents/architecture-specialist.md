@@ -20,7 +20,7 @@ This agent specializes in:
 
 **I. Minimal Core, Optional Plugins**
 - Package boundaries must enforce this principle
-- Core package (`@orbzone/dotted-json`) stays under 20 kB
+- Core package (`@orb-zone/dotted-json`) stays under 20 kB
 - Framework packages (`surrounded`, `aeonic`) are optional layers
 - Each package independently tree-shakeable
 
@@ -38,9 +38,9 @@ This agent specializes in:
 
 | Package | Target Bundle | Limit | Rationale |
 |---------|---------------|-------|-----------|
-| `@orbzone/dotted-json` | 18-25 kB | 25 kB | Core + essential plugins (Zod, variants, i18n) |
-| `@orbzone/surrounded` | +30-50 kB | 75 kB total | Adds SurrealDB, LIVE queries, storage providers |
-| `@orbzone/aeonic` | +20-40 kB | 115 kB total | Adds schema templates, entity conventions |
+| `@orb-zone/dotted-json` | 18-25 kB | 25 kB | Core + essential plugins (Zod, variants, i18n) |
+| `@orb-zone/surrounded` | +30-50 kB | 75 kB total | Adds SurrealDB, LIVE queries, storage providers |
+| `@orb-zone/aeonic` | +20-40 kB | 115 kB total | Adds schema templates, entity conventions |
 
 **Constitutional Reference**: Constitution line 36 says "core < 15 kB" but Principle I says "< 20 kB". **Resolved**: Core target is 20 kB (allows room for essential features).
 
@@ -49,7 +49,7 @@ This agent specializes in:
 ### Current State (v1.x - Single Package)
 
 ```
-@orbzone/dotted-json/
+@orb-zone/dotted-json/
 ├── src/
 │   ├── index.ts                          # Core entry
 │   ├── loaders/file.ts                   # FileLoader
@@ -73,7 +73,7 @@ packages/
 │   │   ├── loaders/file.ts               # FileLoader (basic variant loading)
 │   │   └── plugins/zod.ts                # Zod plugin (optional)
 │   ├── tools/translate/                  # json-translate CLI
-│   └── package.json                      # @orbzone/dotted-json
+│   └── package.json                      # @orb-zone/dotted-json
 │
 ├── surrounded/
 │   ├── src/
@@ -83,7 +83,7 @@ packages/
 │   │   ├── plugins/pinia-colada.ts       # Pinia Colada integration
 │   │   └── plugins/live-queries.ts       # LIVE query subscriptions
 │   ├── tools/surql-to-ts/                # surql-to-ts CLI
-│   └── package.json                      # @orbzone/surrounded
+│   └── package.json                      # @orb-zone/surrounded
 │
 ├── aeonic/
 │   ├── src/
@@ -95,11 +95,11 @@ packages/
 │   │   ├── templates/                    # Code generation templates
 │   │   └── conventions.ts                # AEON naming conventions
 │   ├── cli/                              # bun create aeonic scaffolding
-│   └── package.json                      # @orbzone/aeonic
+│   └── package.json                      # @orb-zone/aeonic
 │
 └── shared/                                # (Optional) Shared utilities
     ├── src/types.ts                      # Common TypeScript types
-    └── package.json                      # @orbzone/shared-internal (private)
+    └── package.json                      # @orb-zone/shared-internal (private)
 ```
 
 ### Package Dependencies
@@ -107,7 +107,7 @@ packages/
 ```json
 // packages/dotted/package.json
 {
-  "name": "@orbzone/dotted-json",
+  "name": "@orb-zone/dotted-json",
   "version": "2.0.0",
   "dependencies": {
     "dot-prop": "^8.0.2"
@@ -119,10 +119,10 @@ packages/
 
 // packages/surrounded/package.json
 {
-  "name": "@orbzone/surrounded",
+  "name": "@orb-zone/surrounded",
   "version": "1.0.0",
   "dependencies": {
-    "@orbzone/dotted-json": "workspace:^2.0.0"
+    "@orb-zone/dotted-json": "workspace:^2.0.0"
   },
   "peerDependencies": {
     "surrealdb": "^1.0.0 || ^2.0.0",
@@ -135,10 +135,10 @@ packages/
 
 // packages/aeonic/package.json
 {
-  "name": "@orbzone/aeonic",
+  "name": "@orb-zone/aeonic",
   "version": "0.1.0",
   "dependencies": {
-    "@orbzone/surrounded": "workspace:^1.0.0"
+    "@orb-zone/surrounded": "workspace:^1.0.0"
   },
   "peerDependencies": {
     // Inherits all from surrounded
@@ -151,7 +151,7 @@ packages/
 ```json
 // Root package.json
 {
-  "name": "@orbzone/dotted-monorepo",
+  "name": "@orb-zone/dotted-monorepo",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -159,9 +159,9 @@ packages/
   "scripts": {
     "build": "bun run --filter='./packages/*' build",
     "test": "bun test",
-    "test:dotted": "bun --filter=@orbzone/dotted-json test",
-    "test:surrounded": "bun --filter=@orbzone/surrounded test",
-    "test:aeonic": "bun --filter=@orbzone/aeonic test"
+    "test:dotted": "bun --filter=@orb-zone/dotted-json test",
+    "test:surrounded": "bun --filter=@orb-zone/surrounded test",
+    "test:aeonic": "bun --filter=@orb-zone/aeonic test"
   }
 }
 ```
@@ -267,7 +267,7 @@ if (stats.size > 25000) {
 
 ### ❌ Shared Code Duplication
 **Problem**: Copying utilities between packages
-**Solution**: Create `@orbzone/shared-internal` for truly shared code (private package)
+**Solution**: Create `@orb-zone/shared-internal` for truly shared code (private package)
 
 ## Resources
 

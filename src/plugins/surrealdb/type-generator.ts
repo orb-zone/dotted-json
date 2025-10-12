@@ -3,7 +3,7 @@
  *
  * Converts SurrealDB types to TypeScript type definitions
  *
- * @module @orbzone/dotted-json/plugins/surrealdb/type-generator
+ * @module @orb-zone/dotted-json/plugins/surrealdb/type-generator
  */
 
 import type { FunctionMetadata } from './function-discovery.js';

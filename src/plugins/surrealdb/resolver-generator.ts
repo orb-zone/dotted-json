@@ -3,7 +3,7 @@
  *
  * Auto-generates dotted-json resolvers from function metadata
  *
- * @module @orbzone/dotted-json/plugins/surrealdb/resolver-generator
+ * @module @orb-zone/dotted-json/plugins/surrealdb/resolver-generator
  */
 
 import type { FunctionMetadata } from './function-discovery.js';

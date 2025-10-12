@@ -93,13 +93,13 @@ const data = dotted<UserSchema>(schema);
 
 ```bash
 # Using bun (recommended - fastest)
-bun add @orbzone/dotted-json
+bun add @orb-zone/dotted-json
 
 # Using npm
-npm install @orbzone/dotted-json
+npm install @orb-zone/dotted-json
 
 # Using yarn
-yarn add @orbzone/dotted-json
+yarn add @orb-zone/dotted-json
 ```
 
 ### Minimal Working Example
@@ -109,7 +109,7 @@ Let's start with the simplest possible example and build up from there.
 #### Step 1: Create a dotted schema
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 // Define data with a special dot-prefixed key
 const data = dotted({
@@ -327,7 +327,7 @@ const data = dotted({
 Let's put it all together in a complete example:
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 // 1. Define your schema with expressions
 const appData = dotted({
@@ -411,7 +411,7 @@ Hello, Alice Johnson! You have 5 unread messages.
 **Use case**: Load environment-specific configuration without hard-coding values.
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 const config = dotted({
   // Base config
@@ -456,7 +456,7 @@ console.log('DB Name:', await config.get('database.name'));  // "myapp_developme
 **Use case**: Build personalized experiences based on user data.
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 const app = dotted({
   // Current user (could come from auth system)
@@ -540,7 +540,7 @@ console.log('Recommendations:', recommendations);
 **Use case**: Gradually roll out features to a percentage of users.
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 import crypto from 'crypto';
 
 const app = dotted({
@@ -779,7 +779,7 @@ const resolvers = {
 };
 
 // ✅ Even better: use Zod plugin for automatic validation
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const data = dotted(schema, {
@@ -1056,8 +1056,8 @@ const data = dotted({
 
 ### Getting Help
 
-- **GitHub Issues**: [Report bugs or ask questions](https://github.com/orbzone/dotted-json/issues)
-- **Discussions**: [Share ideas and patterns](https://github.com/orbzone/dotted-json/discussions)
+- **GitHub Issues**: [Report bugs or ask questions](https://github.com/orb-zone/dotted-json/issues)
+- **Discussions**: [Share ideas and patterns](https://github.com/orb-zone/dotted-json/discussions)
 - **Examples**: [Browse working code](../examples/)
 - **API Docs**: [Detailed reference](../docs/API.md)
 
@@ -1065,6 +1065,6 @@ const data = dotted({
 
 **Ready to build something?** Start with [examples/basic-usage.ts](../examples/basic-usage.ts) and experiment!
 
-**Questions?** Check the [API Reference](../docs/API.md) or [open an issue](https://github.com/orbzone/dotted-json/issues).
+**Questions?** Check the [API Reference](../docs/API.md) or [open an issue](https://github.com/orb-zone/dotted-json/issues).
 
 **Want to contribute?** Read [CONTRIBUTING.md](../CONTRIBUTING.md) and review the [constitution](../.specify/memory/constitution.md).

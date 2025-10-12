@@ -5,7 +5,7 @@
  * - Well-known: lang (ISO codes), gender (m/f/x), form (formality levels)
  * - Custom: dialect, tone, source, etc.
  *
- * @module @orbzone/dotted-json/variant-resolver
+ * @module @orb-zone/dotted-json/variant-resolver
  */
 
 import type { VariantContext } from './types.js';

@@ -98,11 +98,11 @@ docs/
 Dynamic JSON expansion using dot-prefixed expression keys
 
 ` ``bash
-bun add @orbzone/dotted-json
+bun add @orb-zone/dotted-json
 ` ``
 
 ` ``typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 const doc = dotted({
   greeting: '.greet(name)',
@@ -143,7 +143,7 @@ await doc.get('greeting');  // "Hello, Alice!"
 
 ` ``bash
 # Core library
-bun add @orbzone/dotted-json
+bun add @orb-zone/dotted-json
 
 # Optional plugins
 bun add zod  # For Zod validation plugin
@@ -375,20 +375,20 @@ See [migration/v0.5-to-v0.6.md](migration/v0.5-to-v0.6.md) for upgrade instructi
 
 ### 🚨 Breaking Changes
 
-1. **Monorepo Migration**: Package split into @orbzone/dotted-json, @orbzone/surrounded, @orbzone/aeonic
+1. **Monorepo Migration**: Package split into @orb-zone/dotted-json, @orb-zone/surrounded, @orb-zone/aeonic
 
    **Before (v1.x)**:
    ```typescript
-   import { dotted } from '@orbzone/dotted-json';
+   import { dotted } from '@orb-zone/dotted-json';
    ```
 
    **After (v2.0)**:
    ```typescript
    // Core users
-   import { dotted } from '@orbzone/dotted-json';
+   import { dotted } from '@orb-zone/dotted-json';
 
    // Framework users
-   import { useSurrounded } from '@orbzone/surrounded';
+   import { useSurrounded } from '@orb-zone/surrounded';
    ```
 
 ### Migration Instructions
@@ -431,7 +431,7 @@ See [migration/v0.5-to-v0.6.md](migration/v0.5-to-v0.6.md) for upgrade instructi
  *   bun examples/file-loader-i18n.ts
  */
 
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 // Setup: Create loader with context
 const loader = new FileLoader({

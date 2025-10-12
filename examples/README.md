@@ -139,7 +139,7 @@ bun run examples/file-inheritance.ts
 surreal start --bind 0.0.0.0:8000 --user root --pass root memory
 
 # Install dependencies
-bun add @orbzone/dotted-json surrealdb @pinia/colada pinia vue
+bun add @orb-zone/dotted-json surrealdb @pinia/colada pinia vue
 ```
 
 **Quick Start**:
@@ -310,7 +310,7 @@ iwr https://windows.surrealdb.com -useb | iex  # Windows
 surreal start --bind 0.0.0.0:8000 --user root --pass root memory
 
 # Install dependencies
-bun add @orbzone/dotted-json surrealdb @pinia/colada pinia vue
+bun add @orb-zone/dotted-json surrealdb @pinia/colada pinia vue
 ```
 
 ### Package Scripts
@@ -534,6 +534,6 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for full guidelines.
 
 **Questions?**
 
-- Open an issue: [GitHub Issues](https://github.com/orbzone/dotted-json/issues)
+- Open an issue: [GitHub Issues](https://github.com/orb-zone/dotted-json/issues)
 - Read the docs: [Documentation](../docs/)
 - Check the FAQ: [README FAQ](../README.md#faq)

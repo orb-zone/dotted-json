@@ -88,7 +88,7 @@ function showHelp(): void {
   console.log(`
 ╭─────────────────────────────────────────────────────────────╮
 │  surql-to-ts - Generate TypeScript types from SurrealDB    │
-│  Part of @orbzone/dotted-json                              │
+│  Part of @orb-zone/dotted-json                              │
 ╰─────────────────────────────────────────────────────────────╯
 
 USAGE:
@@ -131,7 +131,7 @@ FEATURES:
   ✓ Single source of truth from .surql files
 
 LEARN MORE:
-  https://github.com/orbzone/dotted-json
+  https://github.com/orb-zone/dotted-json
 `);
 }
 

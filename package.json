@@ -1,5 +1,5 @@
 {
-  "name": "@orbzone/dotted-json",
+  "name": "@orb-zone/dotted-json",
   "version": "0.9.7",
   "description": "Dynamic JSON data expansion using dot-prefixed property keys as expression triggers",
   "type": "module",
@@ -111,11 +111,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/orbzone/dotted-json.git"
+    "url": "git+https://github.com/orb-zone/dotted-json.git"
   },
-  "homepage": "https://github.com/orbzone/dotted-json#readme",
+  "homepage": "https://github.com/orb-zone/dotted-json#readme",
   "bugs": {
-    "url": "https://github.com/orbzone/dotted-json/issues"
+    "url": "https://github.com/orb-zone/dotted-json/issues"
   },
   "publishConfig": {
     "access": "public",

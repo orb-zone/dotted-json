@@ -203,7 +203,7 @@ When invoked:
 ### With SurrealDBLoader
 
 ```typescript
-import { SurrealDBLoader } from '@orbzone/dotted/loaders/surrealdb';
+import { SurrealDBLoader } from '@orb-zone/dotted/loaders/surrealdb';
 import { UserSchema } from './schemas.generated';
 
 const loader = new SurrealDBLoader({

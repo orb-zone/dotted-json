@@ -2,7 +2,7 @@
 
 > Spreadsheet formulas for JSON - dynamic data expansion with lazy evaluation and intelligent caching
 
-[![npm version](https://img.shields.io/npm/v/@orbzone/dotted-json.svg)](https://www.npmjs.com/package/@orbzone/dotted-json)
+[![npm version](https://img.shields.io/npm/v/@orb-zone/dotted-json.svg)](https://www.npmjs.com/package/@orb-zone/dotted-json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Why dotted-json?
@@ -52,13 +52,13 @@ await data.get('.profile');   // Automatic caching
 ```bash
 
 # Using bun (recommended)
-bun add @orbzone/dotted-json
+bun add @orb-zone/dotted-json
 
 # Using npm
-npm install @orbzone/dotted-json
+npm install @orb-zone/dotted-json
 
 # Using yarn
-yarn add @orbzone/dotted-json
+yarn add @orb-zone/dotted-json
 ```
 
 ## Quick Start
@@ -67,7 +67,7 @@ yarn add @orbzone/dotted-json
 
 ```typescript
 
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 const data = dotted({
   user: {
@@ -89,7 +89,7 @@ Multi-language support with automatic variant resolution:
 
 ```typescript
 
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './locales' });
 await loader.init();
@@ -121,7 +121,7 @@ Real-time feature management with database sync:
 
 ```typescript
 
-import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
+import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia';
 
 const plugin = await withSurrealDBPinia({
   url: 'ws://localhost:8000/rpc',
@@ -149,7 +149,7 @@ Type-safe database access with automatic caching:
 
 ```typescript
 
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 const plugin = await withSurrealDB({
   url: 'ws://localhost:8000/rpc',
@@ -178,7 +178,7 @@ Environment-aware config with variant support:
 
 ```typescript
 
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './config' });
 await loader.init();
@@ -267,7 +267,7 @@ Use the Zod plugin for runtime validation:
 
 ```typescript
 
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const data = dotted(schema, {
@@ -379,7 +379,7 @@ Generate translated variant files using local Ollama (privacy-friendly, no exter
 ```bash
 
 # Install globally
-bun install -g @orbzone/dotted-json
+bun install -g @orb-zone/dotted-json
 
 # Translate to Spanish
 json-translate strings.jsön --to es
@@ -464,7 +464,7 @@ MIT © [orb.zone](https://orb.zone)
 
 ## Links
 
-- **[GitHub Repository](https://github.com/orbzone/dotted-json)**
+- **[GitHub Repository](https://github.com/orb-zone/dotted-json)**
 
-- **[Issue Tracker](https://github.com/orbzone/dotted-json/issues)**
-- **[NPM Package](https://www.npmjs.com/package/@orbzone/dotted-json)**
+- **[Issue Tracker](https://github.com/orb-zone/dotted-json/issues)**
+- **[NPM Package](https://www.npmjs.com/package/@orb-zone/dotted-json)**

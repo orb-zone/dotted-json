@@ -5,12 +5,12 @@
  * This is an optional plugin - Zod is a peer dependency.
  *
  * @requires zod ^3.0.0
- * @module @orbzone/dotted-json/plugins/zod
+ * @module @orb-zone/dotted-json/plugins/zod
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withZod } from '@orbzone/dotted-json/plugins/zod';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withZod } from '@orb-zone/dotted-json/plugins/zod';
  * import { z } from 'zod';
  *
  * const schemas = {
@@ -130,8 +130,8 @@ export class ValidationError extends Error {
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withZod } from '@orbzone/dotted-json/plugins/zod';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withZod } from '@orb-zone/dotted-json/plugins/zod';
  * import { z } from 'zod';
  *
  * const UserSchema = z.object({

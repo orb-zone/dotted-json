@@ -1,14 +1,14 @@
-# Next Steps: Publishing to @orbzone
+# Next Steps: Publishing to @orb-zone
 
 ## ✅ Completed Preparations
 
-Your `dotted-json` (jsön) project is now **production-ready** for publication to @orbzone organization!
+Your `dotted-json` (jsön) project is now **production-ready** for publication to @orb-zone organization!
 
 ### Repository Status
 
 - **Name**: `dotted-json` ✅ (ASCII-friendly, per constitution)
 - **Fun Name**: `jsön` (umlaut for branding/docs)
-- **Package**: `@orbzone/dotted-json`
+- **Package**: `@orb-zone/dotted-json`
 - **Version**: v0.9.5
 - **License**: MIT
 - **Tests**: 226/226 passing (100%)
@@ -94,7 +94,7 @@ Complete pre-publication checklist:
 ### 5. Package Configuration
 
 **Updated `package.json`**:
-- ✅ Repository URLs: `github.com/orbzone/dotted-json`
+- ✅ Repository URLs: `github.com/orb-zone/dotted-json`
 - ✅ `publishConfig` for NPM public access
 - ✅ Lefthook as devDependency
 - ✅ `prepare` script for automatic git hooks setup
@@ -218,33 +218,33 @@ After publishing, verify on each platform:
 ### NPM
 ```bash
 # Search for package
-npm search @orbzone/dotted-json
+npm search @orb-zone/dotted-json
 
 # View package page
-open https://www.npmjs.com/package/@orbzone/dotted-json
+open https://www.npmjs.com/package/@orb-zone/dotted-json
 
 # Test installation
 cd /tmp
 mkdir test-install && cd test-install
-bun add @orbzone/dotted-json
+bun add @orb-zone/dotted-json
 ```
 
 ### JSR
 ```bash
 # View package page
-open https://jsr.io/@orbzone/dotted-json
+open https://jsr.io/@orb-zone/dotted-json
 
 # Test installation
-bun add jsr:@orbzone/dotted-json
+bun add jsr:@orb-zone/dotted-json
 ```
 
 ### GitHub
 ```bash
 # View releases
-open https://github.com/orbzone/dotted-json/releases
+open https://github.com/orb-zone/dotted-json/releases
 
 # Verify CI passed
-open https://github.com/orbzone/dotted-json/actions
+open https://github.com/orb-zone/dotted-json/actions
 ```
 
 ---
@@ -352,7 +352,7 @@ git commit -m "build: update bundle size limit to 20 kB"
 
 ## 🚀 Next Steps
 
-1. **Create GitHub repository** (dotted-json under @orbzone)
+1. **Create GitHub repository** (dotted-json under @orb-zone)
 2. **Add secrets** (NPM_TOKEN, JSR_TOKEN)
 3. **Push code** (branch + tags)
 4. **Create PR** to main branch
@@ -382,8 +382,8 @@ git commit -m "build: update bundle size limit to 20 kB"
 
 1. **Add badges to README**:
    ```markdown
-   ![NPM Version](https://img.shields.io/npm/v/@orbzone/dotted-json)
-   ![Bundle Size](https://img.shields.io/bundlephobia/minzip/@orbzone/dotted-json)
+   ![NPM Version](https://img.shields.io/npm/v/@orb-zone/dotted-json)
+   ![Bundle Size](https://img.shields.io/bundlephobia/minzip/@orb-zone/dotted-json)
    ![Tests](https://img.shields.io/github/actions/workflow/status/orbzone/dotted-json/ci.yml)
    ```
 

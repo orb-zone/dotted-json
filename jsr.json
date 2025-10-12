@@ -1,5 +1,5 @@
 {
-  "name": "@orbzone/dotted-json",
+  "name": "@orb-zone/dotted-json",
   "version": "0.9.7",
   "exports": {
     ".": "./src/index.ts",

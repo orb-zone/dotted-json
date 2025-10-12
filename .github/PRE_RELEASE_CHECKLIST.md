@@ -1,13 +1,13 @@
 # Pre-Release Checklist
 
-Complete this checklist before publishing to @orbzone organization and public registries.
+Complete this checklist before publishing to @orb-zone organization and public registries.
 
 ## ✅ Repository Setup
 
 - [x] **Repository Name**: `dotted-json` (ASCII-friendly, per constitution)
 - [x] **Fun Name**: `jsön` (with umlaut, used in branding/docs)
-- [x] **Package Name**: `@orbzone/dotted-json`
-- [x] **Organization**: `@orbzone`
+- [x] **Package Name**: `@orb-zone/dotted-json`
+- [x] **Organization**: `@orb-zone`
 - [x] **License**: MIT
 - [x] **Current Version**: v0.9.2
 
@@ -117,14 +117,14 @@ Before publishing, ensure these secrets are configured in GitHub repository sett
 
 1. **Update URLs in package.json** (✅ Already done):
    ```json
-   "repository": "git+https://github.com/orbzone/dotted-json.git",
-   "homepage": "https://github.com/orbzone/dotted-json#readme",
-   "bugs": "https://github.com/orbzone/dotted-json/issues"
+   "repository": "git+https://github.com/orb-zone/dotted-json.git",
+   "homepage": "https://github.com/orb-zone/dotted-json#readme",
+   "bugs": "https://github.com/orb-zone/dotted-json/issues"
    ```
 
 2. **Create GitHub repository**:
    ```bash
-   # On GitHub: create new repository "dotted-json" under @orbzone org
+   # On GitHub: create new repository "dotted-json" under @orb-zone org
    # Settings > General > Make repository public
    ```
 
@@ -155,10 +155,10 @@ Before publishing, ensure these secrets are configured in GitHub repository sett
 
 ## 🎉 Post-Publication
 
-- [ ] Verify package on NPM: https://www.npmjs.com/package/@orbzone/dotted-json
-- [ ] Verify package on JSR: https://jsr.io/@orbzone/dotted-json
-- [ ] Test installation: `bun add @orbzone/dotted-json`
-- [ ] Test JSR installation: `bun add jsr:@orbzone/dotted-json`
+- [ ] Verify package on NPM: https://www.npmjs.com/package/@orb-zone/dotted-json
+- [ ] Verify package on JSR: https://jsr.io/@orb-zone/dotted-json
+- [ ] Test installation: `bun add @orb-zone/dotted-json`
+- [ ] Test JSR installation: `bun add jsr:@orb-zone/dotted-json`
 - [ ] Update project README with badges
 - [ ] Announce on social media / forums (optional)
 
@@ -221,7 +221,7 @@ Expected output:
 
 Once all checkboxes are complete and secrets are configured, the project is ready to:
 
-1. Push to GitHub @orbzone/json
+1. Push to GitHub @orb-zone/json
 2. Make repository public
 3. Tag v0.9.2
 4. Automatic publish to NPM & JSR via GitHub Actions

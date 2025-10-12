@@ -222,15 +222,15 @@ Use specific imports to enable tree-shaking:
 
 ```typescript
 // ❌ Bad: Imports entire library
-import { dotted, FileLoader, SurrealDBLoader } from '@orbzone/dotted-json';
+import { dotted, FileLoader, SurrealDBLoader } from '@orb-zone/dotted-json';
 
 // ✅ Good: Import core separately
-import { dotted } from '@orbzone/dotted-json';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 // Only import when needed
 if (needsSurrealDB) {
-  const { SurrealDBLoader } = await import('@orbzone/dotted-json/loaders/surrealdb');
+  const { SurrealDBLoader } = await import('@orb-zone/dotted-json/loaders/surrealdb');
 }
 ```
 
@@ -240,10 +240,10 @@ Load plugins on-demand:
 
 ```typescript
 // Static import (included in bundle)
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 
 // Dynamic import (lazy-loaded)
-const { withSurrealDBPinia } = await import('@orbzone/dotted-json/plugins/surrealdb-pinia');
+const { withSurrealDBPinia } = await import('@orb-zone/dotted-json/plugins/surrealdb-pinia');
 ```
 
 ### 3. Core Bundle Size

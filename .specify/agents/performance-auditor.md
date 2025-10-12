@@ -50,9 +50,9 @@ This agent specializes in:
 
 | Package | Bundle Target | Rationale |
 |---------|---------------|-----------|
-| `@orbzone/dotted-json` | 18-25 kB | Core + essential features (variants, i18n, Zod) |
-| `@orbzone/surrounded` | +30-50 kB | Adds SurrealDB, LIVE queries, storage |
-| `@orbzone/aeonic` | +20-40 kB | Adds schema templates, conventions |
+| `@orb-zone/dotted-json` | 18-25 kB | Core + essential features (variants, i18n, Zod) |
+| `@orb-zone/surrounded` | +30-50 kB | Adds SurrealDB, LIVE queries, storage |
+| `@orb-zone/aeonic` | +20-40 kB | Adds schema templates, conventions |
 
 **Total Maximum**: ~115 kB (acceptable for full-stack framework)
 
@@ -208,7 +208,7 @@ console.log(`Cache hit rate: ${(cacheHits / (cacheHits + cacheMisses) * 100).toF
 
 ```typescript
 import { describe, test, expect } from 'bun:test';
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 describe('Performance Benchmarks', () => {
   test('expression evaluation < 1ms for simple expressions', async () => {

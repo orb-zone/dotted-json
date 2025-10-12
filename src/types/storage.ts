@@ -1,7 +1,7 @@
 /**
  * Storage provider types for JSöN document persistence
  *
- * @module @orbzone/dotted-json/types/storage
+ * @module @orb-zone/dotted-json/types/storage
  */
 
 import type { VariantContext } from '../types.js';

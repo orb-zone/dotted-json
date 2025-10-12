@@ -197,7 +197,7 @@ const formalityPrompt = {
 
 **API** (see `src/pronouns.ts`):
 ```typescript
-import { pronouns } from '@orbzone/dotted-json';
+import { pronouns } from '@orb-zone/dotted-json';
 
 // Get pronouns for gender
 const masculine = pronouns.get('m');
@@ -251,7 +251,7 @@ const custom = pronouns.get('ze');
 ### Basic Usage
 
 ```typescript
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({
   baseDir: './locales',
@@ -385,7 +385,7 @@ bun tools/translate/index.ts common.jsön --to ko
 
 ```typescript
 import { describe, test, expect } from 'bun:test';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 describe('Variant Resolution', () => {
   test('selects best match by score', async () => {

@@ -73,8 +73,8 @@ export function withZod(options: ValidationOptions) {
 
 **Path-Based Validation**:
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { dotted } from '@orb-zone/dotted-json';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const UserSchema = z.object({

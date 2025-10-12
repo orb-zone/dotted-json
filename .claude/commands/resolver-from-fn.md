@@ -128,7 +128,7 @@ getProfile.metadata = {
 // Date: [timestamp]
 // Contains: 5 functions
 
-import { dotted } from '@orbzone/dotted';
+import { dotted } from '@orb-zone/dotted';
 
 /**
  * Auto-generated SurrealDB function resolvers
@@ -271,7 +271,7 @@ Uses comment hint for return type.
 ## Integration with withSurrealDB
 
 ```typescript
-import { withSurrealDB } from '@orbzone/dotted/plugins/surrealdb';
+import { withSurrealDB } from '@orb-zone/dotted/plugins/surrealdb';
 import { generatedResolvers } from './resolvers.generated';
 
 const plugin = await withSurrealDB({

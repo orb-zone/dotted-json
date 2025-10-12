@@ -5,7 +5,7 @@
  * resolver functions, and error handling.
  */
 
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 // Example 1: Simple expression evaluation
 const userProfile = dotted({

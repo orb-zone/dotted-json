@@ -892,8 +892,8 @@ export class FileLoader implements StorageProvider {
 ### Usage Pattern 1: Load-Only (Current Behavior)
 
 ```typescript
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
-import { dotted } from '@orbzone/dotted-json';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
 
 const loader = new FileLoader({ baseDir: './i18n' });
 await loader.init();
@@ -916,7 +916,7 @@ await data.strings; // Loads strings:es.jsön
 ### Usage Pattern 2: Load + Save
 
 ```typescript
-import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb';
+import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb';
 
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',

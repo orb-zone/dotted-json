@@ -1,7 +1,7 @@
 /**
  * Type definitions for dotted-json
  *
- * @module @orbzone/dotted-json/types
+ * @module @orb-zone/dotted-json/types
  */
 
 /**
@@ -89,11 +89,11 @@ export interface DottedOptions {
 
   /**
    * Validation options for runtime type checking
-   * Provided by plugins like @orbzone/dotted-json/plugins/zod
+   * Provided by plugins like @orb-zone/dotted-json/plugins/zod
    *
    * @example
    * ```typescript
-   * import { withZod } from '@orbzone/dotted-json/plugins/zod'
+   * import { withZod } from '@orb-zone/dotted-json/plugins/zod'
    *
    * const data = dotted(schema, {
    *   ...withZod({ schemas, mode: 'strict' })

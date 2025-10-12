@@ -5,12 +5,12 @@
  * Handles connection, authentication, and CRUD operations with minimal configuration.
  *
  * @requires surrealdb ^1.0.0 or ^2.0.0
- * @module @orbzone/dotted-json/plugins/surrealdb
+ * @module @orb-zone/dotted-json/plugins/surrealdb
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
  *
  * const plugin = await withSurrealDB({
  *   url: 'ws://localhost:8000/rpc',
@@ -431,8 +431,8 @@ function createFunctionResolver(
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
  *
  * const plugin = await withSurrealDB({
  *   url: 'ws://localhost:8000/rpc',

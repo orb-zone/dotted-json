@@ -7,7 +7,7 @@
  * - ${:possessive} → his/her/their
  * - ${:reflexive} → himself/herself/themselves
  *
- * @module @orbzone/dotted-json/pronouns
+ * @module @orb-zone/dotted-json/pronouns
  */
 
 export type Gender = 'm' | 'f' | 'x';

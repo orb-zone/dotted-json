@@ -11,7 +11,7 @@
  * - Natural hierarchical sorting
  * - No redundant base_name/variants fields
  *
- * @module @orbzone/dotted-json/loaders/surrealdb
+ * @module @orb-zone/dotted-json/loaders/surrealdb
  */
 
 import type { VariantContext } from '../types.js';

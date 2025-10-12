@@ -1,4 +1,4 @@
-# Monorepo Migration Plan: @orbzone/web-craft
+# Monorepo Migration Plan: @orb-zone/web-craft
 
 **Status**: Future Planning (v0.10.0+)
 **Target**: v0.10.0 (after v0.9.2 publication)
@@ -9,10 +9,10 @@
 
 ## Overview
 
-Convert the current `@orbzone/dotted-json` single package into a **monorepo workspace** branded as **@orbzone/web-craft**, containing:
+Convert the current `@orb-zone/dotted-json` single package into a **monorepo workspace** branded as **@orb-zone/web-craft**, containing:
 
-1. **@orbzone/dotted** - Core expression engine (renamed from dotted-json)
-2. **@orbzone/surrounded** - Full-stack SurrealDB framework for Vue
+1. **@orb-zone/dotted** - Core expression engine (renamed from dotted-json)
+2. **@orb-zone/surrounded** - Full-stack SurrealDB framework for Vue
 3. **create-surrounded** - Scaffolding CLI (`npm create surrounded@latest`)
 
 ## Naming Philosophy
@@ -27,7 +27,7 @@ All packages use **past tense** for cohesion:
 ```
 web-craft/                              # Git repo root
 ├── .git/
-├── package.json                        # @orbzone/web-craft (private workspace)
+├── package.json                        # @orb-zone/web-craft (private workspace)
 ├── tsconfig.json                       # Shared TypeScript config
 ├── README.md                           # "Web-Craft: Full-stack SurrealDB tooling"
 ├── LICENSE
@@ -35,7 +35,7 @@ web-craft/                              # Git repo root
 │
 ├── packages/
 │   ├── dotted/                         # Core expression engine
-│   │   ├── package.json                # @orbzone/dotted
+│   │   ├── package.json                # @orb-zone/dotted
 │   │   ├── README.md                   # "Dynamic JSON expansion"
 │   │   ├── src/
 │   │   │   ├── index.ts
@@ -60,7 +60,7 @@ web-craft/                              # Git repo root
 │   │   └── tsconfig.json
 │   │
 │   ├── surrounded/                     # Full-stack framework
-│   │   ├── package.json                # @orbzone/surrounded
+│   │   ├── package.json                # @orb-zone/surrounded
 │   │   ├── README.md                   # "Full-stack SurrealDB framework"
 │   │   ├── src/
 │   │   │   ├── index.ts                # Main exports
@@ -119,7 +119,7 @@ web-craft/                              # Git repo root
 
 ## Package Responsibilities
 
-### @orbzone/dotted (Core Engine)
+### @orb-zone/dotted (Core Engine)
 
 **What it includes**:
 - ✅ Core dotted-json engine
@@ -141,7 +141,7 @@ web-craft/                              # Git repo root
 **package.json**:
 ```json
 {
-  "name": "@orbzone/dotted",
+  "name": "@orb-zone/dotted",
   "version": "1.0.0",
   "description": "Dynamic JSON expansion using dot-prefixed expressions",
   "type": "module",
@@ -172,7 +172,7 @@ web-craft/                              # Git repo root
 }
 ```
 
-### @orbzone/surrounded (Framework)
+### @orb-zone/surrounded (Framework)
 
 **What it includes**:
 - ✅ `useSurrounded()` Vue composable
@@ -185,7 +185,7 @@ web-craft/                              # Git repo root
 - ✅ SSR/Nuxt support
 
 **What it requires**:
-- Depends on `@orbzone/dotted`
+- Depends on `@orb-zone/dotted`
 - Always includes: SurrealDB, Vue, Zod, Pinia Colada
 
 **Bundle size**: ~50-80 kB (batteries-included)
@@ -193,7 +193,7 @@ web-craft/                              # Git repo root
 **package.json**:
 ```json
 {
-  "name": "@orbzone/surrounded",
+  "name": "@orb-zone/surrounded",
   "version": "1.0.0",
   "description": "Full-stack SurrealDB framework for Vue - Your app, surrounded by the database",
   "type": "module",
@@ -206,7 +206,7 @@ web-craft/                              # Git repo root
     "surrounded": "./dist/cli/index.js"
   },
   "dependencies": {
-    "@orbzone/dotted": "workspace:*",
+    "@orb-zone/dotted": "workspace:*",
     "surrealdb": "^2.0.0",
     "vue": "^3.0.0",
     "@pinia/colada": "^0.7.0",
@@ -215,7 +215,7 @@ web-craft/                              # Git repo root
     "commander": "^11.0.0"
   },
   "devDependencies": {
-    "@orbzone/dotted": "workspace:*"
+    "@orb-zone/dotted": "workspace:*"
   }
 }
 ```
@@ -273,7 +273,7 @@ mkdir -p packages/dotted packages/surrounded packages/create-surrounded
 # Create root package.json
 cat > package.json << 'EOF'
 {
-  "name": "@orbzone/web-craft",
+  "name": "@orb-zone/web-craft",
   "version": "1.0.0",
   "private": true,
   "description": "Full-stack SurrealDB tooling - dotted expressions, surrounded by the database",
@@ -281,15 +281,15 @@ cat > package.json << 'EOF'
     "packages/*"
   ],
   "scripts": {
-    "build": "bun run --filter \"@orbzone/*\" build",
-    "test": "bun run --filter \"@orbzone/*\" test",
+    "build": "bun run --filter \"@orb-zone/*\" build",
+    "test": "bun run --filter \"@orb-zone/*\" test",
     "test:unit": "bun test packages/*/test/unit",
     "test:integration": "bun test packages/*/test/integration",
     "db:start": "surreal start --user root --pass root memory",
     "db:test": "surreal start --user root --pass root --bind 127.0.0.1:9000 memory",
-    "dev": "bun run --filter \"@orbzone/*\" dev",
-    "lint": "bun run --filter \"@orbzone/*\" lint",
-    "typecheck": "bun run --filter \"@orbzone/*\" typecheck"
+    "dev": "bun run --filter \"@orb-zone/*\" dev",
+    "lint": "bun run --filter \"@orb-zone/*\" lint",
+    "typecheck": "bun run --filter \"@orb-zone/*\" typecheck"
   },
   "keywords": [
     "surrealdb",
@@ -306,7 +306,7 @@ cat > package.json << 'EOF'
 EOF
 ```
 
-### Phase 2: Move @orbzone/dotted (Preserve Git History)
+### Phase 2: Move @orb-zone/dotted (Preserve Git History)
 
 **Goal**: Move existing code to `packages/dotted/` with git history intact
 
@@ -328,7 +328,7 @@ cp LICENSE packages/dotted/LICENSE
 # Update package.json
 cat > packages/dotted/package.json << 'EOF'
 {
-  "name": "@orbzone/dotted",
+  "name": "@orb-zone/dotted",
   "version": "1.0.0",
   "description": "Dynamic JSON expansion using dot-prefixed expressions",
   "type": "module",
@@ -408,7 +408,7 @@ git add -A
 git commit -m "refactor: move core to packages/dotted (preserve history)"
 ```
 
-### Phase 3: Create @orbzone/surrounded Package
+### Phase 3: Create @orb-zone/surrounded Package
 
 **Goal**: Create new framework package
 
@@ -422,7 +422,7 @@ mkdir -p packages/surrounded/templates/{vue-spa,nuxt,vite}
 # Create package.json
 cat > packages/surrounded/package.json << 'EOF'
 {
-  "name": "@orbzone/surrounded",
+  "name": "@orb-zone/surrounded",
   "version": "1.0.0",
   "description": "Full-stack SurrealDB framework for Vue - Your app, surrounded by the database",
   "type": "module",
@@ -456,7 +456,7 @@ cat > packages/surrounded/package.json << 'EOF'
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@orbzone/dotted": "workspace:*",
+    "@orb-zone/dotted": "workspace:*",
     "surrealdb": "^2.0.0",
     "vue": "^3.0.0",
     "@pinia/colada": "^0.7.0",
@@ -474,7 +474,7 @@ EOF
 # Create initial index.ts
 cat > packages/surrounded/src/index.ts << 'EOF'
 /**
- * @orbzone/surrounded
+ * @orb-zone/surrounded
  *
  * Full-stack SurrealDB framework for Vue
  * Your app, surrounded by the database
@@ -494,7 +494,7 @@ EOF
 
 # Create README
 cat > packages/surrounded/README.md << 'EOF'
-# @orbzone/surrounded
+# @orb-zone/surrounded
 
 Full-stack SurrealDB framework for Vue.
 
@@ -512,13 +512,13 @@ Full-stack SurrealDB framework for Vue.
 ## Installation
 
 ```bash
-npm install @orbzone/surrounded
+npm install @orb-zone/surrounded
 ```
 
 ## Quick Start
 
 ```typescript
-import { useSurrounded } from '@orbzone/surrounded';
+import { useSurrounded } from '@orb-zone/surrounded';
 
 const { data, loader, permissions } = await useSurrounded({
   userId: 'user:alice',
@@ -546,7 +546,7 @@ EOF
 
 # Commit
 git add packages/surrounded
-git commit -m "feat: add @orbzone/surrounded framework package"
+git commit -m "feat: add @orb-zone/surrounded framework package"
 ```
 
 ### Phase 4: Create create-surrounded Package
@@ -634,8 +634,8 @@ Dotted expressions, surrounded by the database.
 
 This monorepo contains:
 
-- **[@orbzone/dotted](packages/dotted)** - Core expression engine for dynamic JSON expansion
-- **[@orbzone/surrounded](packages/surrounded)** - Full-stack SurrealDB framework for Vue
+- **[@orb-zone/dotted](packages/dotted)** - Core expression engine for dynamic JSON expansion
+- **[@orb-zone/surrounded](packages/surrounded)** - Full-stack SurrealDB framework for Vue
 - **[create-surrounded](packages/create-surrounded)** - Project scaffolding tool
 
 ## Quick Start
@@ -652,11 +652,11 @@ npm run dev
 ### Use in existing project
 
 ```bash
-npm install @orbzone/surrounded
+npm install @orb-zone/surrounded
 ```
 
 ```typescript
-import { useSurrounded } from '@orbzone/surrounded';
+import { useSurrounded } from '@orb-zone/surrounded';
 
 const app = await useSurrounded({
   userId: 'user:alice',
@@ -748,9 +748,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- **BREAKING**: Restructured as monorepo (@orbzone/web-craft)
-- **BREAKING**: Renamed `@orbzone/dotted-json` → `@orbzone/dotted`
-- Added `@orbzone/surrounded` - Full-stack SurrealDB framework
+- **BREAKING**: Restructured as monorepo (@orb-zone/web-craft)
+- **BREAKING**: Renamed `@orb-zone/dotted-json` → `@orb-zone/dotted`
+- Added `@orb-zone/surrounded` - Full-stack SurrealDB framework
 - Added `create-surrounded` - Project scaffolding tool
 
 ### Migration Guide
@@ -759,16 +759,16 @@ See [docs/migration-guide.md](docs/migration-guide.md) for details.
 
 #### Before (single package)
 ```bash
-npm install @orbzone/dotted-json
+npm install @orb-zone/dotted-json
 ```
 
 #### After (monorepo)
 ```bash
 # For library users
-npm install @orbzone/dotted
+npm install @orb-zone/dotted
 
 # For framework users
-npm install @orbzone/surrounded
+npm install @orb-zone/surrounded
 ```
 
 ### Added
@@ -804,7 +804,7 @@ bun run build
 bun test
 
 # Verify workspace links
-ls -la packages/surrounded/node_modules/@orbzone/dotted
+ls -la packages/surrounded/node_modules/@orb-zone/dotted
 # Should be symlink to ../../dotted
 
 # Test package imports
@@ -849,17 +849,17 @@ git push origin v1.0.0
 
 **Before** (v0.x.x):
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { dotted } from '@orb-zone/dotted-json';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 ```
 
 **After** (v1.0.0):
 ```typescript
-import { dotted } from '@orbzone/dotted';
-import { withZod } from '@orbzone/dotted/plugins/zod';
+import { dotted } from '@orb-zone/dotted';
+import { withZod } from '@orb-zone/dotted/plugins/zod';
 ```
 
-**Migration**: Global find/replace `@orbzone/dotted-json` → `@orbzone/dotted`
+**Migration**: Global find/replace `@orb-zone/dotted-json` → `@orb-zone/dotted`
 
 ### For Framework Users
 
@@ -870,7 +870,7 @@ import { withZod } from '@orbzone/dotted/plugins/zod';
 
 **After** (v1.0.0):
 ```typescript
-import { useSurrounded } from '@orbzone/surrounded';
+import { useSurrounded } from '@orb-zone/surrounded';
 ```
 
 **Migration**: Install new package, use new composable
@@ -908,8 +908,8 @@ import { useSurrounded } from '@orbzone/surrounded';
 3. **CI/CD**: How to handle publishing?
    - **Recommendation**: Use changesets or lerna for coordinated releases
 
-4. **NPM Scope**: Keep @orbzone or create new?
-   - **Recommendation**: Keep @orbzone (already established)
+4. **NPM Scope**: Keep @orb-zone or create new?
+   - **Recommendation**: Keep @orb-zone (already established)
 
 ## Success Metrics
 

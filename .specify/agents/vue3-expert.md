@@ -38,7 +38,7 @@ This agent specializes in:
 ```vue
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useSurrounded } from '@orbzone/surrounded';
+import { useSurrounded } from '@orb-zone/surrounded';
 
 interface Props {
   configId: string;
@@ -233,7 +233,7 @@ const fullName = computed(() => `${firstName.value} ${lastName.value}`);
 
 ✅ **DO** - Use JSöN with Pinia Colada caching:
 ```typescript
-import { usePiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { usePiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 
 export function useConfig(configId: string) {
   return usePiniaColada(
@@ -251,7 +251,7 @@ export function useConfig(configId: string) {
 
 ✅ **DO** - Handle mutations with optimistic updates:
 ```typescript
-import { usePiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { usePiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 
 export function useConfigMutation() {
   const mutation = usePiniaColada('/config', {
@@ -357,7 +357,7 @@ user.profile.age = 31; // Efficient reactivity
 ```vue
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useSurrounded } from '@orbzone/surrounded';
+import { useSurrounded } from '@orb-zone/surrounded';
 import { z } from 'zod';
 
 /**
@@ -593,7 +593,7 @@ button:disabled {
  * ```vue
  * <script setup>
  * import { computed } from 'vue';
- * import { useSurrounded } from '@orbzone/surrounded';
+ * import { useSurrounded } from '@orb-zone/surrounded';
  *
  * const userId = ref('123');
  *

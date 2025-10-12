@@ -95,7 +95,7 @@ DEFINE FUNCTION fn::getActiveOrders($userId: string)
 
 ```typescript
 import { z } from 'zod';
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 const OrderSchema = z.object({
   id: z.string(),
@@ -213,7 +213,7 @@ const plugin = withSurrealDBPinia({
 **Solution**: Pinia Colada provides smart caching with invalidation patterns.
 
 ```typescript
-import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 
 const coladaPlugin = withPiniaColada({
   queries: {
@@ -259,7 +259,7 @@ const coladaPlugin = withPiniaColada({
 
 ```typescript
 import { defineStore } from 'pinia';
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 export const useOrderStore = defineStore('orders', () => {
   const userId = ref('user:alice');
@@ -397,8 +397,8 @@ DEFINE TABLE orders PERMISSIONS
 
 ```typescript
 // plugins/database.ts
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
-import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
+import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 import { z } from 'zod';
 
 // Zod schemas mirror database schema
@@ -487,7 +487,7 @@ export const coladaPlugin = withPiniaColada({
 ```typescript
 // stores/orders.ts
 import { defineStore } from 'pinia';
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 import { surrealPlugin, coladaPlugin } from '~/plugins/database';
 
 export const useOrderStore = defineStore('orders', () => {
@@ -633,7 +633,7 @@ Currently, integrating SurrealDB + Pinia Colada requires manual wiring:
 A unified plugin that combines both layers:
 
 ```typescript
-import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
+import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia';
 
 const plugin = await withSurrealDBPinia({
   // SurrealDB connection

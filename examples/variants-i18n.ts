@@ -8,7 +8,7 @@
 import { dotted } from '../src/index.js';
 
 console.log('═══════════════════════════════════════════════════════════');
-console.log('  Variant System Examples - @orbzone/dotted-json v0.2.0');
+console.log('  Variant System Examples - @orb-zone/dotted-json v0.2.0');
 console.log('═══════════════════════════════════════════════════════════\n');
 
 // ============================================================================

@@ -4,7 +4,7 @@ This directory contains design documentation, memory files, and context for unde
 
 ## Quick Start for New Sessions
 
-This is the **@orbzone/dotted-json** library - dynamic JSON data expansion using dot-prefixed property keys as expression triggers.
+This is the **@orb-zone/dotted-json** library - dynamic JSON data expansion using dot-prefixed property keys as expression triggers.
 
 ### Current Status (v0.6.0-design)
 
@@ -95,11 +95,11 @@ dotted-json/
 └── examples/                 # 5 working examples
 
 Package exports:
-- @orbzone/dotted-json                     # Core library
-- @orbzone/dotted-json/loaders/file        # File loader (separate to keep core small)
-- @orbzone/dotted-json/plugins/zod         # Zod validation plugin (v0.3.0)
-- @orbzone/dotted-json/plugins/surrealdb   # SurrealDB integration (v0.4.0)
-- @orbzone/dotted-json/plugins/pinia-colada # Pinia Colada data fetching (v0.5.0)
+- @orb-zone/dotted-json                     # Core library
+- @orb-zone/dotted-json/loaders/file        # File loader (separate to keep core small)
+- @orb-zone/dotted-json/plugins/zod         # Zod validation plugin (v0.3.0)
+- @orb-zone/dotted-json/plugins/surrealdb   # SurrealDB integration (v0.4.0)
+- @orb-zone/dotted-json/plugins/pinia-colada # Pinia Colada data fetching (v0.5.0)
 
 Global CLI:
 - json-translate                 # Translation tool (via npm install -g)
@@ -263,7 +263,7 @@ These files capture **why** decisions were made, not just **what** was implement
 When starting a new AI session, provide this context:
 
 ```
-This is the @orbzone/dotted-json library (JSöN).
+This is the @orb-zone/dotted-json library (JSöN).
 
 Key facts:
 - Version: 0.6.0-design (design phase complete)
@@ -286,7 +286,7 @@ Phase 6 Design Documents (read for implementation):
 
 Current state: Design phase complete, ready to begin v0.6.0 implementation (FileLoader enhancements).
 
-**Monorepo Migration**: Planned for v2.0.0 after v1.0.0 stable release. Will restructure as Bun workspace monorepo with @orbzone/dotted-json (packages/dotted - core engine), @orbzone/surrounded (packages/surrounded - SurrealDB framework), and @orbzone/aeonic (packages/aeonic - opinionated AEON schema framework). Strategy: stabilize v1.0 API first, then migrate to monorepo with independent package versioning.
+**Monorepo Migration**: Planned for v2.0.0 after v1.0.0 stable release. Will restructure as Bun workspace monorepo with @orb-zone/dotted-json (packages/dotted - core engine), @orb-zone/surrounded (packages/surrounded - SurrealDB framework), and @orb-zone/aeonic (packages/aeonic - opinionated AEON schema framework). Strategy: stabilize v1.0 API first, then migrate to monorepo with independent package versioning.
 ```
 
 ### Contributing

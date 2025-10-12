@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API documentation for `@orbzone/dotted-json` (JSöN).
+Complete API documentation for `@orb-zone/dotted-json` (JSöN).
 
 ---
 
@@ -49,7 +49,7 @@ function dotted(
 #### Example
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
+import { dotted } from '@orb-zone/dotted-json';
 
 const data = dotted({
   user: {
@@ -135,7 +135,7 @@ if (data.has('user.profile')) {
 Load JSöN documents from the filesystem with variant resolution.
 
 ```typescript
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({
   baseDir: './data',
@@ -256,7 +256,7 @@ await loader.close();
 Load/Save JSöN documents from SurrealDB with variant resolution and real-time updates.
 
 ```typescript
-import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb';
+import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb';
 
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',
@@ -396,7 +396,7 @@ await loader.close();
 File system integration with variant-aware loading.
 
 ```typescript
-import { withFileSystem } from '@orbzone/dotted-json/loaders/file';
+import { withFileSystem } from '@orb-zone/dotted-json/loaders/file';
 
 const data = dotted(
   {
@@ -452,7 +452,7 @@ interface FileLoaderOptions {
 Runtime validation plugin using Zod schemas.
 
 ```typescript
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const validation = withZod({
@@ -508,7 +508,7 @@ interface WithZodOptions {
 Zero-boilerplate SurrealDB integration.
 
 ```typescript
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 const plugin = await withSurrealDB({
   url: 'ws://localhost:8000/rpc',
@@ -566,7 +566,7 @@ For each function:
 Vue 3 data fetching with intelligent caching.
 
 ```typescript
-import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 
 const plugin = withPiniaColada({
   queries: {
@@ -649,7 +649,7 @@ interface MutationConfig {
 Unified SurrealDB + Pinia Colada integration.
 
 ```typescript
-import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
+import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia';
 
 const plugin = await withSurrealDBPinia({
   url: 'ws://localhost:8000/rpc',

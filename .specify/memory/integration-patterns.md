@@ -41,8 +41,8 @@ This document provides concrete patterns for integrating SurrealDB with Pinia st
 **Example**:
 
 ```typescript
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
-import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
+import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 import { onUnmounted } from 'vue';
 
 // Setup SurrealDB plugin

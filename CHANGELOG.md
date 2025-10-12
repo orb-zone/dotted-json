@@ -422,7 +422,7 @@ No breaking changes. LIVE queries are an optional feature.
 To use LIVE queries with SurrealDBLoader:
 
 ```typescript
-import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
 
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',
@@ -447,7 +447,7 @@ await unsubscribe()
 To use unified SurrealDB + Pinia plugin:
 
 ```typescript
-import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia'
+import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia'
 
 const plugin = await withSurrealDBPinia({
   url: 'ws://localhost:8000/rpc',
@@ -498,8 +498,8 @@ const config = await data.get('config')
 - **Loaders now use separate export paths** to keep core bundle small:
 
   ```typescript
-  import { FileLoader } from '@orbzone/dotted-json/loaders/file'
-  import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+  import { FileLoader } from '@orb-zone/dotted-json/loaders/file'
+  import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
   ```
 
 - Core bundle remains at **18.18 kB** (within 20 kB constitution limit)
@@ -528,7 +528,7 @@ No breaking changes. SurrealDBLoader is a new feature.
 To use SurrealDBLoader:
 
 ```typescript
-import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
 
 const loader = new SurrealDBLoader({
   url: 'ws://localhost:8000/rpc',
@@ -772,8 +772,8 @@ See `ROADMAP.md` for complete implementation plan.
 ### Usage Example
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+import { dotted } from '@orb-zone/dotted-json';
+import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
 
 const plugin = withPiniaColada({
   queries: {
@@ -853,8 +853,8 @@ plugin.clearCache();
 ### Usage Example
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { dotted } from '@orb-zone/dotted-json';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 const plugin = await withSurrealDB({
   url: 'ws://localhost:8000/rpc',
@@ -927,7 +927,7 @@ await plugin.disconnect();
 const data = dotted(schema, { resolvers });
 
 // After (v0.3.0) - Add optional Zod validation
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const data = dotted(schema, {
@@ -997,7 +997,7 @@ const data = dotted(schema, {
 - **File naming**: Colon-separated variant convention (`strings:es:formal.jsön`)
 - **Extensions**: Support for `.jsön` and `.json` files
 - **Plugin integration**: `withFileSystem()` factory for `extends()` resolver
-- **Export path**: `@orbzone/dotted-json/loaders/file`
+- **Export path**: `@orb-zone/dotted-json/loaders/file`
 
 #### Translation CLI
 
@@ -1009,7 +1009,7 @@ const data = dotted(schema, {
 - **Health checks**: Verify Ollama status and model availability
 - **Progress tracking**: Real-time translation progress
 - **Environment config**: `.env` support for defaults
-- **Global installation**: `npm install -g @orbzone/dotted-json`
+- **Global installation**: `npm install -g @orb-zone/dotted-json`
 
 ### Documentation
 

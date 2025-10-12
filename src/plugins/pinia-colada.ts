@@ -7,12 +7,12 @@
  * @requires @pinia/colada ^0.7.0 (optional, for Vue components)
  * @requires pinia ^2.0.0 (optional, for Vue components)
  * @requires vue ^3.0.0 (optional, for Vue components)
- * @module @orbzone/dotted-json/plugins/pinia-colada
+ * @module @orb-zone/dotted-json/plugins/pinia-colada
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
  *
  * const plugin = withPiniaColada({
  *   queries: {
@@ -341,8 +341,8 @@ function createMutationResolver(
  *
  * @example
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
- * import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
+ * import { dotted } from '@orb-zone/dotted-json';
+ * import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
  *
  * const plugin = withPiniaColada({
  *   queries: {

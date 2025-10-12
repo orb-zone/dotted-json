@@ -4,7 +4,7 @@
  * Auto-discovers custom functions from SurrealDB using INFO FOR DATABASE
  * and generates metadata for resolver/type generation.
  *
- * @module @orbzone/dotted-json/plugins/surrealdb/function-discovery
+ * @module @orb-zone/dotted-json/plugins/surrealdb/function-discovery
  */
 
 /**

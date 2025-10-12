@@ -24,7 +24,7 @@ Learn how to build production-ready feature flag systems using dotted-json's plu
 
 ```bash
 # Install dependencies
-bun add @orbzone/dotted-json surrealdb @pinia/colada pinia vue
+bun add @orb-zone/dotted-json surrealdb @pinia/colada pinia vue
 
 # Start SurrealDB
 surreal start --bind 0.0.0.0:8000 --user root --pass root memory
@@ -780,4 +780,4 @@ isEnabled('flag', { userId: 'user-123' });
 
 **Questions or Issues?**
 
-Open an issue on [GitHub](https://github.com/orbzone/dotted-json/issues) or check the [examples directory](../examples/) for more patterns.
+Open an issue on [GitHub](https://github.com/orb-zone/dotted-json/issues) or check the [examples directory](../examples/) for more patterns.

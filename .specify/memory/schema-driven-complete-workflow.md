@@ -223,8 +223,8 @@ bunx surql-codegen \
 ### Step 3: Use in Application (Zero Boilerplate)
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb';
+import { dotted } from '@orb-zone/dotted-json';
+import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
 
 // Initialize plugin (auto-generates everything)
 const plugin = await withSurrealDB({

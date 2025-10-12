@@ -1,6 +1,6 @@
 # Migration Guide
 
-How to migrate to `@orbzone/dotted-json` from other solutions.
+How to migrate to `@orb-zone/dotted-json` from other solutions.
 
 ---
 
@@ -69,8 +69,8 @@ Create `strings:es.jsön`:
 **Step 2: Use naturally with variant resolution**
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './locales' });
 await loader.init();
@@ -178,8 +178,8 @@ function App() {
 **Step 2: React component with natural integration**
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 import { useState, useEffect } from 'react';
 
 const loader = new FileLoader({ baseDir: './locales' });
@@ -282,7 +282,7 @@ app.use(i18n);
 
 ```vue
 <script setup>
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 import { ref, computed, onMounted } from 'vue';
 
 const loader = new FileLoader({ baseDir: './locales' });
@@ -337,7 +337,7 @@ For a more idiomatic Vue 3 approach, use `<Suspense>`:
 ```vue
 <!-- Child Component (TranslationsView.vue) -->
 <script setup>
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './locales' });
 
@@ -397,9 +397,9 @@ Use the Pinia Colada plugin for automatic caching and real-time updates:
 
 ```vue
 <script setup lang="ts">
-import { dotted } from '@orbzone/dotted-json';
-import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
+import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 import { computed } from 'vue';
 
 // Configure Pinia Colada plugin with queries
@@ -459,7 +459,7 @@ Add full TypeScript support for translations:
 
 ```vue
 <script setup lang="ts">
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 import { ref, computed, onMounted } from 'vue';
 
 // Define translation schema
@@ -526,7 +526,7 @@ Create a reusable composable for translations:
 ```typescript
 // composables/useTranslations.ts
 import { ref, computed, type Ref } from 'vue';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './locales' });
 let initialized = false;
@@ -1025,7 +1025,7 @@ const { enabled } = await response.json();
 
 **After:**
 ```typescript
-import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia';
+import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia';
 
 const plugin = await withSurrealDBPinia({
   url: 'ws://localhost:8000/rpc',
@@ -1068,7 +1068,7 @@ const config = JSON.parse(await fs.readFile(configPath, 'utf-8'));
 
 **After:**
 ```typescript
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './config' });
 await loader.init();
@@ -1114,8 +1114,8 @@ Create `config:prod.jsön`:
 
 **Load with environment detection:**
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { FileLoader } from '@orbzone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
 const loader = new FileLoader({ baseDir: './config' });
 await loader.init();
@@ -1205,7 +1205,7 @@ await benchmark(
 Validate migrated data with Zod:
 
 ```typescript
-import { withZod } from '@orbzone/dotted-json/plugins/zod';
+import { withZod } from '@orb-zone/dotted-json/plugins/zod';
 import { z } from 'zod';
 
 const TranslationSchema = z.record(z.string());
@@ -1233,7 +1233,7 @@ const strings = await data.get('strings');
 - [Examples](../examples/) - See working examples
 - [API Reference](./API.md) - Complete API documentation
 - [Performance Guide](./performance.md) - Optimization tips
-- [GitHub Issues](https://github.com/orbzone/dotted-json/issues) - Ask questions
+- [GitHub Issues](https://github.com/orb-zone/dotted-json/issues) - Ask questions
 
 ---
 
@@ -1253,7 +1253,7 @@ const strings = await data.get('strings');
 - [ ] Import to new system (FileLoader or SurrealDB)
 
 ### Code Migration
-- [ ] Install `@orbzone/dotted-json`
+- [ ] Install `@orb-zone/dotted-json`
 - [ ] Set up loaders (FileLoader or SurrealDBLoader)
 - [ ] Configure plugins (Zod, Pinia Colada, etc.)
 - [ ] Update code to use jsön API

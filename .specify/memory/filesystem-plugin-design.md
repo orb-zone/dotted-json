@@ -11,7 +11,7 @@ Users need to compose JSON schemas from multiple files to avoid duplication. Exa
 - Specific instances that extend bases (superman.json extends hero-card.json)
 - Deep inheritance chains (superman.json → hero-card.json → card-base.json)
 
-## Solution: `@orbzone/dotted-json/plugins/filesystem`
+## Solution: `@orb-zone/dotted-json/plugins/filesystem`
 
 ### Core Concepts
 
@@ -35,15 +35,15 @@ pattern `"."` combined with the `extends()` resolver. This keeps the architectur
 ### Installation
 
 ```bash
-bun add @orbzone/dotted-json
+bun add @orb-zone/dotted-json
 # No extra dependencies - uses Node.js fs module
 ```
 
 ### Basic Usage
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withFileSystem } from '@orbzone/dotted-json/plugins/filesystem';
+import { dotted } from '@orb-zone/dotted-json';
+import { withFileSystem } from '@orb-zone/dotted-json/plugins/filesystem';
 
 const schema = {
   ".": "extends('hero-card')",  // Smart resolution: auto-appends .jsön/.json
@@ -202,7 +202,7 @@ This aligns with Constitution Principle II (Security Through Transparency).
 ### Custom Merge Strategy
 
 ```typescript
-import { withFileSystem, type MergeStrategy } from '@orbzone/dotted-json/plugins/filesystem';
+import { withFileSystem, type MergeStrategy } from '@orb-zone/dotted-json/plugins/filesystem';
 
 const customMerge: MergeStrategy = (base, override) => {
   // Custom logic: arrays concat, objects deep merge

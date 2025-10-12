@@ -27,7 +27,7 @@ Key principles:
 
 ```bash
 # Clone the repository
-git clone https://github.com/orbzone/dotted-json.git
+git clone https://github.com/orb-zone/dotted-json.git
 cd dotted-json
 
 # Install dependencies
@@ -158,8 +158,8 @@ All resolvers MUST validate inputs. We **strongly recommend** using the **Zod pl
 
 ## 💬 Questions?
 
-- Open a [Discussion](https://github.com/orbzone/dotted-json/discussions)
-- Report bugs via [Issues](https://github.com/orbzone/dotted-json/issues)
+- Open a [Discussion](https://github.com/orb-zone/dotted-json/discussions)
+- Report bugs via [Issues](https://github.com/orb-zone/dotted-json/issues)
 
 ## 🙏 Thank You!
 

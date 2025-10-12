@@ -58,8 +58,8 @@ Both parse to: `{ lang: 'es', gender: 'f' }` → 1100 points
 ### Basic Usage
 
 ```typescript
-import { dotted } from '@orbzone/dotted-json';
-import { withFileSystem } from '@orbzone/dotted-json/loaders/file';
+import { dotted } from '@orb-zone/dotted-json';
+import { withFileSystem } from '@orb-zone/dotted-json/loaders/file';
 
 const i18nData = dotted(
   {

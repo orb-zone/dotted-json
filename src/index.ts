@@ -1,9 +1,9 @@
 /**
  * dotted-json (jsön) - Dynamic JSON data expansion using dot-prefixed property keys
  *
- * @module @orbzone/dotted-json
+ * @module @orb-zone/dotted-json
  * @license MIT
- * @see https://github.com/orbzone/dotted-json
+ * @see https://github.com/orb-zone/dotted-json
  */
 
 export type {
@@ -42,14 +42,14 @@ export type {
 } from './loaders/surrealdb.js';
 
 // Note: Loaders are available via separate export paths to keep core bundle small
-// import { FileLoader } from '@orbzone/dotted-json/loaders/file'
-// import { SurrealDBLoader } from '@orbzone/dotted-json/loaders/surrealdb'
+// import { FileLoader } from '@orb-zone/dotted-json/loaders/file'
+// import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
 //
 // Plugins are available via separate export paths:
-// import { withZod } from '@orbzone/dotted-json/plugins/zod'
-// import { withSurrealDB } from '@orbzone/dotted-json/plugins/surrealdb'
-// import { withPiniaColada } from '@orbzone/dotted-json/plugins/pinia-colada'
-// import { withSurrealDBPinia } from '@orbzone/dotted-json/plugins/surrealdb-pinia'
+// import { withZod } from '@orb-zone/dotted-json/plugins/zod'
+// import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb'
+// import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada'
+// import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia'
 
 import { DottedJson } from './dotted-json.js';
 import type { DottedOptions } from './types.js';
@@ -68,7 +68,7 @@ import type { DottedOptions } from './types.js';
  * @example
  * Basic usage:
  * ```typescript
- * import { dotted } from '@orbzone/dotted-json';
+ * import { dotted } from '@orb-zone/dotted-json';
  *
  * const data = dotted({
  *   user: {

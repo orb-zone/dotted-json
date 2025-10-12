@@ -4,5 +4,5 @@ contact_links:
     url: mailto:security@orb.zone
     about: Please report security issues privately via email
   - name: Question or Discussion
-    url: https://github.com/orbzone/dotted-json/discussions
+    url: https://github.com/orb-zone/dotted-json/discussions
     about: Ask questions or discuss ideas with the community
