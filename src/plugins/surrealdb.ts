@@ -462,7 +462,7 @@ export async function withSurrealDB(
   try {
     const surrealdb = await import('surrealdb') as any;
     Surreal = surrealdb.Surreal || surrealdb.default?.Surreal || surrealdb.default;
-  } catch (error) {
+  } catch (_error) {
     throw new Error(
       'SurrealDB plugin requires the "surrealdb" package. Install it with: bun add surrealdb'
     );
