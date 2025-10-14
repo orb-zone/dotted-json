@@ -27,8 +27,8 @@ export class ExpressionEvaluator {
         const interpolatedExpression = this.interpolateVariables(expression);
         return await this.executeExpression(interpolatedExpression);
       }
-    } catch (error) {
-      throw error;
+    } catch (_error) {
+      throw _error;
     }
   }
 
@@ -193,7 +193,7 @@ export class ExpressionEvaluator {
       }
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       // If template evaluation fails, return the string as-is
       return expression;
     }
@@ -238,12 +238,12 @@ export class ExpressionEvaluator {
       }
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       // Preserve the original error if it's already an Error object
-      if (error instanceof Error) {
-        throw error;
+      if (_error instanceof Error) {
+        throw _error;
       }
-      throw new Error(`Expression execution failed: ${expression} - ${String(error)}`);
+      throw new Error(`Expression execution failed: ${expression} - ${String(_error)}`);
     }
   }
 

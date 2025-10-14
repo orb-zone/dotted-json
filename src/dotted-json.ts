@@ -7,7 +7,6 @@ import type {
   SetOptions,
   HasOptions,
   DottedJson as IDottedJson,
-  VariantContext
 } from './types.js';
 
 const DEFAULT_MAX_DEPTH = 100;
@@ -74,7 +73,7 @@ export class DottedJson implements IDottedJson {
       // Value is missing - resolve default using hierarchical lookup
       return await this.resolveDefault(path, options.default);
 
-    } catch (error) {
+    } catch (_error) {
       // Error occurred - check for default first (higher priority than errorDefault)
       if (options.default !== undefined || this.options.default !== undefined) {
         return await this.resolveDefault(path, options.default);
@@ -82,9 +81,9 @@ export class DottedJson implements IDottedJson {
 
       // If no default, resolve errorDefault
       if (this.options.errorDefault !== undefined || options.errorDefault !== undefined) {
-        return await this.resolveErrorDefault(path, error as Error, options.errorDefault);
+        return await this.resolveErrorDefault(path, _error as Error, options.errorDefault);
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -94,8 +93,8 @@ export class DottedJson implements IDottedJson {
 
       // Clear cache since data changed
       this.cache.clear();
-    } catch (error) {
-      throw error;
+    } catch (_error) {
+      throw _error;
     }
   }
 
@@ -163,7 +162,7 @@ export class DottedJson implements IDottedJson {
 
       const resolvedExpressionKey = resolveVariantPath(
         baseExpressionKey,
-        this.options.variants as VariantContext,
+        this.options.variants,
         contextPaths
       );
 
@@ -219,8 +218,8 @@ export class DottedJson implements IDottedJson {
       // Set the evaluated result in the data
       dotSet(this.data, targetPath, result);
 
-    } catch (error) {
-      throw error;
+    } catch (_error) {
+      throw _error;
     } finally {
       // Clean up tracking state
       this.evaluationStack.delete(expressionPath);
@@ -251,7 +250,7 @@ export class DottedJson implements IDottedJson {
    * // → '.bio:es:f' (if exists), or '.bio:es', or '.bio'
    */
   private resolveVariant(path: string): string {
-    const context = this.options.variants as VariantContext;
+    const context = this.options.variants;
     if (!context || Object.keys(context).length === 0) {
       return path;  // No variant context
     }

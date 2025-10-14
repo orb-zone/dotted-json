@@ -150,7 +150,7 @@ export class FileLoader implements StorageProvider {
           this.availableFiles.add(nameWithoutExt);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // Directory doesn't exist or not readable
       // Continue anyway - will fail on actual load
     }
@@ -169,7 +169,7 @@ export class FileLoader implements StorageProvider {
           this.availableFiles.add(nameWithoutExt);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // Directory doesn't exist or not readable
       // Continue anyway - will fail on actual load
     }
@@ -448,7 +448,7 @@ export class FileLoader implements StorageProvider {
           // Deep merge (recursive)
           dataToSave = this.deepMerge(existing, data);
         }
-      } catch (error) {
+      } catch (_error) {
         // File exists but invalid JSON - replace with new data
         dataToSave = data;
       }
@@ -532,7 +532,7 @@ export class FileLoader implements StorageProvider {
           updatedAt: stats.mtime,
           size: stats.size
         };
-      } catch (error) {
+      } catch (_error) {
         // File no longer exists or not readable
         continue;
       }

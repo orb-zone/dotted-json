@@ -255,13 +255,13 @@ function createQueryResolver(
       }, gcTime);
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       const retry = queryDef.retry ?? defaults?.retry ?? 3;
       if (typeof retry === 'number' && retry > 0) {
         // Simple retry logic (can be enhanced)
         console.warn(`[dotted-json/pinia-colada] Query ${name} failed, will retry`);
       }
-      throw error;
+      throw _error;
     }
   };
 }
@@ -310,18 +310,18 @@ function createMutationResolver(
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       // onError hook
       if (mutationDef.onError) {
-        await mutationDef.onError(error as Error, params, context);
+        await mutationDef.onError(_error as Error, params, context);
       }
 
       // onSettled hook
       if (mutationDef.onSettled) {
-        await mutationDef.onSettled(undefined, error as Error, ...params);
+        await mutationDef.onSettled(undefined, _error as Error, ...params);
       }
 
-      throw error;
+      throw _error;
     }
   };
 }
