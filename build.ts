@@ -38,7 +38,6 @@ const plugins = [
   'plugins/zod',
   'plugins/surrealdb',
   'plugins/pinia-colada',
-  'plugins/tanstack',
 ];
 
 for (const plugin of plugins) {
@@ -56,38 +55,13 @@ for (const plugin of plugins) {
       'surrealdb',
       '@pinia/colada',
       'pinia',
-      '@tanstack/react-query',
-      '@tanstack/vue-query',
-      '@tanstack/svelte-query',
-      '@tanstack/solid-query',
     ],
   });
 }
 
-// Framework composables
-const frameworks = [
-  'vue/useTanstackDottedJSON',
-  'react/useTanstackDottedJSON',
-];
-
-for (const framework of frameworks) {
-  await build({
-    entrypoints: [`./src/${framework}.ts`],
-    outdir,
-    target: 'browser',
-    format: 'esm',
-    minify: false,
-    sourcemap: 'external',
-    splitting: true,
-    external: [
-      'dot-prop',
-      'vue',
-      'react',
-      '@tanstack/react-query',
-      '@tanstack/vue-query',
-    ],
-  });
-}
+// Framework composables (none currently)
+// const frameworks = [];
+// for (const framework of frameworks) { ... }
 
 // Generate type declarations using tsc
 console.log('\n📝 Generating type declarations...');
