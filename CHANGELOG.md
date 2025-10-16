@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.7] - 2025-10-15
+
+### Fixed
+
+- **CI/Build Pipeline**: Resolved GitHub Actions workflow failures blocking PR merges
+  - Fixed constitution compliance check by removing `peerDependenciesArchived` sections from package.json
+  - Fixed ESLint errors for unused variables in catch blocks (prefixed with underscore: `_error`)
+  - Updated files: dotted-json.ts, expression-evaluator.ts, file.ts, surrealdb.ts, surrealdb-pinia.ts
+
+### Changed
+
+- **package.json**: Cleaned up deprecated peer dependency sections
+  - Removed `peerDependenciesArchived` and `peerDependenciesMetaArchived`
+  - Streamlined peer dependencies to active integrations only
+
+### Technical
+
+- **ESLint Compliance**: All catch block error variables now follow naming convention `/^_/u`
+- **CI Checks**: Both constitution compliance and lint checks now passing
+- **Code Quality**: 226 tests passing, zero ESLint errors, warnings-only policy maintained
+
 ## [0.9.6] - 2025-10-08
 
 ### Changed
