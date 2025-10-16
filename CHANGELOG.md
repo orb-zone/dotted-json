@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2025-10-15
+
+### Fixed
+
+- **JSR Publication**: Added explicit return types for JSR compliance
+  - Added return type to `getCacheStats()`: `{ size: number; keys: string[] }`
+  - Added return type to `withFileSystem()`: Complete interface with resolver signature
+  - Fixes JSR "slow types" checker errors preventing publication
+
+### Technical
+
+- **Type Safety**: Explicit return types improve IDE performance and type inference speed
+- **JSR Compliance**: Package now passes JSR's strict type checking requirements
+- **Zero Impact**: Purely additive type annotations with no behavioral changes
+- **Tests**: All 226 tests passing
+
+## [0.10.0] - 2025-10-15
+
+### Changed
+
+- **JSR Cleanup**: Package structure optimized for JSR registry
+- **TanStack Removal**: Removed TanStack Query integration (moved to separate package)
+- **Dependencies**: Cleaned up peer dependencies for leaner package
+
 ## [0.9.7] - 2025-10-15
 
 ### Fixed
