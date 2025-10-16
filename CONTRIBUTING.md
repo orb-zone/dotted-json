@@ -55,11 +55,13 @@ bun run dev
 ## 📝 Pull Request Process
 
 1. **Fork and Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. **Follow TDD** - Write tests before implementation
+
    ```bash
    # 1. Write failing test
    bun test test/unit/your-feature.test.ts
@@ -80,6 +82,7 @@ bun run dev
    - Update CHANGELOG.md
 
 5. **Run Quality Checks**
+
    ```bash
    bun test
    bun run typecheck
@@ -87,6 +90,7 @@ bun run dev
    ```
 
 6. **Commit with Conventional Commits**
+
    ```bash
    git commit -m "feat(loaders): add new storage provider"
    git commit -m "fix(core): resolve caching issue"
@@ -108,6 +112,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -120,7 +125,8 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `ci`: CI/CD changes
 
 **Examples:**
-```
+
+```text
 feat(surrealdb): add LIVE query support
 fix(cache): resolve race condition in TTL cleanup
 docs(api): add migration guide from i18next
@@ -130,6 +136,7 @@ perf(variant): optimize scoring algorithm
 ### Git Hooks (Lefthook)
 
 Lefthook will automatically:
+
 - Run tests before commit
 - Validate commit messages
 - Check bundle size
@@ -161,6 +168,6 @@ All resolvers MUST validate inputs. We **strongly recommend** using the **Zod pl
 - Open a [Discussion](https://github.com/orb-zone/dotted-json/discussions)
 - Report bugs via [Issues](https://github.com/orb-zone/dotted-json/issues)
 
-## 🙏 Thank You!
+## 🙏 Thank You
 
 Your contributions make this project better for everyone!

@@ -27,21 +27,25 @@ Your `dotted-json` (jsön) project is now **production-ready** for publication t
 Automatic quality enforcement on every commit:
 
 **Pre-commit** (runs before each commit):
+
 - ✅ Run all tests
 - ✅ Type checking (tsc --noEmit)
 - ✅ Build verification
 
 **Commit-msg** (validates commit messages):
+
 - ✅ Conventional commits format enforcement
 - ✅ Message length validation (< 100 chars)
 - ✅ Allows merge commits
 
 **Pre-push** (runs before pushing):
+
 - ✅ Full test suite
 - ✅ Protected branch check (prevents direct push to main/master/production)
 - ✅ Large file detection (> 1MB)
 
 **Post-merge/Post-checkout**:
+
 - ✅ Auto-install dependencies if package.json changed
 
 **Installation**: Automatic via `bun run prepare` (or `bun install`)
@@ -49,7 +53,9 @@ Automatic quality enforcement on every commit:
 ### 2. CI/CD Workflows
 
 #### `.github/workflows/ci.yml`
+
 Runs on every push and pull request:
+
 - Build and test
 - Type checking
 - Linting
@@ -57,7 +63,9 @@ Runs on every push and pull request:
 - Constitution compliance check
 
 #### `.github/workflows/release.yml`
+
 Triggers on git tags (v*):
+
 - Creates GitHub release with changelog
 - Publishes to NPM (requires `NPM_TOKEN` secret)
 - Publishes to JSR (requires `JSR_TOKEN` secret)
@@ -67,6 +75,7 @@ Triggers on git tags (v*):
 **File**: `jsr.json`
 
 Ready for publishing to JSR (JavaScript Registry):
+
 - All exports configured
 - Source files (`.ts`) for JSR's native TypeScript support
 - Proper include/exclude patterns
@@ -74,7 +83,9 @@ Ready for publishing to JSR (JavaScript Registry):
 ### 4. Documentation Updates
 
 #### `CONTRIBUTING.md`
+
 Comprehensive contributor guidelines:
+
 - Setup instructions
 - TDD workflow
 - Conventional commits guide with examples
@@ -83,7 +94,9 @@ Comprehensive contributor guidelines:
 - Security checklist
 
 #### `.github/PRE_RELEASE_CHECKLIST.md`
+
 Complete pre-publication checklist:
+
 - Repository setup verification
 - Security audit checklist
 - Package configuration review
@@ -94,14 +107,16 @@ Complete pre-publication checklist:
 ### 5. Package Configuration
 
 **Updated `package.json`**:
+
 - ✅ Repository URLs: `github.com/orb-zone/dotted-json`
 - ✅ `publishConfig` for NPM public access
 - ✅ Lefthook as devDependency
 - ✅ `prepare` script for automatic git hooks setup
 
 **Updated `.gitignore`**:
-- Secrets and credentials patterns (*.key, *.pem, secrets/, etc.)
-- Test database files (*.db, *.sqlite)
+
+- Secrets and credentials patterns (*.key,*.pem, secrets/, etc.)
+- Test database files (*.db,*.sqlite)
 - Claude Code history
 
 ---
@@ -124,14 +139,16 @@ Complete pre-publication checklist:
 Required for automated publishing:
 
 **NPM_TOKEN**:
-1. Go to https://www.npmjs.com/settings/[your-username]/tokens
+
+1. Go to <https://www.npmjs.com/settings/[your-username]/tokens>
 2. Generate New Token → Automation
 3. Copy the token
 4. Add to GitHub: Settings → Secrets and variables → Actions → New repository secret
 5. Name: `NPM_TOKEN`, Value: [paste token]
 
 **JSR_TOKEN**:
-1. Go to https://jsr.io/account/tokens
+
+1. Go to <https://jsr.io/account/tokens>
 2. Create new token with `publish` scope
 3. Copy the token
 4. Add to GitHub: Settings → Secrets and variables → Actions → New repository secret
@@ -153,6 +170,7 @@ git push --tags
 ### 4. Publish Workflow
 
 **Option A: Via Pull Request (Recommended)**
+
 1. Push branch to GitHub
 2. Create Pull Request to `main`
 3. Review CI checks (must pass)
@@ -203,6 +221,7 @@ git commit --allow-empty -m "test: verify git hooks" --dry-run
 ```
 
 Expected results:
+
 - ✅ All 226 tests pass
 - ✅ Bundle size < 20 kB (currently 18.18 kB)
 - ✅ 0 TypeScript errors
@@ -216,6 +235,7 @@ Expected results:
 After publishing, verify on each platform:
 
 ### NPM
+
 ```bash
 # Search for package
 npm search @orb-zone/dotted-json
@@ -230,6 +250,7 @@ bun add @orb-zone/dotted-json
 ```
 
 ### JSR
+
 ```bash
 # View package page
 open https://jsr.io/@orb-zone/dotted-json
@@ -239,6 +260,7 @@ bun add jsr:@orb-zone/dotted-json
 ```
 
 ### GitHub
+
 ```bash
 # View releases
 open https://github.com/orb-zone/dotted-json/releases
@@ -251,7 +273,7 @@ open https://github.com/orb-zone/dotted-json/actions
 
 ## 📁 Project Structure
 
-```
+```text
 dotted-json/
 ├── .github/
 │   ├── workflows/
@@ -285,6 +307,7 @@ dotted-json/
 ## 🔐 Security Review
 
 ✅ **No sensitive data found**:
+
 - No `.env` files
 - No API keys or tokens
 - No passwords or secrets
@@ -292,6 +315,7 @@ dotted-json/
 - All sensitive patterns in `.gitignore`
 
 ✅ **Security best practices**:
+
 - Trust model documented in README
 - Security warnings prominently displayed
 - Input validation recommended (Zod plugin)
@@ -381,6 +405,7 @@ git commit -m "build: update bundle size limit to 20 kB"
 ### Optional Enhancements
 
 1. **Add badges to README**:
+
    ```markdown
    ![NPM Version](https://img.shields.io/npm/v/@orb-zone/dotted-json)
    ![Bundle Size](https://img.shields.io/bundlephobia/minzip/@orb-zone/dotted-json)
@@ -411,6 +436,7 @@ If you encounter any issues during publication:
 ## ✨ Summary
 
 Your project is **publication-ready** with:
+
 - ✅ Professional CI/CD automation
 - ✅ Enforced code quality (git hooks)
 - ✅ Comprehensive documentation

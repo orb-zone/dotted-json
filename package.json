@@ -1,6 +1,6 @@
 {
   "name": "@orb-zone/dotted-json",
-  "version": "0.9.7",
+  "version": "0.10.0",
   "description": "Dynamic JSON data expansion using dot-prefixed property keys as expression triggers",
   "type": "module",
   "main": "./dist/index.js",
@@ -38,18 +38,6 @@
     "./plugins/surrealdb-pinia": {
       "import": "./dist/plugins/surrealdb-pinia.js",
       "types": "./dist/plugins/surrealdb-pinia.d.ts"
-    },
-    "./plugins/tanstack": {
-      "import": "./dist/plugins/tanstack.js",
-      "types": "./dist/plugins/tanstack.d.ts"
-    },
-    "./vue": {
-      "import": "./dist/vue/useTanstackDottedJSON.js",
-      "types": "./dist/vue/useTanstackDottedJSON.d.ts"
-    },
-    "./react": {
-      "import": "./dist/react/useTanstackDottedJSON.js",
-      "types": "./dist/react/useTanstackDottedJSON.d.ts"
     }
   },
   "files": [
@@ -100,8 +88,6 @@
     "live-queries",
     "websocket",
     "vue",
-    "react",
-    "tanstack",
     "pinia-colada",
     "data-fetching",
     "cache",
@@ -142,47 +128,6 @@
       "optional": true
     },
     "vue": {
-      "optional": true
-    }
-  },
-  "peerDependenciesArchived": {
-    "comment": "Future plugins - not yet implemented",
-    "surrealdb": "^1.0.0",
-    "@pinia/colada": "^0.7.0",
-    "pinia": "^2.0.0",
-    "vue": "^3.0.0",
-    "react": ">=18.0.0",
-    "@tanstack/react-query": ">=5.0.0",
-    "@tanstack/vue-query": ">=5.0.0",
-    "@tanstack/svelte-query": ">=5.0.0",
-    "@tanstack/solid-query": ">=5.0.0"
-  },
-  "peerDependenciesMetaArchived": {
-    "surrealdb": {
-      "optional": true
-    },
-    "@pinia/colada": {
-      "optional": true
-    },
-    "pinia": {
-      "optional": true
-    },
-    "vue": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    },
-    "@tanstack/react-query": {
-      "optional": true
-    },
-    "@tanstack/vue-query": {
-      "optional": true
-    },
-    "@tanstack/svelte-query": {
-      "optional": true
-    },
-    "@tanstack/solid-query": {
       "optional": true
     }
   },
