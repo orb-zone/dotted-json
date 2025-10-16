@@ -369,7 +369,7 @@ export class FileLoader implements StorageProvider {
   /**
    * Get cache statistics
    */
-  getCacheStats() {
+  getCacheStats(): { size: number; keys: string[] } {
     return {
       size: this.fileCache.size,
       keys: Array.from(this.fileCache.keys())
@@ -669,7 +669,12 @@ export class FileLoader implements StorageProvider {
  * );
  * ```
  */
-export function withFileSystem(options: FileLoaderOptions) {
+export function withFileSystem(options: FileLoaderOptions): {
+  resolvers: {
+    extends(this: any, baseName: string): Promise<any>;
+  };
+  __loader: FileLoader;
+} {
   const loader = new FileLoader(options);
   let initPromise: Promise<void> | null = null;
 

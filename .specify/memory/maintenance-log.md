@@ -29,6 +29,26 @@
 
 ---
 
+## October 2025 - JSR Type Safety Compliance
+
+**Date**: 2025-10-15
+**Branch**: `003-jsr-explicit-return-types`
+**Version**: v0.10.0 → v0.10.1
+
+### JSR Publication Issue
+
+**Problem**: JSR requires explicit return types for all public API functions to ensure "fast types"
+
+**Files Modified**:
+- `src/loaders/file.ts:372` - Added return type to `getCacheStats()`: `{ size: number; keys: string[] }`
+- `src/loaders/file.ts:672` - Added return type to `withFileSystem()`: Complete interface with resolver signature
+
+**Rationale**: JSR's "slow types" checker prevents publishing without explicit return types in public APIs. This improves IDE performance and type inference speed for consumers.
+
+**Impact**: None - purely additive type annotations, no behavioral changes
+
+---
+
 ## Pre-v1.0 Publication Checklist
 
 Use this checklist before any major release:
