@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -66,7 +66,8 @@ jobs:
           echo "Checking constitution compliance..."
 
           # Check 1: No direct framework dependencies in core package.json
-          if grep -E '"(vue|react|svelte|solid|angular)":\s*"[^"]*"' package.json | grep -v peerDependencies | grep -v peerDependenciesMeta; then
+          # Exclude peerDependencies, peerDependenciesMeta, and peerDependenciesArchived
+          if grep -E '"(vue|react|svelte|solid|angular)":\s*"[^"]*"' package.json | grep -v peerDependencies | grep -v peerDependenciesMeta | grep -v peerDependenciesArchived; then
             echo "❌ Constitution violation: Framework dependency in core (Principle VII)"
             exit 1
           fi
