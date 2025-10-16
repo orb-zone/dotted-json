@@ -193,7 +193,7 @@ export class ExpressionEvaluator {
       }
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       // If template evaluation fails, return the string as-is
       return expression;
     }

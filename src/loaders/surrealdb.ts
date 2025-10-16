@@ -619,7 +619,7 @@ export class SurrealDBLoader implements StorageProvider {
             documentData = this.deepMerge(existingDoc.data, data);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         // Document doesn't exist - will create new
       }
     }

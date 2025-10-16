@@ -6,8 +6,7 @@ import type {
   GetOptions,
   SetOptions,
   HasOptions,
-  DottedJson as IDottedJson,
-  VariantContext
+  DottedJson as IDottedJson
 } from './types.js';
 
 const DEFAULT_MAX_DEPTH = 100;
@@ -163,7 +162,7 @@ export class DottedJson implements IDottedJson {
 
       const resolvedExpressionKey = resolveVariantPath(
         baseExpressionKey,
-        this.options.variants as VariantContext,
+        this.options.variants,
         contextPaths
       );
 
@@ -251,7 +250,7 @@ export class DottedJson implements IDottedJson {
    * // → '.bio:es:f' (if exists), or '.bio:es', or '.bio'
    */
   private resolveVariant(path: string): string {
-    const context = this.options.variants as VariantContext;
+    const context = this.options.variants;
     if (!context || Object.keys(context).length === 0) {
       return path;  // No variant context
     }
