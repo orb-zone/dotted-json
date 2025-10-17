@@ -1,6 +1,6 @@
 {
   "name": "@orb-zone/dotted-json",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "description": "Dynamic JSON data expansion using dot-prefixed property keys as expression triggers",
   "type": "module",
   "main": "./dist/index.js",
