@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `json-translate` CLI tool generates translated variant files using local Ollama LLM, enabling privacy-friendly i18n workflows.
+The `dotted-translate` CLI tool generates translated variant files using local Ollama LLM, enabling privacy-friendly i18n workflows.
 
 ## Core Principles
 
@@ -26,7 +26,7 @@ The `json-translate` CLI tool generates translated variant files using local Oll
 **Example**:
 ```bash
 # Input: strings.jsön
-# Command: json-translate strings.jsön --to es --form formal
+# Command: dotted-translate strings.jsön --to es --form formal
 # Output: strings:es:formal.jsön
 ```
 
@@ -297,7 +297,7 @@ if (!FORMALITY_LEVELS.includes(formality)) {
 ```json
 {
   "bin": {
-    "json-translate": "./tools/translate/index.ts"
+    "dotted-translate": "./tools/translate/index.ts"
   }
 }
 ```
@@ -380,12 +380,12 @@ But leave LLM calls untested (integration test territory).
 ## Example Session
 
 ```bash
-$ json-translate --check
+$ dotted-translate --check
 ✅ Ollama is running
    Model: llama3.3
    Status: Available
 
-$ json-translate strings.jsön --to ja --form polite
+$ dotted-translate strings.jsön --to ja --form polite
 🌍 jsön-translate
 📄 Source: strings.jsön
 🎯 Target: ja (polite)

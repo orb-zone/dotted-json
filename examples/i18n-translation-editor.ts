@@ -170,7 +170,7 @@ class TranslationEditor {
         { resolvers: this.plugin.resolvers }
       );
 
-      return await data.get('strings') || {};
+      return await data.get('.strings') || {};
     } catch (error: any) {
       if (error.message.includes('not found')) {
         console.log(`   ℹ️  No translations exist for ${context.lang}${formStr} yet`);

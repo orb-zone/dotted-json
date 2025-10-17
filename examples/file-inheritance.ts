@@ -1,14 +1,24 @@
 /**
  * File Inheritance Example
  *
- * Demonstrates the self-reference pattern with extends() for
- * file-based schema inheritance and composition.
+ * Demonstrates file-based schema inheritance and composition
+ * using FileLoader with extends() pattern.
+ *
+ * NOTE: This example requires data files in ./data/cards/ directory.
+ * For a simpler demonstration without file dependencies, see basic-usage.ts
  */
 
 import { dotted } from '@orb-zone/dotted-json';
-import { withFileSystem } from '@orb-zone/dotted-json/plugins/filesystem';
+import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
 
-// Example 1: Basic file inheritance with self-reference
+// Initialize FileLoader for card data
+const loader = new FileLoader({
+  baseDir: './data/cards',
+  extensions: ['.jsön', '.json'],
+});
+await loader.init();
+
+// Example 1: Basic file inheritance with extends()
 const heroCard = dotted(
   {
     // Self-reference: merge base schema here
@@ -20,10 +30,12 @@ const heroCard = dotted(
     weakness: 'Kryptonite',
   },
   {
-    ...withFileSystem({
-      baseDir: './data/cards',
-      extensions: ['.jsön', '.json'],
-    }),
+    resolvers: {
+      extends: async (baseName: string) => {
+        // Load and merge base schema
+        return await loader.load(baseName);
+      },
+    },
   }
 );
 
@@ -39,9 +51,9 @@ const specialHero = dotted(
     team: 'Justice League',
   },
   {
-    ...withFileSystem({
-      baseDir: './data/cards',
-    }),
+    resolvers: {
+      extends: async (baseName: string) => loader.load(baseName),
+    },
   }
 );
 
@@ -55,14 +67,13 @@ const cardData = dotted(
     character: 'Wonder Woman',
   },
   {
-    ...withFileSystem({
-      baseDir: './data',
-      searchPaths: ['./cards', './shared'],
-      aliases: {
-        '@shared': './shared/templates',
-        '@cards': './data/cards',
+    resolvers: {
+      extends: async (baseName: string) => {
+        // Handle alias-based paths
+        const resolvedPath = baseName.replace('@shared/', 'shared/templates/');
+        return await loader.load(resolvedPath);
       },
-    }),
+    },
   }
 );
 
@@ -77,9 +88,9 @@ const dynamicCard = dotted(
     name: 'Lex Luthor',
   },
   {
-    ...withFileSystem({
-      baseDir: './data/cards',
-    }),
+    resolvers: {
+      extends: async (baseName: string) => loader.load(baseName),
+    },
   }
 );
 
@@ -94,10 +105,8 @@ const composedCard = dotted(
     speed: 'infinite',
   },
   {
-    ...withFileSystem({
-      baseDir: './data/cards',
-    }),
     resolvers: {
+      extends: async (baseName: string) => loader.load(baseName),
       merge: (...objects: any[]) => {
         return Object.assign({}, ...objects);
       },

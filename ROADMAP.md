@@ -1,12 +1,12 @@
 # dotted-json (jsön) - Product Roadmap
 
-**Current Version**: v0.9.5
-**Last Updated**: 2025-10-08
-**Status**: Production-ready - All 226 tests passing, ready for publication
+**Current Version**: v0.11.0
+**Last Updated**: 2025-10-16
+**Status**: Pre-release - Production-ready, ready for publication
 
 ---
 
-## 📍 Current State (v0.9.5)
+## 📍 Current State (v0.11.0)
 
 ### ✅ AEON/ION Architecture Design Complete
 
@@ -73,7 +73,7 @@
 - **Lines of Code**: 3,500+ (loaders, plugins, LIVE queries, type generation)
 - **Test Coverage**: 226/226 tests passing ✅
 - **Bundle Size**: 18.18 kB / 20.00 kB (91% utilization) ✅
-- **CLI Tools**: 2 (json-translate, surql-to-ts)
+- **CLI Tools**: 2 (dotted-translate, surql-to-ts)
 - **Production Examples**: 3 (config manager, translation editor, feature flags)
 - **Documentation**: Complete (API, Migration, Performance, Getting Started, Feature Flags Guide)
 

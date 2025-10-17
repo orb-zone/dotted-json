@@ -382,10 +382,10 @@ Generate translated variant files using local Ollama (privacy-friendly, no exter
 bun install -g @orb-zone/dotted-json
 
 # Translate to Spanish
-json-translate strings.jsön --to es
+dotted-translate strings.jsön --to es
 
 # Translate to Japanese polite (keigo)
-json-translate strings.jsön --to ja --form polite
+dotted-translate strings.jsön --to ja --form polite
 ```
 
 All translations happen **locally** on your machine. No data sent to external services.

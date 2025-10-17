@@ -153,7 +153,7 @@ web-craft/                              # Git repo root
     "./plugins/pinia-colada": "./dist/plugins/pinia-colada.js"
   },
   "bin": {
-    "json-translate": "./tools/translate/index.ts"
+    "dotted-translate": "./tools/translate/index.ts"
   },
   "peerDependencies": {
     "zod": "^3.0.0",
@@ -358,7 +358,7 @@ cat > packages/dotted/package.json << 'EOF'
     }
   },
   "bin": {
-    "json-translate": "./tools/translate/index.ts"
+    "dotted-translate": "./tools/translate/index.ts"
   },
   "files": [
     "dist",

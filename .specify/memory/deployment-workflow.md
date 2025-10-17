@@ -2,8 +2,8 @@
 
 **Purpose**: Document deployment strategy, design decisions, and the rationale behind our release workflow.
 
-**Status**: Implemented (v0.9.7)
-**Implementation**: See `.github/workflows/ci.yml` and `.github/workflows/release.yml` for details
+**Status**: Automated with Changesets (v0.11.0)
+**Implementation**: See `.github/workflows/changesets-release.yml` and `.changeset/WORKFLOW.md`
 **Repository**: https://github.com/orb-zone/dotted-json
 
 ---
@@ -18,7 +18,7 @@
 - High-level workflow concepts (details live in YAML)
 
 ```
-Feature Branch → PR → main → Tag → Automated Release
+Feature Branch → PR (with changeset) → main → Auto "Version Packages" PR → JSR Publish
 ```
 
 ---
@@ -61,17 +61,21 @@ Feature Branch → PR → main → Tag → Automated Release
 
 **Enforcement**: `lefthook.yml` pre-push hook + GitHub branch protection (recommended)
 
-### 4. Tag-Based Releases
+### 4. Changesets-Based Releases (v0.11.0+)
 
-**Decision**: Manual tagging triggers automated release
+**Decision**: Use Changesets for automated versioning and releases
 
 **Rationale**:
-- Gives developer control over release timing
-- Tag annotations provide structured release notes
-- Separates "code ready" (merge to main) from "release ready" (tag)
-- Follows Git best practices
+- Automatic version bumping based on changeset declarations
+- Automatic CHANGELOG generation from changeset summaries
+- PR-based workflow for version bumps (review before release)
+- Multiple changesets can be combined in one release
+- Enforces semantic versioning discipline
+- Zero manual steps for version/changelog management
 
-**Workflow**: See `.github/workflows/release.yml` for implementation details
+**Workflow**: See `.github/workflows/changesets-release.yml` and `.changeset/WORKFLOW.md`
+
+**Migration Note**: Manual tagging (pre-v0.11.0) is now deprecated. Use changesets instead.
 
 ### 5. Bun Runtime
 
@@ -89,24 +93,39 @@ Feature Branch → PR → main → Tag → Automated Release
 
 ## Release Process (Quick Reference)
 
-**For agents**: Follow standard Git workflow. Key commands:
+**For agents**: Follow Changesets workflow. Key commands:
 
 ```bash
 # 1. Feature work on branch (NOT main)
-git checkout -b feat/feature-name
+git checkout -b 004-feature-name
 
-# 2. Create PR (pre-push hook blocks direct push to main)
-gh pr create --base main --head feat/feature-name
+# 2. Create a changeset (describes changes + semver bump)
+bun run changeset:add
+# Interactive prompts:
+#   - Select bump type: patch/minor/major
+#   - Write user-facing summary
+# This creates .changeset/random-name.md
 
-# 3. After merge, tag from main to release
-git checkout main && git pull
-git tag -a v0.9.8 -m "Release notes"
-git push origin v0.9.8
+# 3. Commit changeset WITH your feature code
+git add .changeset/*.md
+git commit -m "feat: your feature"
 
-# Tag push triggers .github/workflows/release.yml automatically
+# 4. Create PR
+gh pr create --base main --head 004-feature-name
+
+# 5. After PR merge to main, workflow automatically:
+#    - Creates "Version Packages" PR
+#    - Updates package.json version
+#    - Updates CHANGELOG.md
+#    - Consumes changesets
+
+# 6. Review & merge "Version Packages" PR
+#    - Triggers JSR publish
+#    - Creates GitHub release
+#    - Tags commit automatically
 ```
 
-**Implementation details**: See workflow YAML files, not this doc.
+**Implementation details**: See `.changeset/WORKFLOW.md` for complete guide.
 
 ---
 
@@ -124,13 +143,15 @@ git push origin v0.9.8
 
 ## For AI Agents: Standard Operations
 
-### Creating a Release
+### Creating a Release (Changesets Workflow)
 
-1. **Verify main is clean**: All PRs merged, CI passing
-2. **Bump versions**: Update `jsr.json`, `package.json`, `CHANGELOG.md` (via PR)
-3. **Tag release**: `git tag -a v0.9.8 -m "Release notes"`
-4. **Push tag**: `git push origin v0.9.8`
-5. **Workflow handles rest**: Tests, build, GitHub release, JSR publish
+1. **Create changeset during development**: `bun run changeset:add`
+2. **Commit changeset with feature code**: Changeset lives in `.changeset/*.md`
+3. **Merge PR to main**: CI validates, changesets detected
+4. **Review "Version Packages" PR**: Auto-created by Changesets action
+5. **Merge "Version Packages" PR**: Triggers JSR publish automatically
+
+**Key Insight**: Version bumps happen via PR (reviewable), not direct commits.
 
 ### Handling CI Failures
 
@@ -143,17 +164,18 @@ git push origin v0.9.8
 
 ### Emergency Procedures
 
-**Hotfix**: Branch from main, PR, merge, tag immediately
-**Rollback**: Revert PR on main, tag new patch version
-**Failed release**: Re-run workflow from GitHub Actions UI
+**Hotfix**: Branch from main, create changeset (patch), merge PR, merge Version Packages PR
+**Rollback**: Revert PR on main, create changeset for patch version
+**Failed release**: Re-run workflow from GitHub Actions UI or manually: `bunx jsr publish`
 
 ---
 
 ## Strategic Roadmap
 
 ### v1.0 Milestone
-- [ ] Re-enable NPM publishing alongside JSR
-- [ ] Automated changelog generation from conventional commits
+- [ ] Re-enable NPM publishing alongside JSR (update changesets workflow)
+- [x] Automated changelog generation (✅ via Changesets)
+- [x] Automated versioning (✅ via Changesets)
 - [ ] Bundle size monitoring in CI
 
 ### Future Considerations
@@ -167,15 +189,18 @@ git push origin v0.9.8
 
 **Implementation** (source of truth):
 - `.github/workflows/ci.yml` - CI workflow
-- `.github/workflows/release.yml` - Release workflow
+- `.github/workflows/changesets-release.yml` - Changesets automation (v0.11.0+)
+- `.github/workflows/release.yml` - Legacy manual releases (deprecated)
+- `.changeset/WORKFLOW.md` - Complete Changesets guide
 - `lefthook.yml` - Git hooks
 - `jsr.json` - JSR package config
 
 **Context**:
+- [Changesets Workflow Design](./changesets-workflow-design.md) - Detailed design decisions
 - [Maintenance Log](./maintenance-log.md) - Quality checklists
 - [Constitution](./constitution.md) - Project principles
 
 ---
 
-**Last Updated**: 2025-10-12
+**Last Updated**: 2025-10-16 (v0.11.0 - Changesets automation)
 **Philosophy**: YAML configs are truth, this doc explains "why"

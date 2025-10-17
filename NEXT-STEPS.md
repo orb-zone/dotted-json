@@ -9,7 +9,7 @@ Your `dotted-json` (jsön) project is now **production-ready** for publication t
 - **Name**: `dotted-json` ✅ (ASCII-friendly, per constitution)
 - **Fun Name**: `jsön` (umlaut for branding/docs)
 - **Package**: `@orb-zone/dotted-json`
-- **Version**: v0.9.5
+- **Version**: v0.11.0
 - **License**: MIT
 - **Tests**: 226/226 passing (100%)
 - **Bundle Size**: 18.18 kB / 20 kB limit (91% utilization)
@@ -447,8 +447,8 @@ Your project is **publication-ready** with:
 **Estimated time to publish**: 15-30 minutes
 *Most time spent on GitHub setup and secret configuration*
 
-**Last Updated**: 2025-10-08
-**Version**: v0.9.5
+**Last Updated**: 2025-10-16
+**Version**: v0.11.0
 **Status**: 🟢 Ready for Publication
 
 ---

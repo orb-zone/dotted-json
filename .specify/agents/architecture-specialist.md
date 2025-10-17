@@ -58,7 +58,7 @@ This agent specializes in:
 │   ├── plugins/surrealdb.ts              # SurrealDB plugin
 │   └── plugins/pinia-colada.ts           # Pinia Colada plugin
 ├── tools/
-│   ├── translate/                        # json-translate CLI
+│   ├── translate/                        # dotted-translate CLI
 │   └── surql-to-ts/                      # surql-to-ts CLI
 └── package.json                          # Single package.json
 ```
@@ -72,7 +72,7 @@ packages/
 │   │   ├── index.ts                      # Core entry (dotted, variants, i18n)
 │   │   ├── loaders/file.ts               # FileLoader (basic variant loading)
 │   │   └── plugins/zod.ts                # Zod plugin (optional)
-│   ├── tools/translate/                  # json-translate CLI
+│   ├── tools/translate/                  # dotted-translate CLI
 │   └── package.json                      # @orb-zone/dotted-json
 │
 ├── surrounded/

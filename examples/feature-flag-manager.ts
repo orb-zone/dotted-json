@@ -163,7 +163,7 @@ class FeatureFlagManager {
         { '.flags': `db.loadIon("flags", { env: "${environment}" })` },
         { resolvers: this.plugin.resolvers }
       );
-      flags = await data.get('flags') || {};
+      flags = await data.get('.flags') || {};
     } catch {
       flags = {};
     }
