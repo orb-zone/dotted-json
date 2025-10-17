@@ -1,5 +1,101 @@
 # Changelog
 
+## 0.12.0
+
+### Minor Changes
+
+- 90db14a: Add support for custom resolvers in variant resolution
+
+  **New API**: `customResolvers` option in DottedOptions
+
+  ````
+
+  ### Bug Fix (patch)
+  ```markdown
+  ---
+  "@orb-zone/dotted-json": patch
+  ---
+
+  Fix cache invalidation in FileLoader when variants change
+  ````
+
+  ### Breaking Change (major)
+
+  ```markdown
+  ---
+  "@orb-zone/dotted-json": major
+  ---
+
+  BREAKING: Remove deprecated `withFileSystem` plugin
+
+  **Migration**: Use `FileLoader` directly instead:
+  \`\`\`ts
+  // Before
+  import { withFileSystem } from '@orb-zone/dotted-json/plugins/filesystem';
+
+  // After
+  import { FileLoader } from '@orb-zone/dotted-json/loaders/file';
+  \`\`\`
+  ```
+
+  ## Troubleshooting
+
+  **Issue**: "No changesets present"
+  **Fix**: Create a changeset with `bun run changeset:add`
+
+  **Issue**: JSR publish fails
+  **Fix**: Check `jsr.json` configuration and workflow permissions
+
+  **Issue**: Version PR not created
+  **Fix**: Verify GITHUB_TOKEN permissions (contents: write, pull-requests: write)
+
+  ## Manual Release (Emergency)
+
+  If GitHub Actions fail:
+
+  ```bash
+  # 1. Version locally
+  bun run changeset:version
+  git add .
+  git commit -m "chore: version packages"
+
+  # 2. Tag and push
+  git tag v0.11.0
+  git push origin main --tags
+
+  # 3. Publish manually
+  bunx jsr publish
+  ```
+
+  ## Resources
+
+  - [Changesets Docs](https://github.com/changesets/changesets)
+  - [JSR Publishing](https://jsr.io/docs/publishing-packages)
+  - [Conventional Commits](https://www.conventionalcommits.org/)
+
+- 90db14a: **CLI Rename & Example Fixes**
+
+  - **BREAKING**: Renamed CLI tool from `json-translate` to `dotted-translate` for better brand alignment
+  - **Fixed**: Corrected critical bugs in 5 example files (file-inheritance.ts, basic-usage.ts, feature-flag-manager.ts, realtime-config-manager.ts, i18n-translation-editor.ts)
+  - **Docs**: Comprehensive documentation audit with specialized agents (fixed 5 critical issues, 3 high-severity bugs)
+  - **Security**: Completed security audit - no secrets, comprehensive .gitignore, only 1 production dependency
+
+  **Migration**: If you installed the CLI globally, reinstall to get the new command name:
+
+  ```bash
+  bun remove -g @orb-zone/dotted-json
+  bun add -g @orb-zone/dotted-json
+  dotted-translate strings.jsön --to es
+  ```
+
+### Patch Changes
+
+- 581f98e: **Changesets Workflow Fix**
+
+  - **Fixed**: Split changesets workflow into proper two-step process (version PR → publish)
+  - **Changed**: Moved JSR publishing to separate workflow triggered only after Version Packages PR is merged
+  - **Improved**: Publish step now runs `bun run build` before publishing to ensure package is ready
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -125,11 +221,13 @@ dotted-translate strings.jsön --to es --form formal
 ### Changed
 
 - **Constitution**: Added comprehensive markdown linting standards to Documentation Requirements
+
   - Codified 5 critical markdownlint rules with examples
   - Enforcement mandate for all documentation-generating agents
   - Rationale and best practices documented
 
 - **Documentation Curator Agent**: Enhanced with markdown linting enforcement section
+
   - Pre-flight checklist for markdown generation
   - Common violations with before/after examples
   - Integration with constitutional standards
@@ -156,6 +254,7 @@ dotted-translate strings.jsön --to es --form formal
 ### Changed
 
 - **README Restructured** (860 → 459 lines):
+
   - Added "Why dotted-json?" section with problem/solution framing
   - Streamlined to focus on value proposition and quick wins
   - Replaced 4 competing examples with focused real-world use cases
@@ -164,6 +263,7 @@ dotted-translate strings.jsön --to es --form formal
   - All variant/file-loader/CLI details moved to getting-started guide
 
 - **Documentation File Naming**:
+
   - Renamed `docs/MIGRATION.md` → `docs/migration.md`
   - Renamed `docs/PERFORMANCE.md` → `docs/performance.md`
   - Renamed `docs/FEATURE-FLAGS.md` → `docs/feature-flags.md`
@@ -184,6 +284,7 @@ dotted-translate strings.jsön --to es --form formal
 ### Documentation
 
 - **Feature Flags Guide** (`docs/feature-flags.md`):
+
   - Comprehensive 500+ line guide for production feature flag patterns
   - Quick start with prerequisites and basic usage
   - Core concepts: real-time updates, intelligent caching, targeting strategies
@@ -193,6 +294,7 @@ dotted-translate strings.jsön --to es --form formal
   - Troubleshooting and best practices
 
 - **Enhanced Examples README** (`examples/README.md`):
+
   - Expanded from 100 to 540+ lines with comprehensive example catalog
   - Categorized examples by use case, complexity, and plugin
   - Quick start instructions for each example
@@ -201,6 +303,7 @@ dotted-translate strings.jsön --to es --form formal
   - Contributing guidelines for new examples
 
 - **Vue 3 Integration Improvements** (`docs/migration.md`):
+
   - **Fixed critical bug**: Removed async `.get()` calls in Vue templates
   - Added Suspense example for modern Vue 3 async handling
   - Added Pinia Colada integration example with intelligent caching
@@ -217,6 +320,7 @@ dotted-translate strings.jsön --to es --form formal
 ### Changed
 
 - **Constitution Updates** (`.specify/memory/constitution.md`):
+
   - Added SurrealDB field naming conventions (`_type`, `_at`, `meta`)
   - Refined AEON acronym definitions (ION, ART, COG, DOT)
   - Updated terminology: "allowed" instead of "whitelisted"
@@ -275,6 +379,7 @@ dotted-translate strings.jsön --to es --form formal
 ### Added
 
 - **Production Examples**:
+
   - `examples/i18n-translation-editor.ts` - Real-time collaborative translation management
     - Multi-language support with variant resolution
     - Formality levels (formal/informal/polite)
@@ -283,6 +388,7 @@ dotted-translate strings.jsön --to es --form formal
     - Comparison tools for identifying missing/outdated translations
 
 - **Integration Test Utilities** (`test/helpers/surrealdb-test-utils.ts`):
+
   - `createTestLoader()` - Create isolated test loaders
   - `cleanupTestData()` - Clean up test data
   - `seedTestData()` - Seed fixtures
@@ -321,23 +427,35 @@ No breaking changes. All additions are new files/utilities.
 **Using Test Utilities:**
 
 ```typescript
-import { withTestLoader, assertIonData } from '../test/helpers/surrealdb-test-utils.js';
+import {
+  withTestLoader,
+  assertIonData,
+} from "../test/helpers/surrealdb-test-utils.js";
 
 await withTestLoader(async (loader) => {
-  await loader.save('config', { apiUrl: 'https://api.example.com' }, { env: 'prod' });
-  await assertIonData(loader, 'config', { env: 'prod' }, { apiUrl: 'https://api.example.com' });
+  await loader.save(
+    "config",
+    { apiUrl: "https://api.example.com" },
+    { env: "prod" }
+  );
+  await assertIonData(
+    loader,
+    "config",
+    { env: "prod" },
+    { apiUrl: "https://api.example.com" }
+  );
 });
 ```
 
 **Performance Monitoring:**
 
 ```typescript
-import { benchmark } from '../test/helpers/surrealdb-test-utils.js';
+import { benchmark } from "../test/helpers/surrealdb-test-utils.js";
 
 await benchmark(
-  async () => loader.load('strings', { lang: 'es' }),
+  async () => loader.load("strings", { lang: "es" }),
   100,
-  'Load Spanish strings'
+  "Load Spanish strings"
 );
 ```
 
@@ -348,6 +466,7 @@ await benchmark(
 ### Added
 
 - **Connection Retry Logic**: Robust connection handling with exponential backoff
+
   - Configurable retry parameters (maxAttempts, initialDelay, maxDelay, backoffMultiplier)
   - Default: 3 attempts with 1s-10s delay range, 2x backoff multiplier
   - Smart error detection (don't retry on auth errors or missing dependencies)
@@ -398,9 +517,9 @@ No breaking changes. All new features are opt-in.
 
 ```typescript
 const loader = new SurrealDBLoader({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
   // Retry enabled by default with sensible defaults
 });
 ```
@@ -409,15 +528,15 @@ const loader = new SurrealDBLoader({
 
 ```typescript
 const loader = new SurrealDBLoader({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
   retry: {
     maxAttempts: 5,
     initialDelay: 2000,
     maxDelay: 30000,
-    backoffMultiplier: 3
-  }
+    backoffMultiplier: 3,
+  },
 });
 ```
 
@@ -425,21 +544,21 @@ const loader = new SurrealDBLoader({
 
 ```typescript
 const loader = new SurrealDBLoader({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
   metrics: true,
   onMetrics: (metrics) => {
     console.log(`${metrics.operation}: ${metrics.duration}ms`);
     if (metrics.cacheHit) {
-      console.log('✓ Cache hit');
+      console.log("✓ Cache hit");
     } else if (metrics.candidateCount) {
       console.log(`Evaluated ${metrics.candidateCount} candidates`);
     }
 
     // Send to monitoring service
     monitoringService.track(metrics);
-  }
+  },
 });
 ```
 
@@ -450,6 +569,7 @@ const loader = new SurrealDBLoader({
 ### Added
 
 - **SurrealDB LIVE Queries**: Real-time document synchronization with automatic cache invalidation
+
   - `subscribe()` method in SurrealDBLoader for watching ion changes
   - Supports watching specific variants or all variants of a baseName
   - DIFF mode for efficient WebSocket updates
@@ -458,6 +578,7 @@ const loader = new SurrealDBLoader({
   - Graceful cleanup with `unsubscribe()` and `close()`
 
 - **Unified withSurrealDBPinia Plugin**: Single-config integration of SurrealDB + Pinia Colada
+
   - Auto-generates cached query resolvers from ion definitions
   - Real-time LIVE query integration with automatic cache invalidation
   - `db.loadIon(baseName, variants)` resolver API
@@ -508,54 +629,61 @@ No breaking changes. LIVE queries are an optional feature.
 To use LIVE queries with SurrealDBLoader:
 
 ```typescript
-import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
+import { SurrealDBLoader } from "@orb-zone/dotted-json/loaders/surrealdb";
 
 const loader = new SurrealDBLoader({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
   onLiveUpdate: (event) => {
-    console.log(`${event.action}: ${event.baseName}`, event.data)
-  }
-})
+    console.log(`${event.action}: ${event.baseName}`, event.data);
+  },
+});
 
-await loader.init()
+await loader.init();
 
 // Subscribe to specific variant
-const unsubscribe = await loader.subscribe('config', { env: 'prod' }, (data) => {
-  console.log('Config updated:', data)
-})
+const unsubscribe = await loader.subscribe(
+  "config",
+  { env: "prod" },
+  (data) => {
+    console.log("Config updated:", data);
+  }
+);
 
 // Stop listening
-await unsubscribe()
+await unsubscribe();
 ```
 
 To use unified SurrealDB + Pinia plugin:
 
 ```typescript
-import { withSurrealDBPinia } from '@orb-zone/dotted-json/plugins/surrealdb-pinia'
+import { withSurrealDBPinia } from "@orb-zone/dotted-json/plugins/surrealdb-pinia";
 
 const plugin = await withSurrealDBPinia({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
   ions: {
-    'config': { staleTime: 60_000 },
-    'strings': { staleTime: 300_000 }
+    config: { staleTime: 60_000 },
+    strings: { staleTime: 300_000 },
   },
   live: {
     enabled: true,
-    ions: ['config', 'strings']
-  }
-})
+    ions: ["config", "strings"],
+  },
+});
 
 // Use in dotted-json
-const data = dotted({
-  '.config': 'db.loadIon("config", { env: "prod" })'
-}, { resolvers: plugin.resolvers })
+const data = dotted(
+  {
+    ".config": 'db.loadIon("config", { env: "prod" })',
+  },
+  { resolvers: plugin.resolvers }
+);
 
 // Automatic cache invalidation via LIVE queries!
-const config = await data.get('config')
+const config = await data.get("config");
 ```
 
 ---
@@ -565,6 +693,7 @@ const config = await data.get('config')
 ### Added
 
 - **SurrealDBLoader**: High-performance SurrealDB storage provider for ions (variant documents)
+
   - Array-based Record IDs: `ion:['baseName', 'lang', 'gender', 'form']`
   - **10-100x performance improvement** over WHERE clause queries via range scans
   - Full StorageProvider interface implementation
@@ -584,8 +713,8 @@ const config = await data.get('config')
 - **Loaders now use separate export paths** to keep core bundle small:
 
   ```typescript
-  import { FileLoader } from '@orb-zone/dotted-json/loaders/file'
-  import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
+  import { FileLoader } from "@orb-zone/dotted-json/loaders/file";
+  import { SurrealDBLoader } from "@orb-zone/dotted-json/loaders/surrealdb";
   ```
 
 - Core bundle remains at **18.18 kB** (within 20 kB constitution limit)
@@ -614,22 +743,22 @@ No breaking changes. SurrealDBLoader is a new feature.
 To use SurrealDBLoader:
 
 ```typescript
-import { SurrealDBLoader } from '@orb-zone/dotted-json/loaders/surrealdb'
+import { SurrealDBLoader } from "@orb-zone/dotted-json/loaders/surrealdb";
 
 const loader = new SurrealDBLoader({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
-  auth: { type: 'root', username: 'root', password: 'root' }
-})
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
+  auth: { type: "root", username: "root", password: "root" },
+});
 
-await loader.init()
+await loader.init();
 
 // Save ion with variants
-await loader.save('strings', { hello: 'Hola' }, { lang: 'es', form: 'formal' })
+await loader.save("strings", { hello: "Hola" }, { lang: "es", form: "formal" });
 
 // Load with variant resolution
-const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
+const strings = await loader.load("strings", { lang: "es", form: "formal" });
 ```
 
 ---
@@ -639,11 +768,13 @@ const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
 ### Added
 
 - **StorageProvider Interface**: Unified API for JSöN document persistence across different backends (filesystem, SurrealDB, etc.)
+
   - `load()`, `save()`, `list()`, `delete()`, `close()` methods
   - Optional `subscribe()` for real-time providers
   - Comprehensive type definitions in `src/types/storage.ts`
 
 - **FileLoader.save()**: Write JSöN documents to filesystem with variant resolution
+
   - Deterministic file naming: `baseName:lang:gender:form.jsön`
   - Merge strategies: `replace` (default), `merge` (shallow), `deep-merge` (recursive)
   - Optional Zod schema validation before saving
@@ -651,15 +782,18 @@ const strings = await loader.load('strings', { lang: 'es', form: 'formal' })
   - Upsert support (create if doesn't exist)
 
 - **FileLoader.list()**: List available JSöN documents with filtering
+
   - Filter by `baseName`, `variants`, or `metadata`
   - Returns file metadata (createdAt, updatedAt, size)
   - Supports partial variant matching
 
 - **FileLoader.delete()**: Remove JSöN documents from filesystem
+
   - Variant-aware deletion (delete specific language/form/gender combination)
   - Automatic cache invalidation
 
 - **FileLoader.close()**: Cleanup resources (implements StorageProvider)
+
   - Clears all caches
   - Resets initialization state
 
@@ -704,17 +838,17 @@ No breaking changes. Existing FileLoader code continues to work without modifica
 To use new save() functionality:
 
 ```typescript
-const loader = new FileLoader({ baseDir: './data' });
+const loader = new FileLoader({ baseDir: "./data" });
 await loader.init();
 
 // Save document
-await loader.save('config', { theme: 'dark' }, { env: 'prod' });
+await loader.save("config", { theme: "dark" }, { env: "prod" });
 
 // List documents
-const docs = await loader.list({ baseName: 'config' });
+const docs = await loader.list({ baseName: "config" });
 
 // Delete document
-await loader.delete('config', { env: 'prod' });
+await loader.delete("config", { env: "prod" });
 ```
 
 ---
@@ -858,50 +992,50 @@ See `ROADMAP.md` for complete implementation plan.
 ### Usage Example
 
 ```typescript
-import { dotted } from '@orb-zone/dotted-json';
-import { withPiniaColada } from '@orb-zone/dotted-json/plugins/pinia-colada';
+import { dotted } from "@orb-zone/dotted-json";
+import { withPiniaColada } from "@orb-zone/dotted-json/plugins/pinia-colada";
 
 const plugin = withPiniaColada({
   queries: {
-    'api.getUser': {
-      key: (id: string) => ['user', id],
+    "api.getUser": {
+      key: (id: string) => ["user", id],
       query: async (id: string) => {
         const res = await fetch(`/api/users/${id}`);
         return res.json();
       },
-      staleTime: 60000 // 1 minute
-    }
+      staleTime: 60000, // 1 minute
+    },
   },
   mutations: {
-    'api.updateUser': {
+    "api.updateUser": {
       mutation: async (id: string, data: any) => {
         const res = await fetch(`/api/users/${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(data)
+          method: "PATCH",
+          body: JSON.stringify(data),
         });
         return res.json();
       },
-      invalidates: [
-        ['users'],
-        (id: string) => ['user', id]
-      ]
-    }
+      invalidates: [["users"], (id: string) => ["user", id]],
+    },
   },
   defaults: {
     staleTime: 30000,
-    retry: 3
-  }
+    retry: 3,
+  },
 });
 
-const data = dotted({
-  user: {
-    id: '123',
-    '.profile': 'api.getUser(${user.id})'
-  }
-}, { resolvers: plugin.resolvers });
+const data = dotted(
+  {
+    user: {
+      id: "123",
+      ".profile": "api.getUser(${user.id})",
+    },
+  },
+  { resolvers: plugin.resolvers }
+);
 
 // Cached access
-const profile = await data.get('user.profile');
+const profile = await data.get("user.profile");
 
 // Clear cache
 plugin.clearCache();
@@ -939,30 +1073,33 @@ plugin.clearCache();
 ### Usage Example
 
 ```typescript
-import { dotted } from '@orb-zone/dotted-json';
-import { withSurrealDB } from '@orb-zone/dotted-json/plugins/surrealdb';
+import { dotted } from "@orb-zone/dotted-json";
+import { withSurrealDB } from "@orb-zone/dotted-json/plugins/surrealdb";
 
 const plugin = await withSurrealDB({
-  url: 'ws://localhost:8000/rpc',
-  namespace: 'app',
-  database: 'main',
-  tables: ['user', 'post'],
+  url: "ws://localhost:8000/rpc",
+  namespace: "app",
+  database: "main",
+  tables: ["user", "post"],
   functions: [
     {
-      name: 'getProfile',
+      name: "getProfile",
       params: z.object({ userId: z.string() }),
-      returns: ProfileSchema
-    }
-  ]
+      returns: ProfileSchema,
+    },
+  ],
 });
 
-const data = dotted({
-  user: {
-    id: 'user:123',
-    '.profile': 'db.user.select(${user.id})',
-    '.posts': 'fn.getUserPosts({ userId: ${user.id} })'
-  }
-}, { resolvers: plugin.resolvers });
+const data = dotted(
+  {
+    user: {
+      id: "user:123",
+      ".profile": "db.user.select(${user.id})",
+      ".posts": "fn.getUserPosts({ userId: ${user.id} })",
+    },
+  },
+  { resolvers: plugin.resolvers }
+);
 
 // Cleanup
 await plugin.disconnect();
@@ -1013,22 +1150,22 @@ await plugin.disconnect();
 const data = dotted(schema, { resolvers });
 
 // After (v0.3.0) - Add optional Zod validation
-import { withZod } from '@orb-zone/dotted-json/plugins/zod';
-import { z } from 'zod';
+import { withZod } from "@orb-zone/dotted-json/plugins/zod";
+import { z } from "zod";
 
 const data = dotted(schema, {
   resolvers,
   ...withZod({
     schemas: {
       paths: {
-        'user.profile': z.object({
+        "user.profile": z.object({
           email: z.string().email(),
-          name: z.string()
-        })
-      }
+          name: z.string(),
+        }),
+      },
     },
-    mode: 'strict'
-  })
+    mode: "strict",
+  }),
 });
 ```
 
