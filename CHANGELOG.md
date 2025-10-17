@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.12.3
+
+### Patch Changes
+
+- f9015a1: **JSR Publish Fix**
+
+  - **Fixed**: Publish workflow now explicitly checks out `main` branch after Version Packages PR merge
+  - **Resolved**: Ensures correct version is published to JSR (was publishing old version from PR branch)
+
+- f9015a1: **Version Sync Fix**
+
+  - **Fixed**: Sync version from package.json to jsr.json automatically during `changeset version`
+  - **Added**: `tools/sync-jsr-version.ts` script to keep jsr.json version in sync
+  - **Resolved**: JSR was publishing old version (0.10.1) because jsr.json wasn't being updated by changesets
+
 ## 0.12.2
 
 ### Patch Changes
