@@ -10,7 +10,6 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
-  id-token: write  # Required for JSR OIDC authentication
 
 jobs:
   release:
@@ -31,20 +30,13 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish to JSR
+      - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
         with:
           # This expects a script named "changeset:version" to bump versions
           version: bun run changeset:version
-          # This expects a script named "release" to publish packages
-          publish: bun run release:jsr
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # JSR uses OIDC, no token needed - id-token permission is sufficient
-
-      - name: Publish to JSR
-        if: steps.changesets.outputs.published == 'true'
-        run: bunx jsr publish --allow-dirty
