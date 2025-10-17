@@ -77,6 +77,15 @@ Feature Branch → PR (with changeset) → main → Auto "Version Packages" PR �
 
 **Migration Note**: Manual tagging (pre-v0.11.0) is now deprecated. Use changesets instead.
 
+**Current Implementation Note (v0.11.2)**:
+
+- Using **manual bash implementation** instead of `changesets/action@v1` due to org-level GitHub Actions restrictions
+- `changesets/action@*` has now been added to org-level allowed actions
+- **TODO for future**: Switch back to official `changesets/action@v1` for cleaner, maintained implementation
+  - See commit history around v0.11.2 for the official action version
+  - Current manual implementation works but requires maintenance if Changesets CLI changes
+  - Official action handles edge cases and updates automatically
+
 ### 5. Bun Runtime
 
 **Decision**: Use Bun for CI/CD (not Node.js/npm)
