@@ -40,3 +40,5 @@ jobs:
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Note: When this PR is merged, the publish-jsr.yml workflow will trigger
+          # automatically to publish the new version to JSR using OIDC
