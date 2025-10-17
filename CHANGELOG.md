@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.2
+
+### Patch Changes
+
+- 0bc1211: **JSR Publish Fix**
+
+  - **Fixed**: Publish workflow now explicitly checks out `main` branch after Version Packages PR merge
+  - **Resolved**: Ensures correct version is published to JSR (was publishing old version from PR branch)
+
 ## 0.12.1
 
 ### Patch Changes
