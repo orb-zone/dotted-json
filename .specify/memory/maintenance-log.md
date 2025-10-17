@@ -4,6 +4,114 @@
 
 ---
 
+## October 2025 - Changesets Automation & Documentation Audit
+
+**Date**: 2025-10-16
+**Branch**: `004-cli-rename-changesets-automation`
+**Version**: v0.10.1 → v0.11.0
+**PR**: https://github.com/orb-zone/dotted-json/pull/10
+
+### Major Changes
+
+#### 1. CLI Tool Rebranding
+**Change**: `json-translate` → `dotted-translate`
+**Rationale**: Better alignment with package name `@orb-zone/dotted-json` and brand identity
+**Impact**: **BREAKING** - Users must reinstall global CLI
+**Files Updated**: 9 files across documentation and memory
+
+#### 2. Changesets Automation Implemented
+**Package**: `@changesets/cli@^2.29.7`
+**Workflow**: `.github/workflows/changesets-release.yml`
+
+**Problem Solved**:
+- Manual version bumping (error-prone)
+- Forgotten CHANGELOG updates
+- No review step before publishing
+- Difficulty tracking what changed in releases
+
+**Solution**:
+- PR-based version bumps (reviewable)
+- Automatic CHANGELOG generation
+- Semantic versioning enforcement
+- Batch multiple PRs into one release
+
+**Architecture**:
+```
+PR (with changeset) → main → Auto "Version Packages" PR → JSR Publish
+```
+
+**Key Scripts Added**:
+- `changeset:add` - Create changeset (developer tool)
+- `changeset:version` - Bump versions (CI tool)
+- `release:jsr` - Publish to JSR (CI tool)
+
+#### 3. Critical Example Fixes (5 bugs)
+**Quality Impact**: High - All examples now functional
+
+**Fixed**:
+- `file-inheritance.ts` - Replaced non-existent `withFileSystem` import with `FileLoader`
+- `basic-usage.ts:89` - Fixed double-dot notation (`stats..engagement` → `stats.engagement`)
+- `feature-flag-manager.ts:166` - Fixed property access pattern (`.flags` instead of `flags`)
+- `realtime-config-manager.ts:127` - Fixed property access pattern (`.config` instead of `config`)
+- `i18n-translation-editor.ts:173` - Fixed property access pattern (`.strings` instead of `strings`)
+
+#### 4. Comprehensive Documentation Audit
+**Method**: 3 specialized agents reviewed Getting Started, API Reference, and all 13 examples
+
+**Findings Summary**:
+- **Getting Started**: 1 CRITICAL, 3 IMPORTANT, 3 MINOR, 2 INFORMATIONAL
+- **API Reference**: 12 MINOR improvements documented (future work)
+- **Examples**: 5 CRITICAL bugs fixed, 5 HIGH-severity issues addressed
+
+**Critical Finding**: Missing variant system showcase in Getting Started (noted for future)
+
+#### 5. Security Audit Completed
+**Status**: ✅ Passed
+
+**Verified**:
+- No .env files or secrets in repository
+- Only 1 production dependency (`dot-prop@^8.0.2`)
+- Comprehensive `.gitignore` coverage
+- Security warnings prominent in README
+
+### Quality Metrics (v0.11.0)
+- ✅ **Tests**: 226/226 passing (100%)
+- ✅ **Bundle Size**: 18.20 kB / 20 kB limit (91%)
+- ✅ **TypeScript**: 0 errors
+- ✅ **ESLint**: 0 errors
+- ✅ **Examples**: All 13 functional
+
+### Documentation Updates
+**New Files**:
+- `.changeset/WORKFLOW.md` - Complete Changesets usage guide
+- `.specify/memory/changesets-workflow-design.md` - Design decisions and architecture
+- `.changeset/cli-rename-and-fixes.md` - First changeset (minor bump)
+
+**Updated Files**:
+- `.specify/memory/deployment-workflow.md` - Updated for Changesets
+- `CHANGELOG.md` - Added v0.11.0 entry
+- All version references updated to v0.11.0
+
+### Migration Notes
+**For CLI Users**:
+```bash
+bun remove -g @orb-zone/dotted-json
+bun add -g @orb-zone/dotted-json
+dotted-translate strings.jsön --to es
+```
+
+**For Contributors**:
+- Now use `bun run changeset:add` instead of manual version bumps
+- See `.changeset/WORKFLOW.md` for complete guide
+
+### Next Steps
+- [ ] Merge PR #10 to trigger Changesets workflow
+- [ ] Review & merge auto-created "Version Packages" PR
+- [ ] Verify JSR publish succeeds (automated)
+- [ ] Add variant system showcase to Getting Started (from audit findings)
+
+---
+
 ## October 2025 - Pre-v1.0 Documentation Audit
 
 **Date**: 2025-10-08
