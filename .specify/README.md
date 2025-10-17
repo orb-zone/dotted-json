@@ -49,7 +49,7 @@ This is the **@orb-zone/dotted-json** library - dynamic JSON data expansion usin
 1. **Core Library**: Expression evaluation, caching, cycle detection
 2. **Variant System**: Language, gender, formality variants with automatic resolution
 3. **File Loader**: Variant-aware filesystem loading with security
-4. **Translation CLI**: Local Ollama-powered translation tool (`json-translate`)
+4. **Translation CLI**: Local Ollama-powered translation tool (`dotted-translate`)
 
 ### Essential Reading
 
@@ -85,7 +85,7 @@ dotted-json/
 │   └── loaders/
 │       └── file.ts           # FileLoader with variant resolution
 ├── tools/
-│   └── translate/            # Translation CLI (json-translate)
+│   └── translate/            # Translation CLI (dotted-translate)
 │       ├── index.ts          # CLI entry point
 │       ├── providers/ollama.ts # Ollama LLM provider
 │       └── utils/file-output.ts # File I/O utilities
@@ -102,7 +102,7 @@ Package exports:
 - @orb-zone/dotted-json/plugins/pinia-colada # Pinia Colada data fetching (v0.5.0)
 
 Global CLI:
-- json-translate                 # Translation tool (via npm install -g)
+- dotted-translate               # Translation tool (via npm install -g)
 ```
 
 ### Key Design Decisions
@@ -162,7 +162,7 @@ bun examples/file-loader-i18n.ts
 - ✅ Expression evaluation with caching and cycle detection
 - ✅ Variant system (language, gender, formality)
 - ✅ File loader with variant-aware resolution
-- ✅ Translation CLI (`json-translate`) with Ollama
+- ✅ Translation CLI (`dotted-translate`) with Ollama
 - ✅ Pronoun helpers for i18n
 
 **Plugin Ecosystem** (v0.3.0-v0.5.0):
@@ -266,8 +266,8 @@ When starting a new AI session, provide this context:
 This is the @orb-zone/dotted-json library (JSöN).
 
 Key facts:
-- Version: 0.6.0-design (design phase complete)
-- Status: 210/210 tests passing, 18.18 kB bundle
+- Version: 0.11.0 (pre-release)
+- Status: 226/226 tests passing, 18.20 kB bundle
 - Recent work: Phase 6 design complete - Storage providers & advanced permissions (6 design docs, ~4,000+ lines)
 
 Please read:
@@ -301,4 +301,4 @@ Key principles:
 
 ---
 
-**Last updated**: 2025-10-06 (v0.6.0-design - Phase 6 design complete, 6 comprehensive design documents created)
+**Last updated**: 2025-10-16 (v0.11.0 - CLI rename, example fixes, documentation audit)

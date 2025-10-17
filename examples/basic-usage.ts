@@ -86,4 +86,4 @@ const dashboard = dotted(
 console.log('\n=== Example 4: Nested Expressions ===');
 console.log('Views:', await dashboard.get('stats.views'));
 console.log('Likes:', await dashboard.get('stats.likes'));
-console.log('Engagement Rate:', await dashboard.get('stats..engagement'));
+console.log('Engagement Rate:', await dashboard.get('stats.engagement'));

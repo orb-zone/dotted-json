@@ -1,0 +1,50 @@
+name: Changesets Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write  # Required for JSR OIDC authentication
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          # This ensures we have the full history for changeset versioning
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Create Release Pull Request or Publish to JSR
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # This expects a script named "changeset:version" to bump versions
+          version: bun run changeset:version
+          # This expects a script named "release" to publish packages
+          publish: bun run release:jsr
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # JSR uses OIDC, no token needed - id-token permission is sufficient
+
+      - name: Publish to JSR
+        if: steps.changesets.outputs.published == 'true'
+        run: bunx jsr publish --allow-dirty

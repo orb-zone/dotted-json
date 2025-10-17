@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2025-10-16
+
+### Changed
+
+- **CLI Tool Rename**: `json-translate` → `dotted-translate` for better brand alignment
+  - Previous name: `json-translate` (v0.2.0 - v0.10.1)
+  - New name: `dotted-translate` (v0.11.0+)
+  - Rationale: Aligns with package name `@orb-zone/dotted-json` and "dotted" brand identity
+  - All documentation and examples updated to reflect new CLI name
+
+### Fixed
+
+- **Example Fixes**: Corrected critical bugs in example files
+  - [file-inheritance.ts](examples/file-inheritance.ts): Fixed non-existent `withFileSystem` import, replaced with FileLoader
+  - [basic-usage.ts](examples/basic-usage.ts:89): Fixed double-dot notation error (`stats..engagement` → `stats.engagement`)
+  - [feature-flag-manager.ts](examples/feature-flag-manager.ts:166): Fixed property access (`.flags` instead of `flags`)
+  - [realtime-config-manager.ts](examples/realtime-config-manager.ts:127): Fixed property access (`.config` instead of `config`)
+  - [i18n-translation-editor.ts](examples/i18n-translation-editor.ts:173): Fixed property access (`.strings` instead of `strings`)
+
+### Documentation
+
+- **Quality Audit**: Comprehensive review of all documentation and examples
+  - Specialized agents reviewed Getting Started Guide, API Reference, and all 13 examples
+  - Fixed 5 critical issues, 3 high-severity bugs, and identified 10+ areas for future improvement
+  - All examples now follow best practices for property access patterns
+
+### Migration
+
+If you installed the CLI globally, reinstall to get the new command name:
+
+```bash
+# Remove old version
+bun remove -g @orb-zone/dotted-json
+
+# Install new version
+bun add -g @orb-zone/dotted-json
+
+# Use new command
+dotted-translate strings.jsön --to es --form formal
+```
+
 ## [0.10.1] - 2025-10-15
 
 ### Fixed

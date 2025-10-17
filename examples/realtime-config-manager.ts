@@ -124,7 +124,7 @@ class RealtimeConfigManager {
       { resolvers: this.plugin.resolvers }
     );
 
-    const config = await data.get('config');
+    const config = await data.get('.config');
     console.log(`✅ Config loaded (from ${config ? 'cache/db' : 'nowhere'})`);
 
     return config as AppConfig;

@@ -100,7 +100,7 @@ strings:es:formal:m.jsön      # Spanish + formal + masculine
 
 ## Translation Workflows
 
-### Translation CLI (`json-translate`)
+### Translation CLI (`dotted-translate`)
 
 **Architecture** (see `.specify/memory/translation-cli-design.md`):
 
