@@ -2,9 +2,9 @@
 "@orb-zone/dotted-json": minor
 ---
 
-**v1.0 Foundation: Property Access, Type Coercion, and Error Handling**
+**v0.13 Foundation: Property Access, Type Coercion, and Error Handling**
 
-This release lays the foundation for the v1.0 API with comprehensive TDD coverage (23/34 tests passing, 68% complete).
+This release adds powerful new API features while maintaining backward compatibility (23/34 tests passing, 68% complete).
 
 ## New Features
 
@@ -38,13 +38,13 @@ None - all changes are additive and backward compatible.
 
 ## Implementation Details
 
-- **23/34 tests passing** (68% of v1.0 API contract)
-- **607 lines** of v1.0 API contract tests
+- **23/34 tests passing** (68% of new API features)
+- **607 lines** of API contract tests
 - **249 lines** of type coercion tests
 - **164 lines** of type coercion helper implementation
 - **Proxy wrapper** for seamless property access
 
-## Remaining v1.0 Work
+## Remaining Work for v0.13
 
 - **Phase 2E**: Deep Proxy Wrapping (6 tests) - recursive proxy for `data.user.name`
 - **Phase 2F**: Cache Semantics (4 tests) - `${foo}` vs `${.foo}` behavior
