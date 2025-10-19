@@ -1,18 +1,23 @@
 <!--
-Sync Impact Report (Version 1.0.0)
+Sync Impact Report (Version 1.1.0)
 ================================================
-Version Change: INITIAL → 1.0.0
+Version Change: 1.0.0 → 1.1.0
 Ratification Date: 2025-10-05
-Last Amendment: 2025-10-05
+Last Amendment: 2025-10-17
 
-Modified Principles: N/A (initial version)
+Modified Principles: Development Workflow section expanded
 Added Sections:
-  - Core Principles (7 principles)
-  - Security Requirements
-  - Development Workflow
-  - Governance
+  - Release Automation (Changesets)
+  - JSR Publishing Standards
+  - CI/CD Best Practices
 
 Removed Sections: N/A
+
+Amendment Rationale:
+  - Codify changesets workflow (v0.11.0+)
+  - Document JSR-first publishing strategy (v0.10.0+)
+  - Establish CI/CD standards (Lefthook, branch protection)
+  - Formalize automated version synchronization
 
 Templates Requiring Updates:
   ✅ plan-template.md - Constitution Check section references constitution
@@ -184,6 +189,96 @@ without bloating the core.
    - [ ] Bundle size within limits (documented in CHANGELOG)
    - [ ] Security audit clean (no high/critical vulnerabilities)
    - [ ] Documentation examples tested against new version
+
+### Release Automation (Changesets)
+
+**Standard Practice**: All releases MUST use Changesets workflow (v0.11.0+)
+
+**Rationale**: Eliminates manual version management errors, enforces semver discipline, provides reviewable version bump PRs before publishing.
+
+**Changeset Creation**:
+
+1. Developer creates changeset during feature development: `bun run changeset:add`
+2. Changeset file (`.changeset/*.md`) committed WITH feature code
+3. Changeset includes semver bump (major/minor/patch) and user-facing summary
+
+**Version Bump Review**:
+
+1. Merge PR to main (with changeset)
+2. GitHub Actions creates/updates "Version Packages" PR
+3. Review Version Packages PR for:
+   - [ ] Correct version bump (semver compliance)
+   - [ ] CHANGELOG.md accuracy
+   - [ ] No unintended breaking changes
+4. Merge Version Packages PR to trigger publish
+
+**Publishing**:
+
+- Automated via GitHub Actions (no manual npm publish)
+- Publishes to JSR registry (OIDC authenticated)
+- Creates git tag automatically (v0.x.x format)
+- Version Packages PR includes both `package.json` and `jsr.json` updates
+
+### JSR Publishing Standards
+
+**Registry Strategy** (v0.10.0+):
+
+- **Primary**: JSR.io (TypeScript-native, OIDC auth)
+- **Future**: npm (planned for v1.0.0)
+
+**Type Safety Requirements**:
+
+- All public APIs MUST have explicit return types (JSR "fast types" requirement)
+- No inferred return types allowed for exported functions
+- Prevents "slow types" errors during JSR publish
+
+**Version Synchronization**:
+
+- `package.json` is primary version source
+- `jsr.json` synced automatically via `tools/sync-jsr-version.ts`
+- Both files MUST match before publishing
+- Sync script runs as part of `changeset:version` workflow
+
+**Authentication**:
+
+- GitHub OIDC (no manual tokens)
+- Requires package linked to GitHub repo on JSR.io
+- Automatic when workflow runs from main branch
+
+**Rationale**: JSR's TypeScript-first approach aligns with our type-safe philosophy. OIDC eliminates secret management burden. Automated version sync prevents registry drift.
+
+### CI/CD Best Practices
+
+**Branch Protection**:
+
+- Direct pushes to main branch MUST be prevented
+- Enforced via Lefthook pre-push hook (local)
+- Enforced via GitHub branch protection (remote)
+- All changes MUST go through PR workflow
+
+**Pre-Push Checks** (Lefthook):
+
+- Lint: `bun run lint`
+- Type check: `bun run typecheck`
+- Tests: `bun test`
+- Bundle size: `bun run build`
+
+**CI Failure Response**:
+
+1. Fix locally: Run same checks as CI (`bun test`, `bun run lint`)
+2. Never merge failing PRs
+3. Never disable CI checks to merge faster
+4. If blocked: Ask for help, don't bypass
+
+**Emergency Releases**:
+
+- Hotfix branches allowed from main
+- Create changeset with `patch` bump
+- Fast-track PR review (security fixes only)
+- Merge Version Packages PR immediately
+- Monitor publish workflow completion
+
+**Rationale**: Automation prevents human error, but humans must maintain the automation. Branch protection ensures code review quality. Emergency procedures allow rapid response without compromising standards.
 
 ### Testing Standards
 

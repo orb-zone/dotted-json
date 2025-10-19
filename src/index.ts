@@ -122,5 +122,33 @@ import type { DottedOptions } from './types.js';
  * @see {@link DottedJson} for instance methods
  */
 export function dotted(schema: Record<string, any>, options?: DottedOptions): any {
-  return new DottedJson(schema, options);
+  const instance = new DottedJson(schema, options);
+
+  return new Proxy(instance, {
+    get(target: any, prop: string | symbol) {
+      // Handle symbols and special properties
+      if (typeof prop === 'symbol' || prop === 'constructor' || prop === 'then') {
+        return target[prop];
+      }
+
+      // If property is a DottedJson method, return it bound to target
+      if (typeof target[prop] === 'function') {
+        return target[prop].bind(target);
+      }
+
+      // Try to get the value from the internal data object
+      // This allows data.foo to access static values and materialized expressions
+      const value = target.data[prop];
+      return value;
+    },
+
+    set(target: any, prop: string | symbol, value: any) {
+      // Only allow setting data properties, not methods
+      if (typeof prop === 'string') {
+        target.data[prop] = value;
+        return true;
+      }
+      return false;
+    }
+  });
 }

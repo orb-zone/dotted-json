@@ -2,7 +2,7 @@
 
 **Purpose**: Document deployment strategy, design decisions, and the rationale behind our release workflow.
 
-**Status**: Automated with Changesets (v0.11.0)
+**Status**: Automated with Changesets (v0.12.0 - official changesets/action@v1)
 **Implementation**: See `.github/workflows/changesets-release.yml` and `.changeset/WORKFLOW.md`
 **Repository**: https://github.com/orb-zone/dotted-json
 
@@ -204,5 +204,5 @@ gh pr create --base main --head 004-feature-name
 
 ---
 
-**Last Updated**: 2025-10-16 (v0.11.0 - Changesets automation)
+**Last Updated**: 2025-10-17 (v0.12.0 - Changesets v1 refactor, JSR version sync)
 **Philosophy**: YAML configs are truth, this doc explains "why"

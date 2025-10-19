@@ -4,6 +4,7 @@
     "": {
       "name": "@orbzone/dotted-json",
       "dependencies": {
+        "@orb-zone/dotted-json": "npm:@jsr/orb-zone__dotted-json",
         "dot-prop": "^8.0.2",
       },
       "devDependencies": {
@@ -112,6 +113,8 @@
     "@nodelib/fs.stat": ["@nodelib/fs.stat@2.0.5", "", {}, "sha512-RkhPPp2zrqDAQA/2jNhnztcPAlv64XdhIp7a7454A5ovI7Bukxgt7MX7udwAu3zg1DcpPU0rz3VV1SeaqvY4+A=="],
 
     "@nodelib/fs.walk": ["@nodelib/fs.walk@1.2.8", "", { "dependencies": { "@nodelib/fs.scandir": "2.1.5", "fastq": "^1.6.0" } }, "sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg=="],
+
+    "@orb-zone/dotted-json": ["@jsr/orb-zone__dotted-json@0.12.3", "https://npm.jsr.io/~/11/@jsr/orb-zone__dotted-json/0.12.3.tgz", { "dependencies": { "dot-prop": "^8.0.2" } }, "sha512-DDytpbV0dCbo3TR4czVbSbPRf8nd3FCysh05ctAVi/6XafA0r+2EZ1kDa4XIIohv+PsTzC718PCb2v4lXJYUFg=="],
 
     "@types/bun": ["@types/bun@1.2.23", "", { "dependencies": { "bun-types": "1.2.23" } }, "sha512-le8ueOY5b6VKYf19xT3McVbXqLqmxzPXHsQT/q9JHgikJ2X22wyTW3g3ohz2ZMnp7dod6aduIiq8A14Xyimm0A=="],
 

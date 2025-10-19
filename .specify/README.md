@@ -6,24 +6,73 @@ This directory contains design documentation, memory files, and context for unde
 
 This is the **@orb-zone/dotted-json** library - dynamic JSON data expansion using dot-prefixed property keys as expression triggers.
 
-### Current Status (v0.6.0-design)
+### Current Status (v0.12.1)
 
-- **Version**: 0.6.0-design (design phase complete)
-- **Bundle**: 18.18 kB (within 20 kB constitution limit)
-- **Tests**: 210/210 passing (all tests green)
-- **Status**: Phase 6 design complete - Storage providers & advanced permissions architecture ready for implementation
+- **Version**: 0.12.1 (production-ready)
+- **Bundle**: 18.20 kB (within 20 kB constitution limit)
+- **Tests**: 226/226 passing (all tests green)
+- **Status**: Changesets automation implemented with official action, JSR version syncing active, production-ready
 
 ### Recent Work
 
-**v0.6.0-design** (Current - Design Phase):
+**v0.12.1** (Current - 2025-10-17):
 
-1. **Storage Provider System Design**: Unified `StorageProvider` interface for JSöN document persistence
-2. **SurrealDBLoader Design**: Load/save JSöN documents from SurrealDB with variant resolution
-3. **Permission Detection Design**: Table-level and field-level permission pre-flight checks
-4. **Zod Integration Design**: Single source of truth with `z.infer<>` for TypeScript type inference
-5. **SurrealQL to Zod Generator Design**: Auto-generate Zod schemas from `.surql` schema files
-6. **Design Documents**: Created 6 comprehensive design documents (~4,000+ lines total)
-7. **Constitution Update**: Added JSöN capitalization rules (uppercase in titles, lowercase in extensions)
+1. **JSR Version Sync**: Automated jsr.json version syncing with package.json during changesets workflow
+2. **Workflow Fix**: Checkout main branch in JSR publish workflow for proper tagging
+3. **Quality Metrics**: 226/226 tests passing, 18.20 kB bundle size (91% of limit)
+
+**v0.12.0** (2025-10-17):
+
+1. **Custom Resolvers**: Support for custom resolvers in variant resolution via `customResolvers` option
+2. **Changesets v1**: Refactored to use official `changesets/action@v1` for cleaner, more maintainable releases
+3. **Workflow Improvements**: Better documentation, resolved org-level GitHub Actions restrictions
+4. **Quality**: All workflows now use industry-standard changesets action
+
+**v0.11.0** (2025-10-16):
+
+1. **CLI Rename**: `json-translate` → `dotted-translate` for brand alignment (BREAKING CHANGE)
+2. **Example Fixes**: Fixed 5 critical bugs in example files (file-inheritance, basic-usage, feature-flag-manager, etc.)
+3. **Changesets Automation**: Implemented automated release workflow with Version Packages PR pattern
+4. **Documentation Audit**: Comprehensive review with specialized agents, fixed 5 critical issues
+
+**v0.10.1** (2025-10-15):
+
+1. **JSR Compliance**: Added explicit return types for JSR "fast types" requirement
+2. **Type Safety**: Improved IDE performance with explicit function return types
+
+**v0.10.0** (2025-10-15):
+
+1. **JSR Cleanup**: Package structure optimized for JSR registry
+2. **TanStack Removal**: Removed TanStack Query integration (moved to separate package)
+
+**v0.9.0-v0.9.7** (2025-10-07-08):
+
+1. **Production Polish**: Connection retry logic, enhanced error messages, performance metrics
+2. **Documentation**: i18n Translation Editor example, integration test utilities, performance guide
+3. **Feature Flags**: Complete feature flag guide (500+ lines), real-world examples
+4. **Getting Started**: 400-line tutorial, README restructure (860→459 lines)
+5. **Markdown Linting**: Compliance with MD022/MD031/MD040/MD032, constitutional standards
+
+**v0.8.0** (2025-10-07):
+
+1. **LIVE Queries**: Real-time document synchronization with SurrealDB LIVE SELECT
+2. **Cache Invalidation**: Automatic cache updates on LIVE query events
+3. **Unified Plugin**: `withSurrealDBPinia` combining SurrealDB + Pinia Colada
+4. **Real-time Examples**: Config manager with instant propagation
+
+**v0.7.0** (2025-10-07):
+
+1. **SurrealDBLoader**: High-performance storage provider with array-based Record IDs
+2. **Performance**: 10-100x faster queries via range scans vs WHERE clauses
+3. **Ion Naming**: Aligned with AEON model architecture
+4. **TypeScript Codegen**: `surql-to-ts` CLI tool for generating types from schemas
+
+**v0.6.0** (2025-10-07):
+
+1. **Storage Providers**: Unified `StorageProvider` interface for persistence
+2. **FileLoader CRUD**: save(), list(), delete() methods with merge strategies
+3. **Zod Validation**: Optional schema validation on save operations
+4. **25 New Tests**: Complete CRUD test coverage (209 total tests passing)
 
 **v0.5.0**:
 
@@ -188,7 +237,7 @@ bun examples/file-loader-i18n.ts
 
 ### Release Plan
 
-**Current state**: v0.6.0-design - **Design phase complete, ready for Phase 6 implementation**
+**Current state**: v0.12.1 - **Production-ready with automated changesets workflow**
 
 **Completed phases** (see [ROADMAP.md](../ROADMAP.md)):
 
@@ -196,43 +245,44 @@ bun examples/file-loader-i18n.ts
 2. ✅ Phase 2 (v0.3.0): Zod plugin - COMPLETE
 3. ✅ Phase 3 (v0.4.0): SurrealDB plugin - COMPLETE
 4. ✅ Phase 4 (v0.5.0): Pinia Colada plugin - COMPLETE
-5. ✅ Phase 6 (v0.6.0-design): Storage providers & permissions design - COMPLETE
-6. 🔜 Phase 6 (v0.6.0-v1.0.0): Implementation in 5 sub-phases
+5. ✅ Phase 6 (v0.6.0-v0.9.7): Storage providers, SurrealDB, LIVE queries, production polish - COMPLETE
+6. ✅ Phase 7 (v0.10.0-v0.12.1): JSR publishing, changesets automation - COMPLETE
+7. 🔜 Phase 8 (v1.0.0): Official production release declaration
 
-**Phase 6 Implementation Roadmap** (v0.6.0 → v1.0.0):
+**Phase 6-7 Achievements** (v0.6.0 → v0.12.1):
 
-- **v0.6.0**: Storage provider foundation (FileLoader save/list/delete)
-- **v0.7.0**: SurrealDBLoader + permission detection (table-level)
-- **v0.8.0**: LIVE query integration + real-time sync
-- **v0.9.0**: Field-level permissions + `surql-to-zod` CLI tool
-- **v1.0.0**: Vue composables + production examples
+- **v0.6.0**: Storage provider foundation (FileLoader CRUD) ✅
+- **v0.7.0**: SurrealDBLoader with 10-100x performance boost ✅
+- **v0.8.0**: LIVE query integration + real-time sync ✅
+- **v0.9.0-v0.9.7**: Production polish + comprehensive docs ✅
+- **v0.10.0-v0.10.1**: JSR registry publishing ✅
+- **v0.11.0**: Changesets automation, CLI rename ✅
+- **v0.12.0-v0.12.1**: Official changesets action, JSR version sync ✅
 
 **Next steps**:
 
-1. 🏗️ Implement v0.6.0 (FileLoader enhancements)
-2. 🏗️ Implement v0.7.0 (SurrealDBLoader + permissions)
-3. 🏗️ Implement v0.8.0 (LIVE queries)
-4. 🏗️ Implement v0.9.0 (Field permissions + CLI)
-5. 📦 Release v1.0.0 to npm
+1. 🔜 Polish remaining documentation gaps
+2. 📦 Declare v1.0.0 production release
+3. 🚀 Publish to npm registry (currently JSR-only)
+4. 🌟 Gather production feedback and case studies
 
-To publish v1.0.0 (when implementation complete):
+**Modern Release Process** (v0.11.0+):
+
+Uses [changesets](https://github.com/changesets/changesets) for automated releases:
 
 ```bash
-# 1. Ensure tests pass
-bun test  # Should show all tests passing
+# 1. Create changeset during feature development
+bun run changeset:add
 
-# 2. Build and verify bundle size
-bun run build  # Core should be ~18-20 kB
+# 2. Merge PR with changeset to main
+# → GitHub Actions creates "Version Packages" PR automatically
 
-# 3. Update version to 1.0.0
-# Edit package.json version field
+# 3. Review and merge "Version Packages" PR
+# → Automatically publishes to JSR registry
+# → Creates git tags
+# → Updates CHANGELOG.md
 
-# 4. Publish (requires npm credentials)
-npm publish --access public
-
-# 5. Create and push tag
-git tag v1.0.0
-git push origin v1.0.0
+# No manual version bumps, no manual publishing!
 ```
 
 ### Memory Files
@@ -301,4 +351,4 @@ Key principles:
 
 ---
 
-**Last updated**: 2025-10-16 (v0.11.0 - CLI rename, example fixes, documentation audit)
+**Last updated**: 2025-10-17 (v0.12.1 - JSR version sync, changesets v1 refactor, documentation update)

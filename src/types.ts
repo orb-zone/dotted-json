@@ -101,6 +101,47 @@ export interface DottedOptions {
    * ```
    */
   validation?: ValidationOptions;
+
+  /**
+   * Custom error handler for expression evaluation failures
+   *
+   * By default (v1.0+), errors are logged to console.error and return undefined.
+   * Use this to customize error handling (e.g., throw in dev, graceful in prod).
+   *
+   * @param error - The error that occurred
+   * @param path - The path where the error occurred
+   * @param context - The context object (for env-based logic)
+   * @returns Fallback value to return, or throw to fail-fast
+   *
+   * @example
+   * ```typescript
+   * // Fail-fast in development, graceful in production
+   * onError: (error, path, context) => {
+   *   if (context?.env === 'development') {
+   *     throw error;  // Fail-fast
+   *   }
+   *   logger.error(`Failed to evaluate ${path}`, error);
+   *   return null;  // Graceful fallback
+   * }
+   * ```
+   */
+  onError?: (error: Error, path: string, context?: any) => any;
+
+  /**
+   * Arbitrary context object passed to error handlers and resolvers
+   *
+   * Useful for environment-specific logic (dev vs prod), user context, etc.
+   *
+   * @example
+   * ```typescript
+   * context: {
+   *   env: 'production',
+   *   userId: '123',
+   *   logger: myLogger
+   * }
+   * ```
+   */
+  context?: any;
 }
 
 /**
@@ -190,4 +231,5 @@ export interface ExpressionContext {
   path: string[];
   variants?: VariantContext;  // Variant context for pronoun resolution
   error?: Error; // Available in .errorDefault expressions
+  options?: DottedOptions;  // Options for error handling and other configuration
 }

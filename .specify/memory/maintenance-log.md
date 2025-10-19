@@ -4,7 +4,107 @@
 
 ---
 
-## October 2025 - Changesets Automation & Documentation Audit
+## October 2025 - Changesets v1 Refactor & JSR Version Sync
+
+**Date**: 2025-10-17
+**Branch**: `009-sync-jsr-version`, `005-changesets-v1-refactor`
+**Version**: v0.11.0 → v0.12.1
+**PRs**: #14 (v0.12.0), #15, #19 (v0.12.1)
+
+### Major Changes
+
+#### 1. Changesets v1 Migration (v0.12.0)
+
+**Change**: Replaced manual bash implementation with official `changesets/action@v1`
+
+**Rationale**:
+- Cleaner, more maintainable implementation
+- Resolves org-level GitHub Actions restrictions
+- Industry-standard action with better error handling
+- Reduces workflow YAML from 150+ lines to ~30 lines
+
+**Impact**: Zero user impact, workflow now uses official changesets action
+
+**Files Updated**:
+- `.github/workflows/changesets-release.yml` - Migrated to official action
+- Removed custom bash scripts for version/publish steps
+
+**Before** (Manual Bash):
+```yaml
+# Custom bash scripts (~150 lines)
+- name: Version packages
+  run: |
+    # Custom bash implementation...
+    bun run changeset:version
+    # Manual git operations...
+```
+
+**After** (Official Action):
+```yaml
+# Official action (~30 lines)
+- name: Create Release Pull Request or Publish
+  uses: changesets/action@v1
+  with:
+    version: bun run changeset:version
+    publish: echo "Published via separate JSR workflow"
+```
+
+#### 2. JSR Version Syncing (v0.12.1)
+
+**Change**: Automated `jsr.json` version sync with `package.json` during changesets version step
+
+**Implementation**:
+- Added `tools/sync-jsr-version.ts` script
+- Integrated into `changeset:version` npm script:
+  ```json
+  "changeset:version": "changeset version && bun tools/sync-jsr-version.ts && bun install --frozen-lockfile"
+  ```
+
+**Rationale**: Prevents version drift between npm and JSR registries
+
+**Impact**:
+- ✅ Zero manual steps for version management
+- ✅ Both `package.json` and `jsr.json` stay in perfect sync
+- ✅ Version Packages PR includes both file updates
+
+**Files Created**:
+- `tools/sync-jsr-version.ts` - Automatic version synchronization script
+
+**Testing**: Verified in PR #19 that both files updated correctly
+
+#### 3. Custom Resolvers Feature (v0.12.0)
+
+**Change**: Added `customResolvers` option to `DottedOptions`
+
+**API**: Allows users to provide custom resolvers for variant resolution
+
+**Documented In**: CHANGELOG.md (changesets automation handled documentation)
+
+### Quality Metrics (v0.12.1)
+
+- ✅ **Tests**: 226/226 passing (100%)
+- ✅ **Bundle Size**: 18.20 kB / 20 kB limit (91%)
+- ✅ **TypeScript**: 0 errors
+- ✅ **ESLint**: 0 errors
+- ✅ **Changesets**: Fully automated with official action
+- ✅ **JSR Publishing**: Automated via GitHub OIDC
+- ✅ **Version Sync**: Automated `jsr.json` ↔ `package.json`
+
+### Lessons Learned
+
+1. **Official Actions > Custom Scripts**: Official `changesets/action@v1` is far cleaner than custom bash
+2. **Version Sync Automation**: Dual-registry publishing requires automation to prevent drift
+3. **Workflow Simplification**: 150 lines of YAML → 30 lines = better maintainability
+
+### Related PRs
+
+- #14: Changesets v1 refactor (v0.12.0)
+- #15: Version packages PR (automated)
+- #19: JSR version sync implementation (v0.12.1)
+
+---
+
+## October 2025 - Changesets Automation & Documentation Audit (ARCHIVED)
 
 **Date**: 2025-10-16
 **Branch**: `004-cli-rename-changesets-automation`

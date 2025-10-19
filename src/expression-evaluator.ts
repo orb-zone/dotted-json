@@ -1,5 +1,6 @@
 import { getProperty as dotGet } from 'dot-prop';
 import { resolvePronoun, isPronounPlaceholder, extractPronounForm, type Gender } from './pronouns.js';
+import { typeCoercionHelpers } from './helpers/type-coercion.js';
 import type { ExpressionContext, ResolverContext, VariantContext } from './types.js';
 
 export class ExpressionEvaluator {
@@ -25,7 +26,8 @@ export class ExpressionEvaluator {
       } else {
         // Function calls (with or without template literals)
         const interpolatedExpression = this.interpolateVariables(expression);
-        return await this.executeExpression(interpolatedExpression);
+        const pathStr = this.context.path.join('.');
+        return await this.executeExpression(interpolatedExpression, pathStr);
       }
     } catch (_error) {
       throw _error;
@@ -223,7 +225,7 @@ export class ExpressionEvaluator {
     });
   }
 
-  private async executeExpression(expression: string): Promise<any> {
+  private async executeExpression(expression: string, path?: string): Promise<any> {
     // Create a safe execution environment with resolvers
     const resolverContext = this.createResolverContext();
 
@@ -239,16 +241,44 @@ export class ExpressionEvaluator {
 
       return result;
     } catch (_error) {
-      // Preserve the original error if it's already an Error object
-      if (_error instanceof Error) {
-        throw _error;
-      }
-      throw new Error(`Expression execution failed: ${expression} - ${String(_error)}`);
+      // Handle error according to v1.0 error handling contract
+      const error = _error instanceof Error
+        ? _error
+        : new Error(`Expression execution failed: ${expression} - ${String(_error)}`);
+
+      return this.handleError(error, path || 'unknown');
     }
+  }
+
+  /**
+   * Handle expression evaluation errors
+   *
+   * Behavior:
+   * - If options.onError is set: use custom handler
+   * - Otherwise: throw error (backward compatible default)
+   *
+   * @param error - The error that occurred
+   * @param path - The path where error occurred
+   * @returns Fallback value or throws
+   */
+  private handleError(error: Error, path: string): any {
+    const options = this.context.options;
+
+    // Custom error handler (v1.0 feature)
+    if (options?.onError) {
+      return options.onError(error, path, options.context);
+    }
+
+    // Default behavior: throw (backward compatible)
+    throw error;
   }
 
   private createResolverContext(): Record<string, any> {
     const context: Record<string, any> = {};
+
+    // Add type coercion helpers (int, float, bool, json)
+    // These are always available in expression evaluation contexts
+    Object.assign(context, typeCoercionHelpers);
 
     // Flatten resolver hierarchy for direct access
     this.flattenResolvers(this.context.resolvers, context);
@@ -293,12 +323,14 @@ export function createExpressionEvaluator(
   data: Record<string, any>,
   resolvers: ResolverContext,
   path: string[] = [],
-  variants?: VariantContext
+  variants?: VariantContext,
+  options?: any
 ): ExpressionEvaluator {
   return new ExpressionEvaluator({
     data,
     resolvers,
     path,
-    variants
+    variants,
+    options
   });
 }

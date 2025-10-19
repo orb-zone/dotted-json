@@ -13,7 +13,7 @@ const DEFAULT_MAX_DEPTH = 100;
 
 export class DottedJson implements IDottedJson {
   private schema: Record<string, any>;
-  private data: Record<string, any>;
+  public data: Record<string, any>;  // Public for Proxy access
   private cache: Map<string, any> = new Map();
   private options: Required<Omit<DottedOptions, 'validation'>> & Pick<DottedOptions, 'validation'>;
   private evaluationStack: Set<string> = new Set();
@@ -29,8 +29,10 @@ export class DottedJson implements IDottedJson {
       resolvers: options.resolvers || {},
       maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH,
       variants: options.variants || {},
-      validation: options.validation
-    };
+      validation: options.validation,
+      onError: options.onError,
+      context: options.context
+    } as any;
 
     // Merge schema with initial data
     this.data = this.mergeData(this.schema, this.options.initial);
@@ -89,12 +91,68 @@ export class DottedJson implements IDottedJson {
 
   async set(path: string, value: any, _options: SetOptions = {}): Promise<void> {
     try {
-      dotSet(this.data, path, value);
+      // Validate key is not reserved
+      this.validateKey(path);
+
+      // If path starts with a dot (expression key), we need to escape it for dot-prop
+      // because dot-prop treats leading dots as path separators
+      let escapedPath = path;
+      let materializedPath: string | null = null;
+
+      if (path.startsWith('.')) {
+        // Escape the leading dot: .greeting -> \.greeting
+        escapedPath = '\\' + path;
+        // Track the materialized path (without the dot)
+        materializedPath = path.substring(1);
+      }
+
+      dotSet(this.data, escapedPath, value);
+
+      // If setting an expression key, clear the materialized value
+      if (materializedPath) {
+        // Delete the materialized value
+        if (dotHas(this.data, materializedPath)) {
+          const pathParts = materializedPath.split('.');
+          const parentPath = pathParts.slice(0, -1).join('.');
+          const key = pathParts[pathParts.length - 1];
+
+          if (parentPath) {
+            const parent = dotGet(this.data, parentPath);
+            if (parent && typeof parent === 'object' && key) {
+              delete parent[key];
+            }
+          } else if (key) {
+            delete this.data[key];
+          }
+        }
+      }
 
       // Clear cache since data changed
       this.cache.clear();
     } catch (_error) {
       throw _error;
+    }
+  }
+
+  /**
+   * Validate that a key name is not reserved
+   * Reserved keys are method names that would conflict with the DottedJson API
+   *
+   * @param path - The path/key to validate
+   * @throws {Error} If key is reserved
+   */
+  private validateKey(path: string): void {
+    const RESERVED_KEYS = ['get', 'set', 'has', 'delete', 'clear', 'keys'];
+
+    // Extract the final key from the path (e.g., "user.name" → "name")
+    const finalKey = path.includes('.') ? path.split('.').pop()! : path;
+
+    if (RESERVED_KEYS.includes(finalKey)) {
+      throw new Error(
+        `Cannot set reserved key: "${finalKey}". ` +
+        `Reserved keys: ${RESERVED_KEYS.join(', ')}. ` +
+        `These keys are used by the DottedJson API and cannot be modified.`
+      );
     }
   }
 
@@ -210,7 +268,7 @@ export class DottedJson implements IDottedJson {
       this.evaluationStack.add(expressionPath);
       this.evaluationDepth++;
 
-      const result = await this.evaluateExpressionString(expression);
+      const result = await this.evaluateExpressionString(expression, targetPath);
 
       // Cache the result
       this.cache.set(expressionPath, result);
@@ -227,15 +285,19 @@ export class DottedJson implements IDottedJson {
     }
   }
 
-  private async evaluateExpressionString(expression: string): Promise<any> {
+  private async evaluateExpressionString(expression: string, targetPath: string): Promise<any> {
     // Check if expression has dependencies that need to be resolved first
     await this.resolveDependencies(expression);
+
+    // Convert dot-separated path to array for context
+    const pathArray = targetPath.split('.');
 
     const evaluator = createExpressionEvaluator(
       this.data,
       this.options.resolvers,
-      [],
-      this.options.variants
+      pathArray,
+      this.options.variants,
+      this.options  // Pass full options for error handling
     );
 
     return await evaluator.evaluate(expression);

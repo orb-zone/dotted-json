@@ -1,11 +1,11 @@
 # Monorepo Migration Plan: @orb-zone/web-craft
 
-**Status**: Future Planning (v0.10.0+)
-**Target**: v0.10.0 (after v0.9.2 publication)
+**Status**: Future Planning (v2.0.0+)
+**Target**: v2.0.0 (after v1.0.0 stable release)
 **Created**: 2025-10-06
-**Updated**: 2025-10-08
+**Updated**: 2025-10-17
 
-**Note**: This is a future vision document. Current project (v0.9.2) is a single package ready for publication. Monorepo transformation will occur after initial release and user feedback.
+**Note**: This is a future vision document. Current project (v0.12.1) is production-ready with automated changesets workflow. Monorepo transformation will occur after v1.0.0 stable release and user feedback.
 
 ## Overview
 
