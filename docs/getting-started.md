@@ -95,11 +95,14 @@ const data = dotted<UserSchema>(schema);
 # Using bun (recommended - fastest)
 bun add @orb-zone/dotted-json
 
-# Using npm
-npm install @orb-zone/dotted-json
+# Using Deno
+deno add jsr:@orb-zone/dotted-json
 
-# Using yarn
-yarn add @orb-zone/dotted-json
+# Using npm (via JSR)
+npx jsr add @orb-zone/dotted-json
+
+# Using pnpm (via JSR)
+pnpm dlx jsr add @orb-zone/dotted-json
 ```
 
 ### Minimal Working Example
