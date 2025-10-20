@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- 79c4ea9: feat: Add fresh() resolver for live re-evaluation
+
+  - Rename live() resolver to fresh() to avoid confusion with SurrealDB LIVE queries
+  - Add fresh() function that forces re-evaluation of expressions with { fresh: true }
+  - Update expression evaluator to support fresh() calls in expressions
+  - Prevent caching of expressions containing fresh() calls to ensure live updates
+  - Update tests and documentation to use fresh() syntax
+
+### Patch Changes
+
+- 482e150: Restored automatic variant resolution system that was lost in v1.1.0. The system now uses tree-walking to automatically discover variant context from data properties (lang, gender, form, style, etc.) and resolve variant paths with clean `:variant` syntax instead of complex expressions.
+
 ## 1.1.0
 
 ### Major Changes
@@ -13,6 +29,7 @@
   - **Removed complex context collection logic** - Simplified variant resolution to use simple tree-walking
 
   **Migration Guide:**
+
   - Move variant values (gender, lang, etc.) from global `variants` option into your data as regular properties
   - Update expressions to use `${.gender}` instead of relying on global variants for pronouns
   - Example: `gender: 'f'` in data instead of `{ variants: { gender: 'f' } }`
