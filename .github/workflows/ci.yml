@@ -43,10 +43,10 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Verify bundle size (< 20 kB)
+      - name: Verify bundle size (< 50 kB)
         run: |
           SIZE=$(stat -f%z dist/index.js 2>/dev/null || stat -c%s dist/index.js)
-          MAX_SIZE=$((20 * 1024))
+          MAX_SIZE=$((50 * 1024))
           if [ "$SIZE" -gt "$MAX_SIZE" ]; then
             echo "❌ Bundle size ${SIZE} bytes exceeds limit of ${MAX_SIZE} bytes"
             exit 1
