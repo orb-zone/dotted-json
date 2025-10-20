@@ -161,23 +161,22 @@ export class DottedJson implements IDottedJson {
   }
 
   async set(path: string, value: any, _options: SetOptions = {}): Promise<void> {
-    try {
-      // Validate key is not reserved
-      this.validateKey(path);
+    // Validate key is not reserved
+    this.validateKey(path);
 
-      // If path starts with a dot (expression key), we need to escape it for dot-prop
-      // because dot-prop treats leading dots as path separators
-      let escapedPath = path;
-      let materializedPath: string | null = null;
+    // If path starts with a dot (expression key), we need to escape it for dot-prop
+    // because dot-prop treats leading dots as path separators
+    let escapedPath = path;
+    let materializedPath: string | null = null;
 
-      if (path.startsWith('.')) {
-        // Escape the leading dot: .greeting -> \.greeting
-        escapedPath = '\\' + path;
-        // Track the materialized path (without the dot)
-        materializedPath = path.substring(1);
-      }
+    if (path.startsWith('.')) {
+      // Escape the leading dot: .greeting -> \.greeting
+      escapedPath = '\\' + path;
+      // Track the materialized path (without the dot)
+      materializedPath = path.substring(1);
+    }
 
-      dotSet(this.data, escapedPath, value);
+    dotSet(this.data, escapedPath, value);
 
       // If setting an expression key, clear the materialized value
       if (materializedPath) {
@@ -198,15 +197,12 @@ export class DottedJson implements IDottedJson {
         }
       }
 
-      // Clear cache since data changed
-      this.cache.clear();
-      
-      // Clear all materialized expression values (simple invalidation strategy)
-      // This ensures that expressions depending on the changed value are re-evaluated
-      this.clearMaterializedValues(this.data);
-    } catch (_error) {
-      throw _error;
-    }
+    // Clear cache since data changed
+    this.cache.clear();
+    
+    // Clear all materialized expression values (simple invalidation strategy)
+    // This ensures that expressions depending on the changed value are re-evaluated
+    this.clearMaterializedValues(this.data);
   }
 
   /**
@@ -382,8 +378,6 @@ export class DottedJson implements IDottedJson {
       // Set the evaluated result in the data
       dotSet(this.data, targetPath, result);
 
-    } catch (_error) {
-      throw _error;
     } finally {
       // Clean up tracking state
       this.evaluationStack.delete(expressionPath);

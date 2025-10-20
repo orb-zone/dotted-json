@@ -37,9 +37,16 @@ export function int(val: unknown): number {
   if (val === null) return 0;
   if (val === undefined) return NaN;
   if (typeof val === 'boolean') return val ? 1 : 0;
+  if (typeof val === 'number') return Math.trunc(val);
 
   // Convert to string first to handle all types consistently
-  const str = String(val);
+  let str: string;
+  if (typeof val === 'object' && val !== null) {
+    // For objects/arrays, use JSON stringification for more meaningful conversion
+    str = JSON.stringify(val);
+  } else {
+    str = String(val as string | number | boolean);
+  }
 
   // Use parseInt for integer conversion
   const result = parseInt(str, 10);
@@ -72,7 +79,13 @@ export function float(val: unknown): number {
   if (typeof val === 'number') return val;
 
   // Convert to string and parse
-  const str = String(val);
+  let str: string;
+  if (typeof val === 'object' && val !== null) {
+    // For objects/arrays, use JSON stringification for more meaningful conversion
+    str = JSON.stringify(val);
+  } else {
+    str = String(val as string | number | boolean);
+  }
   const result = parseFloat(str);
 
   return result;
