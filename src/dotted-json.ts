@@ -40,8 +40,7 @@ export class DottedJson implements IDottedJson {
       maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH,
       variants: options.variants || {},
       validation: options.validation,
-      onError: options.onError,
-      context: options.context
+      onError: options.onError
     } as any;
 
     // Merge schema with initial data

@@ -1,6 +1,6 @@
 # Hierarchical Context Design
 
-**Status**: Design (Future - v0.10+ or v1.1+)
+**Status**: Implemented (v0.14.0)
 **Strategy**: Path-based context inference from nested data
 **Created**: 2025-10-08
 **Author**: Personal use case driven

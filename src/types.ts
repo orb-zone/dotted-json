@@ -149,26 +149,7 @@ export interface DottedOptions {
    */
   onError?: (error: Error, path: string) => 'throw' | 'fallback' | any;
 
-  /**
-   * Arbitrary context object passed to resolvers (deprecated - use closure instead)
-   * 
-   * @deprecated Store context in resolver closures instead
-   * @example
-   * ```typescript
-   * // Instead of:
-   * const data = dotted(schema, {
-   *   context: { userId: '123' },
-   *   resolvers: { getUser: () => context.userId }
-   * });
-   * 
-   * // Do this:
-   * const userId = '123';
-   * const data = dotted(schema, {
-   *   resolvers: { getUser: () => userId }
-   * });
-   * ```
-   */
-  context?: any;
+
 }
 
 /**
