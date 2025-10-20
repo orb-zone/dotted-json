@@ -76,17 +76,15 @@ Get a value by path, evaluating expressions if needed.
 
 ```typescript
 const value = await data.get('user.profile');
-const withVariants = await data.get('strings.welcome', {
-  variants: { lang: 'es', form: 'formal' }
-});
+const fresh = await data.get('timestamp', { fresh: true });
 ```
 
 **Parameters:**
 
 - `path` `string` - Dot-notation path (e.g., `'user.profile.email'`)
 - `options` `GetOptions` (optional)
-  - `variants` `VariantContext` - Variant context for resolution
-  - `errorDefault` `any` - Default value on error
+  - `fresh` `boolean` - Force re-evaluation of the expression
+  - `fallback` `any | (() => any) | (() => Promise<any>)` - Override fallback for this call
 
 **Returns:** `Promise<any>` - Resolved value
 
@@ -400,12 +398,12 @@ import { withFileSystem } from '@orb-zone/dotted-json/loaders/file';
 
 const data = dotted(
   {
+    lang: 'es',
     user: {
       '.profile': 'extends("user-profile")'  // Loads from filesystem
     }
   },
   {
-    variants: { lang: 'es' },
     ...withFileSystem({
       baseDir: './data',
       extensions: ['.jsön', '.json'],
@@ -750,11 +748,12 @@ Configuration for dotted JSON creation.
 
 ```typescript
 interface DottedOptions {
-  resolvers?: Record<string, any>;        // Custom resolvers
-  extends?: string;                       // Base document to extend
+  initial?: Record<string, any>;          // Initial data to merge with schema
+  fallback?: any | (() => any) | (() => Promise<any>);  // Fallback value for missing paths or expression errors
+  resolvers?: Record<string, any>;        // Function registry for expression resolvers
   maxEvaluationDepth?: number;           // Max depth (default: 100)
-  validation?: ValidationOptions;         // Zod validation
-  variants?: VariantContext;             // Default variants
+  validation?: ValidationOptions;         // Validation options for runtime type checking
+  onError?: (error: Error, path: string) => 'throw' | 'fallback' | any;  // Custom error handler for expression evaluation failures
 }
 ```
 
@@ -874,9 +873,7 @@ const data = dotted({
   }
 });
 
-await data.get('user.message', {
-  variants: { gender: 'f' }
-});
+await data.get('user.message');
 // "she completed her task"
 ```
 
@@ -955,18 +952,20 @@ const plugin = await withSurrealDBPinia({
 ```typescript
 // Use well-known variants for better caching
 const data = dotted({
-  '.strings': 'db.loadIon("strings", ${variants})'
+  lang: 'es',
+  form: 'formal',
+  '.strings': 'db.loadIon("strings", ${lang}, ${form})'
 }, { resolvers });
 
-// Good: cache key is deterministic
-await data.get('strings', {
-  variants: { lang: 'es', form: 'formal' }
-});
+// Good: variants automatically discovered from data
+await data.get('strings');  // Uses lang: 'es', form: 'formal'
 
-// Avoid: custom variants should be allowed
-await data.get('strings', {
-  variants: { customVariant: 'value' }  // May cause cache misses
-});
+// For dynamic variants, include them in data
+const dynamicData = dotted({
+  lang: userLang,
+  form: userForm,
+  '.strings': 'db.loadIon("strings", ${lang}, ${form})'
+}, { resolvers });
 ```
 
 ---

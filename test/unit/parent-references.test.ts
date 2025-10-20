@@ -60,7 +60,7 @@ describe('Parent path references', () => {
 
   test('throws helpful error when parent path is missing', async () => {
     await expect(data.get('company.employees.alice.missing')).rejects.toThrow(
-      "Parent reference '..missingProperty' at 'company.employees.alice.missing' resolved to undefined path 'company.employees.missingProperty'"
+      "Parent reference '..missingProperty' at 'company.employees.alice' resolved to undefined path 'company.employees.missingProperty'"
     );
   });
 });

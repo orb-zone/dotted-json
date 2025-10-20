@@ -9,7 +9,7 @@
  * 2. Deep proxy wrapping
  * 3. Reserved keys protection
  * 4. Error handling (console.error + custom handlers)
- * 5. Cache semantics (${foo} vs ${.foo})
+ * 5. Cache semantics (${foo} vs fresh('.foo'))
  * 6. Type coercion helpers
  */
 
@@ -433,13 +433,13 @@ describe('API Contract', () => {
       expect(snapshot2).toBe(1); // Still 1, not 2
     });
 
-    test.skip('${.foo} forces re-evaluation of foo', async () => {
+    test('fresh(.foo) forces re-evaluation of foo', async () => {
       let count = 0;
 
       const data = dotted(
         {
           '.counter': 'increment()',
-          '.live': '${.counter}'  // Live dependency - always re-evaluate
+          '.live': 'fresh(\'.counter\')'  // Fresh dependency - forces fresh evaluation of .counter
         },
         {
           resolvers: {

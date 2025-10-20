@@ -1,7 +1,7 @@
 import { getProperty as dotGet } from 'dot-prop';
 import { resolvePronoun, isPronounPlaceholder, extractPronounForm, type Gender } from './pronouns.js';
 import { typeCoercionHelpers } from './helpers/type-coercion.js';
-import type { ExpressionContext, ResolverContext, VariantContext } from './types.js';
+import type { ExpressionContext, ResolverContext } from './types.js';
 
 const VARIABLE_REFERENCE_PATTERN = /(?:\.{1,}[a-zA-Z_$][a-zA-Z0-9_$.]*|[a-zA-Z_$][a-zA-Z0-9_$.]*)(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*/g;
 const SIMPLE_PATH_PATTERN = /^\.{0,}[a-zA-Z_$][a-zA-Z0-9_$.]*$/;
@@ -24,11 +24,13 @@ export class ExpressionEvaluator {
 
     // Simple template literal (only ${} interpolation, no function calls)
     if (hasTemplateLiterals && !hasFunctionCalls) {
-      return this.evaluateTemplateLiteral(expression);
+      return await this.evaluateTemplateLiteral(expression);
     } else {
       // Function calls (with or without template literals)
       const interpolatedExpression = this.interpolateVariables(expression);
-      const pathStr = this.context.path.join('.');
+      const pathStr = this.context.fullPath || (this.context.path.length > 0
+        ? this.context.path.join('.')
+        : 'unknown');
       return await this.executeExpression(interpolatedExpression, pathStr);
     }
   }
@@ -43,8 +45,8 @@ export class ExpressionEvaluator {
   }
 
   /**
-   * Resolve a variable path with scoped context lookup
-   * First tries relative to current path context, then falls back to root
+   * Resolve a variable path with scoped lookup and tree-walking for variants
+   * Leading dot (.) crawls up the object hierarchy from current expression location
    */
   private resolveScopedValue(varPath: string): any {
     const leadingDots = varPath.match(/^\.+/)?.[0].length ?? 0;
@@ -53,39 +55,49 @@ export class ExpressionEvaluator {
       return this.resolveParentReference(varPath, leadingDots);
     }
 
-    // Handle leading dot (expression prefix) - actual data is stored without the dot
-    const actualPath = leadingDots === 1 ? varPath.substring(1) : varPath;
-    
-    // If we have a path context (nested evaluation), try scoped lookup first
+    // Handle leading dot (tree-walking lookup)
+    if (leadingDots === 1) {
+      return this.resolveTreeWalkingValue(varPath.substring(1));
+    }
+
+    // Regular path lookup with scoped context (no leading dots)
+    // First try scoped lookup relative to current path context
     if (this.context.path && this.context.path.length > 0) {
-      // Get parent path (exclude the last segment which is the current property)
-      const parentPath = this.context.path.slice(0, -1);
-      
-      if (parentPath.length > 0) {
-        // Try to resolve relative to parent context
-        const scopedPath = `${parentPath.join('.')}.${actualPath}`;
-        const scopedValue = dotGet(this.context.data, scopedPath);
-        
-        if (scopedValue !== undefined) {
-          return scopedValue;
-        }
+      // Try to resolve relative to current object context
+      const scopedPath = `${this.context.path.join('.')}.${varPath}`;
+      const scopedValue = dotGet(this.context.data, scopedPath);
+
+      if (scopedValue !== undefined) {
+        return scopedValue;
       }
     }
-    
+
     // Fall back to root-level lookup
-    const rootValue = dotGet(this.context.data, actualPath);
-    if (rootValue !== undefined) {
-      return rootValue;
-    }
+    return dotGet(this.context.data, varPath) ?? undefined;
+  }
 
-    if (!actualPath.includes('.') && !varPath.startsWith('.') && this.context.variants) {
-      const variantValue = this.context.variants[actualPath];
-      if (variantValue !== undefined) {
-        return variantValue;
+  /**
+   * Resolve value using tree-walking from current expression location
+   * Crawls up the object hierarchy looking for the property
+   */
+  public resolveTreeWalkingValue(property: string): any {
+    // Start from current path context and walk up the hierarchy
+    const currentPath = this.context.path || [];
+
+    // Walk up from current location to root
+    for (let depth = currentPath.length; depth >= 0; depth--) {
+      const pathSegments = currentPath.slice(0, depth);
+      const testPath = pathSegments.length > 0
+        ? `${pathSegments.join('.')}.${property}`
+        : property;
+
+      const value = dotGet(this.context.data, testPath);
+      if (value !== undefined) {
+        return value;
       }
     }
 
-    return rootValue;
+    return undefined;
   }
 
   private resolveParentReference(varPath: string, leadingDots: number): any {
@@ -103,12 +115,20 @@ export class ExpressionEvaluator {
       return value;
     }
 
-    if (propertySegments.length === 1 && this.context.variants) {
-      const [variantKey] = propertySegments;
-      if (variantKey) {
-        const variantValue = this.context.variants[variantKey];
-        if (variantValue !== undefined) {
-          return variantValue;
+    // For single property segments, try tree-walking from the resolved location
+    if (propertySegments.length === 1) {
+      const [property] = propertySegments;
+      // Start tree-walking from the target location (after parent reference resolution)
+      const targetPathSegments = targetPath ? targetPath.split('.') : [];
+      for (let depth = targetPathSegments.length; depth >= 0; depth--) {
+        const pathSegments = targetPathSegments.slice(0, depth);
+        const testPath = pathSegments.length > 0
+          ? `${pathSegments.join('.')}.${property}`
+          : property;
+
+        const treeValue = dotGet(this.context.data, testPath!);
+        if (treeValue !== undefined) {
+          return treeValue;
         }
       }
     }
@@ -142,7 +162,7 @@ export class ExpressionEvaluator {
 
     const parentSegments = currentPathSegments.slice(0, -1);
     const parentLevels = leadingDots - 1;
-    const availableLevels = parentSegments.length;
+    const availableLevels = currentPathSegments.length;
 
     if (availableLevels < parentLevels) {
       throw new Error(
@@ -168,17 +188,17 @@ export class ExpressionEvaluator {
     };
   }
 
-  private evaluateTemplateLiteral(expression: string): any {
+  private async evaluateTemplateLiteral(expression: string): Promise<any> {
     // Check if expression is a single variable reference (e.g., "${counter}" or "${.foo}")
     // In this case, return the value directly without string conversion to preserve type
     const singleVarMatch = expression.trim().match(/^\$\{([^}]+)\}$/);
     if (singleVarMatch && singleVarMatch[1]) {
       const varPath = singleVarMatch[1].trim();
 
-      // Check for pronoun placeholder
-      if (isPronounPlaceholder(varPath)) {
-        return this.resolvePronounPlaceholder(varPath);
-      }
+       // Check for pronoun placeholder
+       if (isPronounPlaceholder(varPath)) {
+         return this.resolvePronounPlaceholder(varPath);
+       }
 
       if (!SIMPLE_PATH_PATTERN.test(varPath)) {
         return this.executeTemplateExpression(expression);
@@ -368,6 +388,9 @@ export class ExpressionEvaluator {
     // Replace ${path} with actual values from the data context
     return expression.replace(/\$\{([^}]+)\}/g, (_match, pathStr) => {
       const trimmedPath = pathStr.trim();
+
+      // No special @ syntax - live evaluation handled by fresh() resolver
+
       const value = this.resolveScopedValue(trimmedPath);
 
       if (value === undefined || value === null) {
@@ -453,6 +476,13 @@ export class ExpressionEvaluator {
     // These are always available in expression evaluation contexts
     Object.assign(context, typeCoercionHelpers);
 
+    // Add fresh re-evaluation resolver if DottedJson instance is available
+    if (this.context.dottedInstance) {
+      context.fresh = async (path: string) => {
+        return await this.context.dottedInstance.get(path, { fresh: true });
+      };
+    }
+
     // Flatten resolver hierarchy for direct access
     this.flattenResolvers(this.context.resolvers, context);
 
@@ -476,7 +506,7 @@ export class ExpressionEvaluator {
   }
 
   /**
-   * Resolve pronoun placeholder based on variant context
+   * Resolve pronoun placeholder using tree-walking for gender/lang lookup
    *
    * @param placeholder - Pronoun placeholder (e.g., ':subject', ':possessive')
    * @returns Resolved pronoun string
@@ -485,8 +515,10 @@ export class ExpressionEvaluator {
     const form = extractPronounForm(placeholder);
     if (!form) return placeholder;  // Invalid placeholder
 
-    const gender = (this.context.variants?.gender || 'x') as Gender;
-    const lang = this.context.variants?.lang || 'en';
+    // Use tree-walking to find gender and lang from current expression location
+    // Variants are now stored as regular data properties, no fallback to context.variants
+    const gender = (this.resolveTreeWalkingValue('gender') || 'x') as Gender;
+    const lang = (this.resolveTreeWalkingValue('lang') || 'en') as string;
 
     return resolvePronoun(form, gender, lang);
   }
@@ -496,14 +528,16 @@ export function createExpressionEvaluator(
   data: Record<string, any>,
   resolvers: ResolverContext,
   path: string[] = [],
-  variants?: VariantContext,
-  options?: any
+  options?: any,
+  fullPath?: string,
+  dottedInstance?: any
 ): ExpressionEvaluator {
   return new ExpressionEvaluator({
     data,
     resolvers,
     path,
-    variants,
-    options
+    fullPath,
+    options,
+    dottedInstance
   });
 }

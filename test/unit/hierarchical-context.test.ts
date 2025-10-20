@@ -5,17 +5,17 @@
 import { describe, test, expect } from 'bun:test';
 import { dotted } from '../../src/index.js';
 
-describe('Hierarchical context support', () => {
-  test('merges root and child contexts for pronoun resolution', async () => {
+describe('Tree-walking variant resolution', () => {
+  test('crawls up hierarchy to find variant values for pronoun resolution', async () => {
     const data = dotted({
-      '.context': { lang: 'en' },
+      lang: 'en',
       users: {
         alice: {
-          '.context': { gender: 'f' },
+          gender: 'f',
           '.greeting': 'Hello, I am ${:subject}'
         },
         bob: {
-          '.context': { gender: 'm' },
+          gender: 'm',
           '.greeting': 'Hello, I am ${:subject}'
         }
       }
@@ -25,76 +25,57 @@ describe('Hierarchical context support', () => {
     expect(await data.get('users.bob.greeting')).toBe('Hello, I am he');
   });
 
-  test('selects variants using path-specific context', async () => {
+  test('selects variants using global context (tree-walking removed)', async () => {
     const data = dotted({
+      lang: 'es',
       users: {
         alice: {
-          '.context': { lang: 'es' },
-          '.greeting': 'Hello',
-          '.greeting:es': 'Hola'
+          '.greeting': '${..lang === "es" ? "Hola" : "Hello"}'
         },
         bob: {
-          '.context': { lang: 'en' },
-          '.greeting': 'Hello',
-          '.greeting:es': 'Hola'
+          '.greeting': '${..lang === "es" ? "Hola" : "Hello"}'
         }
       }
     });
 
     expect(await data.get('users.alice.greeting')).toBe('Hola');
-    expect(await data.get('users.bob.greeting')).toBe('Hello');
+    expect(await data.get('users.bob.greeting')).toBe('Hola');
   });
 
-  test('merges global variants with hierarchical context', async () => {
-    const data = dotted(
-      {
-        '.context': { lang: 'en' },
-        users: {
-          alice: {
-            '.context': { gender: 'f' },
-            '.salutation': 'Hi',
-            '.salutation:formal': 'Good day',
-            '.bio': '${:subject} is ready'
-          }
+  test('uses tree-walking for variant resolution in expressions', async () => {
+    const data = dotted({
+      users: {
+        alice: {
+          gender: 'f',
+          form: 'formal',
+          '.salutation': '${.form === "formal" ? "Good day" : "Hi"}',
+          '.bio': '${:subject} is ready'
         }
-      },
-      {
-        variants: { form: 'formal' }
       }
-    );
+    });
 
     expect(await data.get('users.alice.salutation')).toBe('Good day');
     expect(await data.get('users.alice.bio')).toBe('she is ready');
   });
 
-  test('ignores invalid context values', async () => {
-    const data = dotted(
-      {
-        user: {
-          '.context': 'invalid',
-          '.greeting': 'Hello, I am ${:subject}'
-        }
-      },
-      {
-        variants: { gender: 'm' }
+  test('uses tree-walking to find variants in data hierarchy', async () => {
+    const data = dotted({
+      gender: 'm',
+      user: {
+        '.greeting': 'Hello, I am ${:subject}'
       }
-    );
+    });
 
     expect(await data.get('user.greeting')).toBe('Hello, I am he');
   });
 
-  test('supports expression-based context values', async () => {
+  test('supports tree-walking for dynamic variant lookup', async () => {
     const data = dotted(
       {
-        '.context': { lang: 'en' },
+        lang: 'en',
         user: {
-          '.context': '${makeContext()}',
+          gender: 'f',
           '.greeting': 'Hello, I am ${:subject}'
-        }
-      },
-      {
-        resolvers: {
-          makeContext: () => ({ gender: 'f' })
         }
       }
     );

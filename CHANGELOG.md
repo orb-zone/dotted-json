@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.0
+
+### Major Changes
+
+- **Breaking Changes: Tree-walking variant resolution**
+
+  - **Removed `.context` system entirely** - No more `.context` properties in data
+  - **Implemented tree-walking variant resolution** - Expressions can now reference variants using `${.property}` syntax that crawls up the object hierarchy
+  - **Variants are now regular data properties** - Gender, language, and other variants must be stored as regular properties in your data
+  - **Pronoun resolution uses tree-walking** - No longer falls back to global `variants` option for pronoun resolution
+  - **Removed complex context collection logic** - Simplified variant resolution to use simple tree-walking
+
+  **Migration Guide:**
+  - Move variant values (gender, lang, etc.) from global `variants` option into your data as regular properties
+  - Update expressions to use `${.gender}` instead of relying on global variants for pronouns
+  - Example: `gender: 'f'` in data instead of `{ variants: { gender: 'f' } }`
+
 ## 1.0.1
 
 ### Patch Changes

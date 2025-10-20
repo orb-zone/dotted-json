@@ -56,71 +56,51 @@ describe('Pronoun helper functions', () => {
 
 describe('Pronoun placeholders in expressions', () => {
   test('resolves subject pronoun in template literal', async () => {
-    const data = dotted(
-      {
-        name: 'Alice',
-        '.bio': '${name} is a developer. ${:subject} loves coding.'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      name: 'Alice',
+      gender: 'f',
+      '.bio': '${name} is a developer. ${:subject} loves coding.'
+    });
 
     expect(await data.get('.bio')).toBe('Alice is a developer. she loves coding.');
   });
 
   test('resolves possessive pronoun', async () => {
-    const data = dotted(
-      {
-        name: 'Bob',
-        '.bio': '${name} is known for ${:possessive} work in AI.'
-      },
-      {
-        variants: { gender: 'm' }
-      }
-    );
+    const data = dotted({
+      name: 'Bob',
+      gender: 'm',
+      '.bio': '${name} is known for ${:possessive} work in AI.'
+    });
 
     expect(await data.get('.bio')).toBe('Bob is known for his work in AI.');
   });
 
   test('resolves object pronoun', async () => {
-    const data = dotted(
-      {
-        name: 'Charlie',
-        '.bio': 'Everyone respects ${name}. We admire ${:object}.'
-      },
-      {
-        variants: { gender: 'x' }
-      }
-    );
+    const data = dotted({
+      gender: 'x',
+      name: 'Charlie',
+      '.bio': 'Everyone respects ${name}. We admire ${:object}.'
+    });
 
     expect(await data.get('.bio')).toBe('Everyone respects Charlie. We admire them.');
   });
 
   test('resolves reflexive pronoun', async () => {
-    const data = dotted(
-      {
-        name: 'Dana',
-        '.bio': '${name} taught ${:reflexive} to code.'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      name: 'Dana',
+      gender: 'f',
+      '.bio': '${name} taught ${:reflexive} to code.'
+    });
 
     expect(await data.get('.bio')).toBe('Dana taught herself to code.');
   });
 
   test('resolves multiple pronouns in one expression', async () => {
-    const data = dotted(
-      {
-        name: 'Eve',
-        '.bio': '${name} is brilliant. ${:subject} created ${:possessive} own framework by ${:reflexive}.'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      name: 'Eve',
+      gender: 'f',
+      '.bio': '${name} is brilliant. ${:subject} created ${:possessive} own framework by ${:reflexive}.'
+    });
 
     expect(await data.get('.bio')).toBe('Eve is brilliant. she created her own framework by herself.');
   });
@@ -135,16 +115,12 @@ describe('Pronoun placeholders in expressions', () => {
   });
 
   test('works with variant + pronoun combination', async () => {
-    const data = dotted(
-      {
-        name: 'María',
-        '.bio': '${name} is an author. ${:subject} writes ${:possessive} books.',
-        '.bio:es': '${name} es autora. ${:subject} escribe ${:possessive} libros.'
-      },
-      {
-        variants: { lang: 'es', gender: 'f' }
-      }
-    );
+    const data = dotted({
+      name: 'María',
+      gender: 'f',
+      lang: 'es',
+      '.bio': '${.lang === "es" ? `${name} es autora. ${:subject} escribe ${:possessive} libros.` : `${name} is an author. ${:subject} writes ${:possessive} books.`}'
+    });
 
     // Note: Currently pronoun resolution is English-only
     // Spanish variant is selected, but pronouns resolve to English
@@ -152,15 +128,11 @@ describe('Pronoun placeholders in expressions', () => {
   });
 
   test('handles capitalization via custom wrapper', async () => {
-    const data = dotted(
-      {
-        name: 'Frank',
-        '.bio': '${name} codes. ${:subject} is great.'
-      },
-      {
-        variants: { gender: 'm' }
-      }
-    );
+    const data = dotted({
+      name: 'Frank',
+      gender: 'm',
+      '.bio': '${name} codes. ${:subject} is great.'
+    });
 
     const bio = await data.get('.bio');
     // Capitalize first letter after period
@@ -172,45 +144,33 @@ describe('Pronoun placeholders in expressions', () => {
 
 describe('Pronoun edge cases', () => {
   test('handles invalid pronoun placeholder gracefully', async () => {
-    const data = dotted(
-      {
-        '.bio': 'Test ${:invalid} placeholder'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      gender: 'f',
+      '.bio': 'Test ${:invalid} placeholder'
+    });
 
     // Invalid placeholders should be left as-is
     expect(await data.get('.bio')).toBe('Test ${:invalid} placeholder');
   });
 
   test('handles pronoun with no colon prefix', async () => {
-    const data = dotted(
-      {
-        subject: 'topic',
-        '.bio': 'The ${subject} is interesting'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      gender: 'f',
+      subject: 'topic',
+      '.bio': 'The ${subject} is interesting'
+    });
 
     // Regular variable, not a pronoun placeholder
     expect(await data.get('.bio')).toBe('The topic is interesting');
   });
 
   test('handles nested pronoun references', async () => {
-    const data = dotted(
-      {
-        author: 'Grace',
-        '.title': '${author}',
-        '.bio': '${.title} is amazing. ${:subject} inspires others.'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      author: 'Grace',
+      gender: 'f',
+      '.title': '${author}',
+      '.bio': '${.title} is amazing. ${:subject} inspires others.'
+    });
 
     expect(await data.get('.bio')).toBe('Grace is amazing. she inspires others.');
   });

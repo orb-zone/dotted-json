@@ -212,157 +212,124 @@ describe('Variant resolution', () => {
 
 describe('Variant integration in DottedJson', () => {
   test('resolves variant properties automatically', async () => {
-    const data = dotted(
-      {
-        name: 'Default',
-        'name:es': 'Español',
-        'name:fr': 'Français'
-      },
-      {
-        variants: { lang: 'es' }
-      }
-    );
+    const data = dotted({
+      lang: 'es',
+      name: 'Default',
+      'name:es': 'Español',
+      'name:fr': 'Français'
+    });
 
     expect(await data.get('name')).toBe('Español');
   });
 
   test('supports gender variants', async () => {
-    const data = dotted(
-      {
-        '.bio': 'The author is known',
-        '.bio:f': 'She is known for her work',
-        '.bio:m': 'He is known for his work',
-        '.bio:x': 'They are known for their work'
-      },
-      {
-        variants: { gender: 'f' }
-      }
-    );
+    const data = dotted({
+      gender: 'f',
+      '.bio': 'The author is known',
+      '.bio:f': 'She is known for her work',
+      '.bio:m': 'He is known for his work',
+      '.bio:x': 'They are known for their work'
+    });
 
     expect(await data.get('.bio')).toBe('She is known for her work');
   });
 
   test('supports multi-dimensional variants', async () => {
-    const data = dotted(
-      {
-        '.greeting': 'Hello',
-        '.greeting:es': 'Hola',
-        '.greeting:es:formal': 'Buenos días',
-        '.greeting:es:casual': '¡Ey!'
-      },
-      {
-        variants: { lang: 'es', form: 'formal' }  // form is now a well-known variant
-      }
-    );
+    const data = dotted({
+      lang: 'es',
+      form: 'formal',
+      '.greeting': 'Hello',
+      '.greeting:es': 'Hola',
+      '.greeting:es:formal': 'Buenos días',
+      '.greeting:es:casual': '¡Ey!'
+    });
 
     expect(await data.get('.greeting')).toBe('Buenos días');
   });
 
   test('supports custom dimension variants', async () => {
-    const data = dotted(
-      {
-        '.action': 'Attack',
-        '.action:pirate': "Blast 'em!",
-        '.action:cowboy': 'Draw!',
-        '.action:surfer': 'Shred it!'
-      },
-      {
-        variants: { pirate: 'pirate' }
-      }
-    );
+    const data = dotted({
+      style: 'pirate',
+      '.action': 'Attack',
+      '.action:pirate': "Blast 'em!",
+      '.action:cowboy': 'Draw!',
+      '.action:surfer': 'Shred it!'
+    });
 
     expect(await data.get('.action')).toBe("Blast 'em!");
   });
 
   test('falls back to default when variant not found', async () => {
-    const data = dotted(
-      {
-        name: 'Default',
-        'name:es': 'Español'
-      },
-      {
-        variants: { lang: 'fr' }  // French not available
-      }
-    );
+    const data = dotted({
+      lang: 'fr',  // French not available
+      name: 'Default',
+      'name:es': 'Español'
+    });
 
     expect(await data.get('name')).toBe('Default');
   });
 
   test('supports Japanese formality levels (keigo)', async () => {
-    const data = dotted(
-      {
-        '.greeting': 'Hello',
-        '.greeting:ja': 'こんにちは',           // Casual
-        '.greeting:ja:polite': 'おはようございます',    // Polite (teineigo)
-        '.greeting:ja:honorific': 'いらっしゃいませ'    // Honorific (keigo)
-      },
-      {
-        variants: { lang: 'ja', form: 'honorific' }
-      }
-    );
+    const data = dotted({
+      lang: 'ja',
+      form: 'honorific',
+      '.greeting': 'Hello',
+      '.greeting:ja': 'こんにちは',
+      '.greeting:ja:polite': 'おはようございます',
+      '.greeting:ja:honorific': 'いらっしゃいませ'
+    });
 
     expect(await data.get('.greeting')).toBe('いらっしゃいませ');
   });
 
   test('supports Korean formality (jondaemal)', async () => {
-    const data = dotted(
-      {
-        '.question': 'How are you?',
-        '.question:ko': '어떻게 지내?',        // Informal (banmal)
-        '.question:ko:formal': '어떻게 지내세요?'  // Formal (jondaemal)
-      },
-      {
-        variants: { lang: 'ko', form: 'formal' }
-      }
-    );
+    const data = dotted({
+      lang: 'ko',
+      form: 'formal',
+      '.question': 'How are you?',
+      '.question:ko': '어떻게 지내?',
+      '.question:ko:formal': '어떻게 지내세요?'
+    });
 
     expect(await data.get('.question')).toBe('어떻게 지내세요?');
   });
 
   test('supports German formality (Sie vs du)', async () => {
-    const data = dotted(
-      {
-        '.you': 'you',
-        '.you:de': 'du',              // Informal
-        '.you:de:formal': 'Sie'        // Formal
-      },
-      {
-        variants: { lang: 'de', form: 'formal' }
-      }
-    );
+    const data = dotted({
+      lang: 'de',
+      form: 'formal',
+      '.pronoun': 'you',
+      '.pronoun:de': 'du',
+      '.pronoun:de:formal': 'Sie'
+    });
 
-    expect(await data.get('.you')).toBe('Sie');
+    expect(await data.get('.pronoun')).toBe('Sie');
   });
 
   test('combines lang + form + gender for Japanese', async () => {
-    const data = dotted(
-      {
-        '.title': 'Teacher',
-        '.title:ja': '先生',
-        '.title:ja:polite': '先生様',
-        '.title:ja:polite:f': '女性先生様'
-      },
-      {
-        variants: { lang: 'ja', form: 'polite', gender: 'f' }
-      }
-    );
+    const data = dotted({
+      lang: 'ja',
+      form: 'polite',
+      gender: 'f',
+      '.title': 'Teacher',
+      '.title:ja': '先生',
+      '.title:ja:polite': '先生様',
+      '.title:ja:polite:f': '女性先生様'
+    });
 
     expect(await data.get('.title')).toBe('女性先生様');
   });
 
   test('form variant falls back gracefully', async () => {
-    const data = dotted(
-      {
-        '.greeting': 'Hello',
-        '.greeting:ja': 'こんにちは'
-        // No :polite variant
-      },
-      {
-        variants: { lang: 'ja', form: 'polite' }
-      }
-    );
+    const data = dotted({
+      lang: 'ja',
+      form: 'polite',
+      '.greeting': 'Hello',
+      '.greeting:ja': 'こんにちは'
+      // No :polite variant, so falls back to lang match
+    });
 
-    // Should fall back to .greeting:ja (lang match, no form match)
+    // Should fall back to lang match (no form match)
     expect(await data.get('.greeting')).toBe('こんにちは');
   });
 
@@ -376,34 +343,26 @@ describe('Variant integration in DottedJson', () => {
   });
 
   test('combines lang and gender variants', async () => {
-    const data = dotted(
-      {
-        '.title': 'Author',
-        '.title:es': 'Autor',
-        '.title:es:f': 'Autora',
-        '.title:es:m': 'Autor'
-      },
-      {
-        variants: { lang: 'es', gender: 'f' }
-      }
-    );
+    const data = dotted({
+      lang: 'es',
+      gender: 'f',
+      '.title': 'Author',
+      '.title:es': 'Autor',
+      '.title:es:f': 'Autora'
+    });
 
     expect(await data.get('.title')).toBe('Autora');
   });
 
   test('variant resolution works with expressions', async () => {
-    const data = dotted(
-      {
-        firstName: 'María',
-        lastName: 'García',
-        '.fullName': '${firstName} ${lastName}',
-        '.fullName:es': '${firstName} ${lastName}',
-        '.fullName:en': '${firstName} ${lastName}'
-      },
-      {
-        variants: { lang: 'es' }
-      }
-    );
+    const data = dotted({
+      lang: 'es',
+      firstName: 'María',
+      lastName: 'García',
+      '.fullName': '${firstName} ${lastName}',
+      '.fullName:es': '${firstName} ${lastName}',
+      '.fullName:en': '${firstName} ${lastName}'
+    });
 
     expect(await data.get('.fullName')).toBe('María García');
   });
