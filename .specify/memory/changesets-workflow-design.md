@@ -2,7 +2,7 @@
 
 **Purpose**: Document the design decisions, architecture, and rationale behind our Changesets-based release automation.
 
-**Status**: Implemented (v0.11.0)
+**Status**: Implemented (v0.12.0 - using official changesets/action@v1)
 **Implementation**: See `.changeset/WORKFLOW.md` for usage guide
 **Package**: `@changesets/cli@^2.29.7`
 
@@ -450,6 +450,6 @@ If JSR publish fails:
 
 ---
 
-**Last Updated**: 2025-10-16 (v0.11.0)
+**Last Updated**: 2025-10-17 (v0.12.0 - migrated to official changesets/action@v1)
 **Status**: ✅ Production-ready, fully automated
 **Next Review**: At v2.0 monorepo migration

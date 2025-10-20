@@ -138,6 +138,7 @@
     }
   },
   "dependencies": {
+    "@orb-zone/dotted-json": "npm:@jsr/orb-zone__dotted-json",
     "dot-prop": "^8.0.2"
   },
   "devDependencies": {

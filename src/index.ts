@@ -53,6 +53,7 @@ export type {
 
 import { DottedJson } from './dotted-json.js';
 import type { DottedOptions } from './types.js';
+import { getProperty as dotGet, setProperty as dotSet } from 'dot-prop';
 
 /**
  * Create a dotted JSON object with lazy expression evaluation.
@@ -121,6 +122,69 @@ import type { DottedOptions } from './types.js';
  * @see {@link DottedOptions} for configuration options
  * @see {@link DottedJson} for instance methods
  */
+/**
+ * Create a scoped proxy for nested object access
+ * This allows nested objects to have .get(), .set(), etc. methods
+ * and resolves paths relative to the nested context
+ */
+function createScopedProxy(instance: DottedJson, path: string[] = []): any {
+  // Create a proxy that intercepts property access
+  return new Proxy({}, {
+    get(_target: any, prop: string | symbol) {
+      // Handle symbols and special properties
+      if (typeof prop === 'symbol' || prop === 'constructor' || prop === 'then') {
+        return undefined;
+      }
+
+      // If property is a DottedJson method, create a scoped version
+      if (prop === 'get' || prop === 'set' || prop === 'has') {
+        const method = (instance as any)[prop].bind(instance);
+        return function(relativePath: string, ...args: any[]) {
+          // Resolve path relative to current scope
+          const fullPath = path.length > 0 
+            ? `${path.join('.')}.${relativePath}` 
+            : relativePath;
+          
+          // Call the method on the root instance
+          return method(fullPath, ...args);
+        };
+      }
+
+      // Get the current data value at this path
+      const currentPath = path.length > 0 ? path.join('.') : '';
+      const currentData = currentPath ? dotGet(instance.data, currentPath) : instance.data;
+      
+      if (!currentData || typeof currentData !== 'object') {
+        return undefined;
+      }
+
+      // Get the value of this property
+      const value = currentData[prop];
+      
+      // If value is an object (not null, not array), wrap it in a scoped proxy
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        return createScopedProxy(instance, [...path, prop]);
+      }
+      
+      return value;
+    },
+
+    set(_target: any, prop: string | symbol, value: any) {
+      // Only allow setting data properties, not methods
+      if (typeof prop === 'string') {
+        const currentPath = path.length > 0 ? path.join('.') : '';
+        const fullPath = currentPath ? `${currentPath}.${prop}` : prop;
+        dotSet(instance.data, fullPath, value);
+        return true;
+      }
+      return false;
+    }
+  });
+}
+
 export function dotted(schema: Record<string, any>, options?: DottedOptions): any {
-  return new DottedJson(schema, options);
+  const instance = new DottedJson(schema, options);
+
+  // Create the root proxy with scoped access
+  return createScopedProxy(instance);
 }

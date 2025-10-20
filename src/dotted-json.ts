@@ -13,7 +13,7 @@ const DEFAULT_MAX_DEPTH = 100;
 
 export class DottedJson implements IDottedJson {
   private schema: Record<string, any>;
-  private data: Record<string, any>;
+  public data: Record<string, any>;  // Public for Proxy access
   private cache: Map<string, any> = new Map();
   private options: Required<Omit<DottedOptions, 'validation'>> & Pick<DottedOptions, 'validation'>;
   private evaluationStack: Set<string> = new Set();
@@ -22,15 +22,24 @@ export class DottedJson implements IDottedJson {
 
   constructor(schema: Record<string, any>, options: DottedOptions = {}) {
     this.schema = structuredClone(schema);
+    
+    // Backward compatibility: support old 'default' and 'errorDefault' as 'fallback'
+    const fallback = options.fallback !== undefined 
+      ? options.fallback 
+      : ((options as any).errorDefault !== undefined 
+          ? (options as any).errorDefault 
+          : (options as any).default);  // Support legacy options
+    
     this.options = {
       initial: options.initial || {},
-      default: options.default,
-      errorDefault: options.errorDefault,
+      fallback,
       resolvers: options.resolvers || {},
       maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH,
       variants: options.variants || {},
-      validation: options.validation
-    };
+      validation: options.validation,
+      onError: options.onError,
+      context: options.context
+    } as any;
 
     // Merge schema with initial data
     this.data = this.mergeData(this.schema, this.options.initial);
@@ -52,8 +61,18 @@ export class DottedJson implements IDottedJson {
       // Resolve variant path based on context (e.g., .bio → .bio:es:f)
       const resolvedPath = this.resolveVariant(path);
 
+      // Backward compatibility: support old 'ignoreCache' as 'fresh'
+      const fresh = options.fresh !== undefined 
+        ? options.fresh 
+        : (options as any).ignoreCache;
+      
+      // Backward compatibility: support old 'default' as 'fallback'
+      const fallback = options.fallback !== undefined 
+        ? options.fallback 
+        : (options as any).default;
+
       // Check if we need to evaluate any dot-prefixed expressions along the path
-      await this.evaluateExpressionsInPath(resolvedPath, options.ignoreCache);
+      await this.evaluateExpressionsInPath(resolvedPath, fresh);
 
       // Handle leading dot (expression prefix) - actual data is stored without the dot
       const actualPath = resolvedPath.startsWith('.') ? resolvedPath.substring(1) : resolvedPath;
@@ -70,38 +89,119 @@ export class DottedJson implements IDottedJson {
         return result;
       }
 
-      // Value is missing - resolve default using hierarchical lookup
-      return await this.resolveDefault(path, options.default);
+      // Value is missing - return fallback
+      return this.resolveFallback(fallback);
 
     } catch (_error) {
-      // Error occurred - check for default first (higher priority than errorDefault)
-      if (options.default !== undefined || this.options.default !== undefined) {
-        return await this.resolveDefault(path, options.default);
-      }
-
-      // If no default, resolve errorDefault
-      if (this.options.errorDefault !== undefined || options.errorDefault !== undefined) {
-        return await this.resolveErrorDefault(path, _error as Error, options.errorDefault);
-      }
-      throw _error;
+      // Handle error using onError or fallback
+      return this.handleError(_error as Error, path, options.fallback || (options as any).default);
     }
   }
 
   async set(path: string, value: any, _options: SetOptions = {}): Promise<void> {
     try {
-      dotSet(this.data, path, value);
+      // Validate key is not reserved
+      this.validateKey(path);
+
+      // If path starts with a dot (expression key), we need to escape it for dot-prop
+      // because dot-prop treats leading dots as path separators
+      let escapedPath = path;
+      let materializedPath: string | null = null;
+
+      if (path.startsWith('.')) {
+        // Escape the leading dot: .greeting -> \.greeting
+        escapedPath = '\\' + path;
+        // Track the materialized path (without the dot)
+        materializedPath = path.substring(1);
+      }
+
+      dotSet(this.data, escapedPath, value);
+
+      // If setting an expression key, clear the materialized value
+      if (materializedPath) {
+        // Delete the materialized value
+        if (dotHas(this.data, materializedPath)) {
+          const pathParts = materializedPath.split('.');
+          const parentPath = pathParts.slice(0, -1).join('.');
+          const key = pathParts[pathParts.length - 1];
+
+          if (parentPath) {
+            const parent = dotGet(this.data, parentPath);
+            if (parent && typeof parent === 'object' && key) {
+              delete parent[key];
+            }
+          } else if (key) {
+            delete this.data[key];
+          }
+        }
+      }
 
       // Clear cache since data changed
       this.cache.clear();
+      
+      // Clear all materialized expression values (simple invalidation strategy)
+      // This ensures that expressions depending on the changed value are re-evaluated
+      this.clearMaterializedValues(this.data);
     } catch (_error) {
       throw _error;
     }
   }
 
+  /**
+   * Clear materialized expression values from data
+   * A value is considered materialized if there exists a corresponding dot-prefixed expression key
+   */
+  private clearMaterializedValues(obj: any, prefix = ''): void {
+    if (!obj || typeof obj !== 'object') return;
+
+    for (const key of Object.keys(obj)) {
+      if (key.startsWith('.') || key.startsWith('\\')) {
+        // This is an expression key, check if there's a materialized value
+        const expressionKey = key.startsWith('\\') ? key.substring(1) : key;
+        const materializedKey = expressionKey.startsWith('.') ? expressionKey.substring(1) : expressionKey;
+        
+        if (materializedKey in obj) {
+          delete obj[materializedKey];
+        }
+      } else if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+        // Recursively clear nested objects
+        const nestedPrefix = prefix ? `${prefix}.${key}` : key;
+        this.clearMaterializedValues(obj[key], nestedPrefix);
+      }
+    }
+  }
+
+  /**
+   * Validate that a key name is not reserved
+   * Reserved keys are method names that would conflict with the DottedJson API
+   *
+   * @param path - The path/key to validate
+   * @throws {Error} If key is reserved
+   */
+  private validateKey(path: string): void {
+    const RESERVED_KEYS = ['get', 'set', 'has', 'delete', 'clear', 'keys'];
+
+    // Extract the final key from the path (e.g., "user.name" → "name")
+    const finalKey = path.includes('.') ? path.split('.').pop()! : path;
+
+    if (RESERVED_KEYS.includes(finalKey)) {
+      throw new Error(
+        `Cannot set reserved key: "${finalKey}". ` +
+        `Reserved keys: ${RESERVED_KEYS.join(', ')}. ` +
+        `These keys are used by the DottedJson API and cannot be modified.`
+      );
+    }
+  }
+
   async has(path: string, options: HasOptions = {}): Promise<boolean> {
     try {
+      // Backward compatibility: support old 'ignoreCache' as 'fresh'
+      const fresh = options.fresh !== undefined 
+        ? options.fresh 
+        : (options as any).ignoreCache;
+      
       // Evaluate expressions along the path if needed
-      await this.evaluateExpressionsInPath(path, options.ignoreCache);
+      await this.evaluateExpressionsInPath(path, fresh);
 
       return dotHas(this.data, path);
     } catch (_error) {
@@ -125,7 +225,7 @@ export class DottedJson implements IDottedJson {
     return result;
   }
 
-  private async evaluateExpressionsInPath(path: string, ignoreCache = false): Promise<void> {
+  private async evaluateExpressionsInPath(path: string, fresh = false): Promise<void> {
     // Handle leading dot (expression prefix) specially
     const isExpression = path.startsWith('.');
     const actualPath = isExpression ? path.substring(1) : path;
@@ -136,8 +236,8 @@ export class DottedJson implements IDottedJson {
       const escapedExpressionPath = `\\.${actualPath}`;
       if (dotHas(this.data, escapedExpressionPath)) {
         const cachedResult = dotGet(this.data, actualPath);
-        if (cachedResult === undefined || ignoreCache) {
-          await this.evaluateExpression(escapedExpressionPath, actualPath, ignoreCache);
+        if (cachedResult === undefined || fresh) {
+          await this.evaluateExpression(escapedExpressionPath, actualPath, fresh);
         }
       }
     }
@@ -172,17 +272,17 @@ export class DottedJson implements IDottedJson {
         escapedExpressionPath = parentPath ? `${parentPath}.\\.${resolvedSegment}` : `\\.${resolvedSegment}`;
       }
 
-      // If the expression exists and hasn't been evaluated yet (or we're ignoring cache)
+      // If the expression exists and hasn't been evaluated yet (or we want fresh evaluation)
       if (dotHas(this.data, escapedExpressionPath)) {
         const cachedResult = dotGet(this.data, partialPath);
-        if (cachedResult === undefined || ignoreCache) {
-          await this.evaluateExpression(escapedExpressionPath, partialPath, ignoreCache);
+        if (cachedResult === undefined || fresh) {
+          await this.evaluateExpression(escapedExpressionPath, partialPath, fresh);
         }
       }
     }
   }
 
-  private async evaluateExpression(expressionPath: string, targetPath: string, ignoreCache = false): Promise<void> {
+  private async evaluateExpression(expressionPath: string, targetPath: string, fresh = false): Promise<void> {
     // Cycle detection (Constitution Principle VI)
     if (this.evaluationStack.has(expressionPath)) {
       throw new Error(`Circular dependency detected: ${expressionPath} references itself`);
@@ -193,8 +293,8 @@ export class DottedJson implements IDottedJson {
       throw new Error(`Maximum evaluation depth of ${this.options.maxEvaluationDepth} exceeded`);
     }
 
-    // Check cache first
-    if (!ignoreCache && this.cache.has(expressionPath)) {
+    // Check cache first (unless fresh evaluation is requested)
+    if (!fresh && this.cache.has(expressionPath)) {
       dotSet(this.data, targetPath, this.cache.get(expressionPath));
       return;
     }
@@ -210,7 +310,7 @@ export class DottedJson implements IDottedJson {
       this.evaluationStack.add(expressionPath);
       this.evaluationDepth++;
 
-      const result = await this.evaluateExpressionString(expression);
+      const result = await this.evaluateExpressionString(expression, targetPath);
 
       // Cache the result
       this.cache.set(expressionPath, result);
@@ -227,15 +327,19 @@ export class DottedJson implements IDottedJson {
     }
   }
 
-  private async evaluateExpressionString(expression: string): Promise<any> {
+  private async evaluateExpressionString(expression: string, targetPath: string): Promise<any> {
     // Check if expression has dependencies that need to be resolved first
     await this.resolveDependencies(expression);
+
+    // Convert dot-separated path to array for context
+    const pathArray = targetPath.split('.');
 
     const evaluator = createExpressionEvaluator(
       this.data,
       this.options.resolvers,
-      [],
-      this.options.variants
+      pathArray,
+      this.options.variants,
+      this.options  // Pass full options for error handling
     );
 
     return await evaluator.evaluate(expression);
@@ -277,23 +381,51 @@ export class DottedJson implements IDottedJson {
     }
   }
 
-  private async resolveDefault(_path: string, overrideDefault?: any): Promise<any> {
-    // 1. Use override default if provided
-    if (overrideDefault !== undefined) {
-      return overrideDefault;
+  /**
+   * Resolve fallback value (supports static values and functions)
+   */
+  private async resolveFallback(overrideFallback?: any): Promise<any> {
+    const fallback = overrideFallback !== undefined 
+      ? overrideFallback 
+      : this.options.fallback;
+
+    // If fallback is a function, call it
+    if (typeof fallback === 'function') {
+      const result = fallback();
+      // Handle async functions
+      return result && typeof result.then === 'function' ? await result : result;
     }
 
-    // 2. Fall back to instance-level default
-    return this.options.default;
+    return fallback;
   }
 
-  private async resolveErrorDefault(_path: string, _error: Error, overrideErrorDefault?: any): Promise<any> {
-    // 1. Use override errorDefault if provided
-    if (overrideErrorDefault !== undefined) {
-      return overrideErrorDefault;
+  /**
+   * Handle errors using onError handler or fallback
+   */
+  private async handleError(error: Error, path: string, overrideFallback?: any): Promise<any> {
+    // If custom error handler is provided, use it
+    if (this.options.onError) {
+      const result = this.options.onError(error, path);
+      
+      if (result === 'throw') {
+        throw error;
+      }
+      
+      if (result === 'fallback') {
+        return this.resolveFallback(overrideFallback);
+      }
+      
+      // Return custom value from error handler
+      return result;
     }
 
-    // 2. Fall back to instance-level errorDefault
-    return this.options.errorDefault;
+    // If fallback is provided (instance or override), use it
+    const hasFallback = overrideFallback !== undefined || this.options.fallback !== undefined;
+    if (hasFallback) {
+      return this.resolveFallback(overrideFallback);
+    }
+
+    // Default behavior: throw (no error handler, no fallback)
+    throw error;
   }
 }

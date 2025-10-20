@@ -1,18 +1,21 @@
 <!--
-Sync Impact Report (Version 1.0.0)
+Sync Impact Report (Version 1.2.0)
 ================================================
-Version Change: INITIAL → 1.0.0
+Version Change: 1.1.0 → 1.2.0
 Ratification Date: 2025-10-05
-Last Amendment: 2025-10-05
+Last Amendment: 2025-10-19
 
-Modified Principles: N/A (initial version)
-Added Sections:
-  - Core Principles (7 principles)
-  - Security Requirements
-  - Development Workflow
-  - Governance
+Modified Principles: Core bundle size limit increased
+Added Sections: N/A
 
 Removed Sections: N/A
+
+Amendment Rationale:
+  - Increase bundle size limit from 20 kB to 50 kB
+  - Accommodate v0.13 features: deep proxy wrapping, scoped resolution, 
+    dependency invalidation, enhanced error handling
+  - Provide buffer for future growth (hierarchical context, parent references)
+  - Current size: ~25 kB (50% of new limit)
 
 Templates Requiring Updates:
   ✅ plan-template.md - Constitution Check section references constitution
@@ -32,7 +35,7 @@ Follow-up TODOs: None
 The core library MUST remain lightweight and dependency-free (except essential utilities
 like dot-prop). All framework integrations (Zod, SurrealDB, TanStack, Pinia Colada,
 Vue/React) MUST be implemented as optional peer dependencies that users explicitly
-install. The core library MUST NOT exceed 20 kB minified bundle size.
+install. The core library MUST NOT exceed 50 kB minified bundle size.
 
 **Core features** (included in bundle limit):
 - Expression evaluation with lazy loading
@@ -43,8 +46,9 @@ install. The core library MUST NOT exceed 20 kB minified bundle size.
 
 **Rationale**: Users adopting dotted-json should not pay the bundle cost for features
 they don't use. A minimal core ensures maximum flexibility and broad adoption across
-different tech stacks. The 20 kB limit accommodates essential i18n/variant features
-while remaining lightweight.
+different tech stacks. The 50 kB limit accommodates essential i18n/variant features,
+property access materialization, and scoped expression evaluation while remaining
+lightweight.
 
 ### II. Security Through Transparency (NON-NEGOTIABLE)
 
@@ -168,7 +172,7 @@ without bloating the core.
    - [ ] Tests added for new functionality
    - [ ] Breaking changes documented in CHANGELOG.md
    - [ ] Security implications reviewed (if touching expression evaluator)
-   - [ ] Bundle size impact checked (core must stay under 20 kB)
+   - [ ] Bundle size impact checked (core must stay under 50 kB)
    - [ ] TypeScript types updated (no `any` without justification)
 
 ### Release Process
@@ -184,6 +188,96 @@ without bloating the core.
    - [ ] Bundle size within limits (documented in CHANGELOG)
    - [ ] Security audit clean (no high/critical vulnerabilities)
    - [ ] Documentation examples tested against new version
+
+### Release Automation (Changesets)
+
+**Standard Practice**: All releases MUST use Changesets workflow (v0.11.0+)
+
+**Rationale**: Eliminates manual version management errors, enforces semver discipline, provides reviewable version bump PRs before publishing.
+
+**Changeset Creation**:
+
+1. Developer creates changeset during feature development: `bun run changeset:add`
+2. Changeset file (`.changeset/*.md`) committed WITH feature code
+3. Changeset includes semver bump (major/minor/patch) and user-facing summary
+
+**Version Bump Review**:
+
+1. Merge PR to main (with changeset)
+2. GitHub Actions creates/updates "Version Packages" PR
+3. Review Version Packages PR for:
+   - [ ] Correct version bump (semver compliance)
+   - [ ] CHANGELOG.md accuracy
+   - [ ] No unintended breaking changes
+4. Merge Version Packages PR to trigger publish
+
+**Publishing**:
+
+- Automated via GitHub Actions (no manual npm publish)
+- Publishes to JSR registry (OIDC authenticated)
+- Creates git tag automatically (v0.x.x format)
+- Version Packages PR includes both `package.json` and `jsr.json` updates
+
+### JSR Publishing Standards
+
+**Registry Strategy** (v0.10.0+):
+
+- **Primary**: JSR.io (TypeScript-native, OIDC auth)
+- **Future**: npm (planned for v1.0.0)
+
+**Type Safety Requirements**:
+
+- All public APIs MUST have explicit return types (JSR "fast types" requirement)
+- No inferred return types allowed for exported functions
+- Prevents "slow types" errors during JSR publish
+
+**Version Synchronization**:
+
+- `package.json` is primary version source
+- `jsr.json` synced automatically via `tools/sync-jsr-version.ts`
+- Both files MUST match before publishing
+- Sync script runs as part of `changeset:version` workflow
+
+**Authentication**:
+
+- GitHub OIDC (no manual tokens)
+- Requires package linked to GitHub repo on JSR.io
+- Automatic when workflow runs from main branch
+
+**Rationale**: JSR's TypeScript-first approach aligns with our type-safe philosophy. OIDC eliminates secret management burden. Automated version sync prevents registry drift.
+
+### CI/CD Best Practices
+
+**Branch Protection**:
+
+- Direct pushes to main branch MUST be prevented
+- Enforced via Lefthook pre-push hook (local)
+- Enforced via GitHub branch protection (remote)
+- All changes MUST go through PR workflow
+
+**Pre-Push Checks** (Lefthook):
+
+- Lint: `bun run lint`
+- Type check: `bun run typecheck`
+- Tests: `bun test`
+- Bundle size: `bun run build`
+
+**CI Failure Response**:
+
+1. Fix locally: Run same checks as CI (`bun test`, `bun run lint`)
+2. Never merge failing PRs
+3. Never disable CI checks to merge faster
+4. If blocked: Ask for help, don't bypass
+
+**Emergency Releases**:
+
+- Hotfix branches allowed from main
+- Create changeset with `patch` bump
+- Fast-track PR review (security fixes only)
+- Merge Version Packages PR immediately
+- Monitor publish workflow completion
+
+**Rationale**: Automation prevents human error, but humans must maintain the automation. Branch protection ensures code review quality. Emergency procedures allow rapid response without compromising standards.
 
 ### Testing Standards
 
@@ -373,7 +467,7 @@ When status is "Implemented", MUST include:
 1. **Pre-PR Self-Check**: Contributors MUST verify compliance with Core Principles
    before submitting PR
 2. **Automated Checks**: CI pipeline MUST enforce:
-   - Bundle size limits (core < 15 kB)
+   - Bundle size limits (core < 50 kB)
    - Test pass rate (100%)
    - TypeScript compilation (zero errors)
 3. **Quarterly Review**: Maintainers review constitution relevance and update based
@@ -389,4 +483,4 @@ migration path to compliance.
 agent-specific development guidance (e.g., CLAUDE.md, GEMINI.md). Agent files MUST NOT
 contradict constitution principles but MAY provide additional context.
 
-**Version**: 1.0.0 | **Ratified**: 2025-10-05 | **Last Amended**: 2025-10-05
+**Version**: 1.2.0 | **Ratified**: 2025-10-05 | **Last Amended**: 2025-10-19
