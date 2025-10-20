@@ -221,7 +221,7 @@ export class ExpressionEvaluator {
       }
 
       if (trimmedPath.startsWith(':')) {
-        return `\$\{${trimmedPath}\}`;
+        return `\${${trimmedPath}}`;
       }
 
       // Use scoped value resolution
@@ -381,7 +381,7 @@ export class ExpressionEvaluator {
 
       // Convert to appropriate string representation for JavaScript evaluation
       if (typeof value === 'string') {
-        const strValue = value as string;
+        const strValue = value;
         return `"${strValue.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
       } else if (typeof value === 'number' || typeof value === 'boolean') {
         return String(value);
