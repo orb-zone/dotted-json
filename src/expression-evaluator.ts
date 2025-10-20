@@ -43,14 +43,62 @@ export class ExpressionEvaluator {
     return /[a-zA-Z_$][a-zA-Z0-9_$.]*\s*\(/.test(expression);
   }
 
+  /**
+   * Resolve a variable path with scoped context lookup
+   * First tries relative to current path context, then falls back to root
+   */
+  private resolveScopedValue(varPath: string): any {
+    // Handle leading dot (expression prefix) - actual data is stored without the dot
+    const actualPath = varPath.startsWith('.') ? varPath.substring(1) : varPath;
+    
+    // If we have a path context (nested evaluation), try scoped lookup first
+    if (this.context.path && this.context.path.length > 0) {
+      // Get parent path (exclude the last segment which is the current property)
+      const parentPath = this.context.path.slice(0, -1);
+      
+      if (parentPath.length > 0) {
+        // Try to resolve relative to parent context
+        const scopedPath = `${parentPath.join('.')}.${actualPath}`;
+        const scopedValue = dotGet(this.context.data, scopedPath);
+        
+        if (scopedValue !== undefined) {
+          return scopedValue;
+        }
+      }
+    }
+    
+    // Fall back to root-level lookup
+    return dotGet(this.context.data, actualPath);
+  }
+
   private evaluateTemplateLiteral(expression: string): any {
+    // Check if expression is a single variable reference (e.g., "${counter}" or "${.foo}")
+    // In this case, return the value directly without string conversion to preserve type
+    const singleVarMatch = expression.trim().match(/^\$\{([^}]+)\}$/);
+    if (singleVarMatch && singleVarMatch[1]) {
+      const varPath = singleVarMatch[1].trim();
+      
+      // Check for pronoun placeholder
+      if (isPronounPlaceholder(varPath)) {
+        return this.resolvePronounPlaceholder(varPath);
+      }
+      
+      // Return the value directly to preserve its type (number, boolean, object, etc.)
+      return this.resolveScopedValue(varPath);
+    }
+    
+    // Check if expression is wrapped in quotes (JavaScript string literal)
+    // e.g., '"${firstName} ${lastName}"' or "'${name}'"
+    const isQuotedString = /^["'].*["']$/.test(expression.trim());
+    
     // Check if template literal contains JavaScript expressions
     // Either operators inside ${} OR operators outside (mixed expressions like "${x} * 2")
     const hasOperatorsInside = /\$\{[^}]*[+\-*/()[\]<>=!&|?:][^}]*\}/g.test(expression);
     const hasOperatorsOutside = /\$\{[^}]+\}\s*[+\-*/()[\]<>=!&|?:]/.test(expression) ||
                                  /[+\-*/()[\]<>=!&|?:]\s*\$\{[^}]+\}/.test(expression);
 
-    if (hasOperatorsInside || hasOperatorsOutside) {
+    // If quoted or has operators, use full expression evaluation
+    if (isQuotedString || hasOperatorsInside || hasOperatorsOutside) {
       // Use full expression evaluation for JS expressions (pass original expression)
       return this.executeTemplateExpression(expression);
     }
@@ -64,9 +112,8 @@ export class ExpressionEvaluator {
         return this.resolvePronounPlaceholder(trimmedPath);
       }
 
-      // Handle leading dot (expression prefix) - actual data is stored without the dot
-      const actualPath = trimmedPath.startsWith('.') ? trimmedPath.substring(1) : trimmedPath;
-      const value = dotGet(this.context.data, actualPath);
+      // Use scoped value resolution
+      const value = this.resolveScopedValue(trimmedPath);
 
       if (value === undefined || value === null) {
         return 'undefined';
@@ -104,22 +151,15 @@ export class ExpressionEvaluator {
 
         for (const varName of varNames) {
           if (!(varName in variables)) {
-            // Handle leading dot (expression prefix) - actual data is stored without the dot
-            const actualVarName = varName.startsWith('.') ? varName.substring(1) : varName;
-
-            // Try to get the value - handle both root level and dotted paths
-            let value = dotGet(this.context.data, actualVarName);
-
-            // If not found with dot-prop, try direct property access (for simple names)
-            if (value === undefined && !actualVarName.includes('.')) {
-              value = this.context.data[actualVarName];
-            }
+            // Use scoped value resolution
+            const value = this.resolveScopedValue(varName);
 
             if (value !== undefined) {
               // Store with the original variable name (including leading dot if present)
               variables[varName] = value;
 
               // For dotted paths (with . as separator), also add underscore version
+              const actualVarName = varName.startsWith('.') ? varName.substring(1) : varName;
               if (actualVarName.includes('.')) {
                 const safeName = actualVarName.replace(/\./g, '_');
                 variables[safeName] = value;
@@ -160,9 +200,22 @@ export class ExpressionEvaluator {
       // For expressions without (after variable replacement), evaluate as JavaScript
       let result;
       if (hasTemplateLiterals) {
-        // Evaluate as template literal (allows ${} interpolation with JavaScript expressions)
-        const func = new Function(...Object.keys(safeVariables), 'return `' + safeExpression + '`');
-        const templateResult = func(...Object.values(safeVariables));
+        // Check if the original expression is wrapped in quotes (JavaScript string literal with template)
+        // e.g., '"${firstName} ${lastName}"' should be evaluated as a JS string, not wrapped in backticks
+        const isQuotedExpression = /^["'].*["']$/.test(expression.trim());
+        
+        let templateResult;
+        if (isQuotedExpression) {
+          // The expression is a quoted string with ${} inside
+          // Convert it to a template literal by replacing the outer quotes with backticks
+          const asTemplateLiteral = safeExpression.replace(/^["']/, '`').replace(/["']$/, '`');
+          const func = new Function(...Object.keys(safeVariables), 'return ' + asTemplateLiteral);
+          templateResult = func(...Object.values(safeVariables));
+        } else {
+          // Evaluate as template literal (allows ${} interpolation with JavaScript expressions)
+          const func = new Function(...Object.keys(safeVariables), 'return `' + safeExpression + '`');
+          templateResult = func(...Object.values(safeVariables));
+        }
 
         // Only do secondary evaluation if there were operators truly OUTSIDE template literals
         // E.g., "${x} * 2" should evaluate to 10, but "${.a} + ${.b}" should stay as "5 + 5"
@@ -255,7 +308,7 @@ export class ExpressionEvaluator {
    *
    * Behavior:
    * - If options.onError is set: use custom handler
-   * - Otherwise: throw error (backward compatible default)
+   * - Otherwise: throw error
    *
    * @param error - The error that occurred
    * @param path - The path where error occurred
@@ -264,12 +317,21 @@ export class ExpressionEvaluator {
   private handleError(error: Error, path: string): any {
     const options = this.context.options;
 
-    // Custom error handler (v1.0 feature)
+    // Custom error handler
     if (options?.onError) {
-      return options.onError(error, path, options.context);
+      const result = options.onError(error, path);
+      
+      // If handler returns 'throw', re-throw the error
+      if (result === 'throw') {
+        throw error;
+      }
+      
+      // Handler will return 'fallback' or a custom value
+      // The calling code (dotted-json.ts) will handle 'fallback'
+      return result;
     }
 
-    // Default behavior: throw (backward compatible)
+    // Default behavior: throw
     throw error;
   }
 

@@ -50,14 +50,29 @@ export interface DottedOptions {
   initial?: Record<string, any>;
 
   /**
-   * Default value for missing values (fallback when path not found)
+   * Fallback value for missing paths or expression errors
+   * 
+   * Can be a static value or a function (for lazy evaluation).
+   * Functions are called each time a fallback is needed.
+   * 
+   * Used when:
+   * - A path doesn't exist in the data
+   * - An expression evaluation fails and onError returns 'fallback'
+   * 
+   * @example
+   * ```typescript
+   * // Static fallback
+   * const data = dotted(schema, {
+   *   fallback: null  // Return null for missing/failed values
+   * });
+   * 
+   * // Dynamic fallback (called on each miss)
+   * const data = dotted(schema, {
+   *   fallback: () => ({ timestamp: Date.now() })
+   * });
+   * ```
    */
-  default?: any;
-
-  /**
-   * Default value for evaluation errors (fallback when expression fails)
-   */
-  errorDefault?: any;
+  fallback?: any | (() => any) | (() => Promise<any>);
 
   /**
    * Function registry for expression resolvers
@@ -105,40 +120,52 @@ export interface DottedOptions {
   /**
    * Custom error handler for expression evaluation failures
    *
-   * By default (v1.0+), errors are logged to console.error and return undefined.
-   * Use this to customize error handling (e.g., throw in dev, graceful in prod).
+   * Return values:
+   * - `'throw'` - Re-throw the error (fail-fast)
+   * - `'fallback'` - Use the fallback value
+   * - Any other value - Use that value as the result
    *
    * @param error - The error that occurred
    * @param path - The path where the error occurred
-   * @param context - The context object (for env-based logic)
-   * @returns Fallback value to return, or throw to fail-fast
+   * @returns 'throw' | 'fallback' | any custom value
    *
    * @example
    * ```typescript
    * // Fail-fast in development, graceful in production
-   * onError: (error, path, context) => {
-   *   if (context?.env === 'development') {
-   *     throw error;  // Fail-fast
+   * onError: (error, path) => {
+   *   if (process.env.NODE_ENV === 'development') {
+   *     return 'throw';  // Re-throw error
    *   }
    *   logger.error(`Failed to evaluate ${path}`, error);
-   *   return null;  // Graceful fallback
+   *   return 'fallback';  // Use fallback value
+   * }
+   * 
+   * // Return custom fallback per path
+   * onError: (error, path) => {
+   *   if (path.startsWith('user.')) return { name: 'Guest' };
+   *   return 'fallback';
    * }
    * ```
    */
-  onError?: (error: Error, path: string, context?: any) => any;
+  onError?: (error: Error, path: string) => 'throw' | 'fallback' | any;
 
   /**
-   * Arbitrary context object passed to error handlers and resolvers
-   *
-   * Useful for environment-specific logic (dev vs prod), user context, etc.
-   *
+   * Arbitrary context object passed to resolvers (deprecated - use closure instead)
+   * 
+   * @deprecated Store context in resolver closures instead
    * @example
    * ```typescript
-   * context: {
-   *   env: 'production',
-   *   userId: '123',
-   *   logger: myLogger
-   * }
+   * // Instead of:
+   * const data = dotted(schema, {
+   *   context: { userId: '123' },
+   *   resolvers: { getUser: () => context.userId }
+   * });
+   * 
+   * // Do this:
+   * const userId = '123';
+   * const data = dotted(schema, {
+   *   resolvers: { getUser: () => userId }
+   * });
    * ```
    */
   context?: any;
@@ -173,19 +200,50 @@ export interface ValidationOptions {
 
 export interface GetOptions {
   /**
-   * Force re-evaluation even if cached
+   * Force re-evaluation of the expression
+   * 
+   * When true, bypasses the cache and re-evaluates the expression,
+   * then caches the new result for future calls.
+   * 
+   * Useful for:
+   * - Getting fresh data from resolvers that might return different values
+   * - Testing expression behavior
+   * - Manual cache invalidation
+   * 
+   * @example
+   * ```typescript
+   * // Get cached value
+   * const cached = await data.get('timestamp');
+   * 
+   * // Get fresh value (re-evaluate)
+   * const fresh = await data.get('timestamp', { fresh: true });
+   * 
+   * // Subsequent calls use the new cached value
+   * const newCached = await data.get('timestamp');  // Uses fresh result
+   * ```
    */
-  ignoreCache?: boolean;
+  fresh?: boolean;
 
   /**
-   * Override instance default for missing values
+   * Override the instance-level fallback for this call only
+   * 
+   * Can be a static value or a function (for lazy evaluation).
+   * 
+   * @example
+   * ```typescript
+   * // Instance fallback is null
+   * const data = dotted(schema, { fallback: null });
+   * 
+   * // Override for specific call with static value
+   * const value = await data.get('missing.path', { fallback: 'N/A' });
+   * 
+   * // Override with dynamic value
+   * const value = await data.get('cache.key', { 
+   *   fallback: () => generateDefault() 
+   * });
+   * ```
    */
-  default?: any;
-
-  /**
-   * Override instance errorDefault for errors
-   */
-  errorDefault?: any;
+  fallback?: any | (() => any) | (() => Promise<any>);
 }
 
 export interface SetOptions {
@@ -197,9 +255,11 @@ export interface SetOptions {
 
 export interface HasOptions {
   /**
-   * Force evaluation to check existence
+   * Force re-evaluation to check existence
+   * 
+   * When true, re-evaluates expressions before checking if the path exists.
    */
-  ignoreCache?: boolean;
+  fresh?: boolean;
 }
 
 export interface DottedJson {
