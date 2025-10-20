@@ -425,7 +425,7 @@ describe('API Contract', () => {
       expect(snapshot1).toBe(1);
 
       // Manually invalidate counter to force re-evaluation
-      await data.get('counter', { ignoreCache: true });
+      await data.get('counter', { fresh: true });
       expect(await data.get('counter')).toBe(2);
 
       // Snapshot still uses captured value
@@ -510,7 +510,7 @@ describe('API Contract', () => {
       expect(await data.get('counter')).toBe(20); // (2 * 10)
     });
 
-    test.skip('ignoreCache option bypasses cache', async () => {
+    test('fresh option re-evaluates and updates cache', async () => {
       let count = 0;
 
       const data = dotted(
@@ -528,11 +528,11 @@ describe('API Contract', () => {
       expect(await data.get('counter')).toBe(1);
       expect(await data.get('counter')).toBe(1); // Cached
 
-      // Bypass cache
-      expect(await data.get('counter', { ignoreCache: true })).toBe(2);
+      // Re-evaluate with fresh (updates cache)
+      expect(await data.get('counter', { fresh: true })).toBe(2);
 
-      // Normal call still uses old cache
-      expect(await data.get('counter')).toBe(1);
+      // Subsequent calls use new cached value
+      expect(await data.get('counter')).toBe(2);
     });
   });
 

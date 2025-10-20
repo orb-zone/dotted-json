@@ -123,10 +123,7 @@ export class DottedJson implements IDottedJson {
       // Resolve variant path based on context (e.g., .bio → .bio:es:f)
       const resolvedPath = await this.resolveVariant(path);
 
-      // Backward compatibility: support old 'ignoreCache' as 'fresh'
-      const fresh = options.fresh !== undefined 
-        ? options.fresh 
-        : (options as any).ignoreCache;
+      const fresh = options.fresh;
       
       // Backward compatibility: support old 'default' as 'fallback'
       const fallback = options.fallback !== undefined 
@@ -253,10 +250,7 @@ export class DottedJson implements IDottedJson {
 
   async has(path: string, options: HasOptions = {}): Promise<boolean> {
     try {
-      // Backward compatibility: support old 'ignoreCache' as 'fresh'
-      const fresh = options.fresh !== undefined 
-        ? options.fresh 
-        : (options as any).ignoreCache;
+      const fresh = options.fresh;
       
       // Evaluate expressions along the path if needed
       await this.evaluateExpressionsInPath(path, fresh);
