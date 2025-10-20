@@ -3,6 +3,9 @@ import { resolvePronoun, isPronounPlaceholder, extractPronounForm, type Gender }
 import { typeCoercionHelpers } from './helpers/type-coercion.js';
 import type { ExpressionContext, ResolverContext, VariantContext } from './types.js';
 
+const VARIABLE_REFERENCE_PATTERN = /(?:\.{1,}[a-zA-Z_$][a-zA-Z0-9_$.]*|[a-zA-Z_$][a-zA-Z0-9_$.]*)(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*/g;
+const SIMPLE_PATH_PATTERN = /^\.{0,}[a-zA-Z_$][a-zA-Z0-9_$.]*$/;
+
 export class ExpressionEvaluator {
   private context: ExpressionContext;
 
@@ -48,8 +51,14 @@ export class ExpressionEvaluator {
    * First tries relative to current path context, then falls back to root
    */
   private resolveScopedValue(varPath: string): any {
+    const leadingDots = varPath.match(/^\.+/)?.[0].length ?? 0;
+
+    if (leadingDots > 1) {
+      return this.resolveParentReference(varPath, leadingDots);
+    }
+
     // Handle leading dot (expression prefix) - actual data is stored without the dot
-    const actualPath = varPath.startsWith('.') ? varPath.substring(1) : varPath;
+    const actualPath = leadingDots === 1 ? varPath.substring(1) : varPath;
     
     // If we have a path context (nested evaluation), try scoped lookup first
     if (this.context.path && this.context.path.length > 0) {
@@ -68,7 +77,99 @@ export class ExpressionEvaluator {
     }
     
     // Fall back to root-level lookup
-    return dotGet(this.context.data, actualPath);
+    const rootValue = dotGet(this.context.data, actualPath);
+    if (rootValue !== undefined) {
+      return rootValue;
+    }
+
+    if (!actualPath.includes('.') && !varPath.startsWith('.') && this.context.variants) {
+      const variantValue = this.context.variants[actualPath];
+      if (variantValue !== undefined) {
+        return variantValue;
+      }
+    }
+
+    return rootValue;
+  }
+
+  private resolveParentReference(varPath: string, leadingDots: number): any {
+    const {
+      targetPath,
+      propertySegments,
+      propertyPath
+    } = this.computeParentReferenceTarget(varPath, leadingDots);
+
+    const value = targetPath
+      ? dotGet(this.context.data, targetPath)
+      : this.context.data;
+
+    if (value !== undefined) {
+      return value;
+    }
+
+    if (propertySegments.length === 1 && this.context.variants) {
+      const [variantKey] = propertySegments;
+      if (variantKey) {
+        const variantValue = this.context.variants[variantKey];
+        if (variantValue !== undefined) {
+          return variantValue;
+        }
+      }
+    }
+
+    const currentPathStr = this.context.path && this.context.path.length > 0
+      ? this.context.path.join('.')
+      : '(root)';
+    const resolvedPath = targetPath || propertyPath || '(root)';
+    throw new Error(
+      `Parent reference '${varPath}' at '${currentPathStr}' resolved to undefined path '${resolvedPath}'`
+    );
+  }
+
+  private computeParentReferenceTarget(
+    varPath: string,
+    leadingDots: number
+  ): {
+    targetPath: string;
+    parentLevels: number;
+    availableLevels: number;
+    baseSegments: string[];
+    propertySegments: string[];
+    propertyPath: string;
+  } {
+    const currentPathSegments = Array.isArray(this.context.path)
+      ? [...this.context.path]
+      : [];
+    const currentPathStr = currentPathSegments.length > 0
+      ? currentPathSegments.join('.')
+      : '(root)';
+
+    const parentSegments = currentPathSegments.slice(0, -1);
+    const parentLevels = leadingDots - 1;
+    const availableLevels = parentSegments.length;
+
+    if (availableLevels < parentLevels) {
+      throw new Error(
+        `Parent reference '${varPath}' at '${currentPathStr}' goes beyond root (requires ${parentLevels} parent levels, only ${availableLevels} available)`
+      );
+    }
+
+    const baseSegments = parentLevels > 0
+      ? parentSegments.slice(0, availableLevels - parentLevels)
+      : parentSegments;
+    const propertyPath = varPath.substring(leadingDots);
+    const propertySegments = propertyPath ? propertyPath.split('.') : [];
+    const targetSegments = [...baseSegments, ...propertySegments];
+    const targetPath = targetSegments.filter(Boolean).join('.');
+
+    return {
+      targetPath,
+      parentLevels,
+      availableLevels,
+      baseSegments,
+      propertySegments,
+      propertyPath
+    };
   }
 
   private evaluateTemplateLiteral(expression: string): any {
@@ -77,25 +178,32 @@ export class ExpressionEvaluator {
     const singleVarMatch = expression.trim().match(/^\$\{([^}]+)\}$/);
     if (singleVarMatch && singleVarMatch[1]) {
       const varPath = singleVarMatch[1].trim();
-      
+
       // Check for pronoun placeholder
       if (isPronounPlaceholder(varPath)) {
         return this.resolvePronounPlaceholder(varPath);
       }
-      
+
+      if (!SIMPLE_PATH_PATTERN.test(varPath)) {
+        return this.executeTemplateExpression(expression);
+      }
+
       // Return the value directly to preserve its type (number, boolean, object, etc.)
       return this.resolveScopedValue(varPath);
     }
-    
+
     // Check if expression is wrapped in quotes (JavaScript string literal)
     // e.g., '"${firstName} ${lastName}"' or "'${name}'"
     const isQuotedString = /^["'].*["']$/.test(expression.trim());
-    
+
+    // Replace pronoun placeholders with a neutral token to avoid false operator detection
+    const sanitizedExpression = expression.replace(/\$\{(:[a-z]+)\}/g, '${PRONOUN}');
+
     // Check if template literal contains JavaScript expressions
     // Either operators inside ${} OR operators outside (mixed expressions like "${x} * 2")
-    const hasOperatorsInside = /\$\{[^}]*[+\-*/()[\]<>=!&|?:][^}]*\}/g.test(expression);
-    const hasOperatorsOutside = /\$\{[^}]+\}\s*[+\-*/()[\]<>=!&|?:]/.test(expression) ||
-                                 /[+\-*/()[\]<>=!&|?:]\s*\$\{[^}]+\}/.test(expression);
+    const hasOperatorsInside = /\$\{[^}]*[+\-*/()[\]<>!=&|?:][^}]*\}/g.test(sanitizedExpression);
+    const hasOperatorsOutside = /\$\{[^}]+\}\s*[+\-*/()[\]<>!=&|?:]/.test(sanitizedExpression) ||
+      /[+\-*/()[\]<>!=&|?:]\s*\$\{[^}]+\}/.test(sanitizedExpression);
 
     // If quoted or has operators, use full expression evaluation
     if (isQuotedString || hasOperatorsInside || hasOperatorsOutside) {
@@ -112,6 +220,10 @@ export class ExpressionEvaluator {
         return this.resolvePronounPlaceholder(trimmedPath);
       }
 
+      if (trimmedPath.startsWith(':')) {
+        return `\$\{${trimmedPath}\}`;
+      }
+
       // Use scoped value resolution
       const value = this.resolveScopedValue(trimmedPath);
 
@@ -124,6 +236,7 @@ export class ExpressionEvaluator {
   }
 
   private executeTemplateExpression(expression: string): any {
+
     try {
       // First, resolve pronoun placeholders
       let processedExpression = expression;
@@ -146,8 +259,8 @@ export class ExpressionEvaluator {
         const expr = match[1];
         if (!expr) continue;
 
-        // Extract simple variable names from the expression (handle dot notation and leading dots)
-        const varNames = expr.match(/\.?[a-zA-Z_$][a-zA-Z0-9_$.]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*(?![a-zA-Z0-9_$])/g) || [];
+        // Extract simple variable names from the expression (handle dot notation and parent references)
+        const varNames = expr.match(VARIABLE_REFERENCE_PATTERN) || [];
 
         for (const varName of varNames) {
           if (!(varName in variables)) {
@@ -180,7 +293,8 @@ export class ExpressionEvaluator {
         // Create a safe identifier (replace dots with underscores, add prefix for leading dot)
         let safeName = varName;
         if (varName.startsWith('.')) {
-          safeName = '_dot_' + varName.substring(1);
+          const normalizedName = varName.substring(1).replace(/\./g, '_');
+          safeName = `_dot_${normalizedName}`;
           // Escape the dot for regex (backslash-dot matches literal dot)
           safeExpression = safeExpression.replace(new RegExp(varName.replace(/\./g, '\\.') + '\\b', 'g'), safeName);
         } else if (varName.includes('.')) {
@@ -258,11 +372,12 @@ export class ExpressionEvaluator {
     // Replace ${path} with actual values from the data context
     return expression.replace(/\$\{([^}]+)\}/g, (_match, pathStr) => {
       const trimmedPath = pathStr.trim();
-      const value = dotGet(this.context.data, trimmedPath);
+      const value = this.resolveScopedValue(trimmedPath);
 
       if (value === undefined || value === null) {
-        return 'undefined';
+        return SIMPLE_PATH_PATTERN.test(trimmedPath) ? 'undefined' : trimmedPath;
       }
+
 
       // Convert to appropriate string representation for JavaScript evaluation
       if (typeof value === 'string') {
