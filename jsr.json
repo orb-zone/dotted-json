@@ -1,6 +1,6 @@
 {
   "name": "@orb-zone/dotted-json",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "exports": {
     ".": "./src/index.ts",
     "./loaders/file": "./src/loaders/file.ts",
