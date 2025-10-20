@@ -238,7 +238,7 @@ Results cached until explicitly invalidated:
 
 await data.get('user.profile');  // Evaluates expression, caches result
 await data.get('user.profile');  // Returns cached value
-await data.get('user.profile', { ignoreCache: true });  // Force re-evaluation
+await data.get('user.profile', { fresh: true });  // Force re-evaluation
 ```
 
 ## Security
@@ -310,7 +310,7 @@ await data.set('user.id', 456);
 const exists = await data.has('user.profile');
 
 // Force re-evaluation
-await data.get('user.profile', { ignoreCache: true });
+await data.get('user.profile', { fresh: true });
 ```
 
 ### Constructor Options
@@ -319,12 +319,15 @@ await data.get('user.profile', { ignoreCache: true });
 
 interface DottedOptions {
   initial?: object;                 // Initial data to merge
-  default?: any;                    // Default for missing values
-  errorDefault?: any;               // Default for failed evaluations
+  fallback?: any;                   // Default for missing values and errors
   resolvers?: Record<string, any>;  // Function registry
   variants?: VariantContext;        // Variant context (lang, gender, form, custom)
   maxEvaluationDepth?: number;      // Max depth (default: 100)
+  onError?: (error: Error, path: string) => 'throw' | 'fallback' | any;
+  validation?: ValidationConfig;    // Zod validation (via plugin)
 }
+
+// Note: Old API (default, errorDefault, ignoreCache) still works via backward compatibility
 ```
 
 **[📖 Complete API documentation](docs/API.md)**
