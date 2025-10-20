@@ -25,12 +25,13 @@ const profile = await fetchUserProfile(user.id); // No caching, manual managemen
 ```typescript
 // ✅ dotted-json: Declarative, variant-aware, auto-cached
 const data = dotted({
+  lang: user.lang,
+  form: user.formality,
   '.greeting': 'Hello',
   '.greeting:es': 'Hola',
   '.greeting:es:formal': 'Buenos días',
   '.profile': 'api.getUser(${user.id})'  // Auto-cached
 }, {
-  variants: { lang: user.lang, form: user.formality },
   resolvers: { api }
 });
 
@@ -220,12 +221,12 @@ Multi-dimensional content adaptation (language, gender, formality, custom):
 ```typescript
 
 const data = dotted({
+  lang: 'es',
+  gender: 'f',
   '.title': 'Author',
   '.title:es': 'Autor',
   '.title:es:f': 'Autora',           // Spanish female
   '.title:ja:polite': '著者です',      // Japanese polite (keigo)
-}, {
-  variants: { lang: 'es', gender: 'f' }
 });
 
 await data.get('.title');  // "Autora" (auto-selected best match)

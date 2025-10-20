@@ -398,12 +398,12 @@ import { withFileSystem } from '@orb-zone/dotted-json/loaders/file';
 
 const data = dotted(
   {
+    lang: 'es',
     user: {
       '.profile': 'extends("user-profile")'  // Loads from filesystem
     }
   },
   {
-    variants: { lang: 'es' },
     ...withFileSystem({
       baseDir: './data',
       extensions: ['.jsön', '.json'],
@@ -873,9 +873,7 @@ const data = dotted({
   }
 });
 
-await data.get('user.message', {
-  variants: { gender: 'f' }
-});
+await data.get('user.message');
 // "she completed her task"
 ```
 
@@ -954,18 +952,20 @@ const plugin = await withSurrealDBPinia({
 ```typescript
 // Use well-known variants for better caching
 const data = dotted({
-  '.strings': 'db.loadIon("strings", ${variants})'
+  lang: 'es',
+  form: 'formal',
+  '.strings': 'db.loadIon("strings", ${lang}, ${form})'
 }, { resolvers });
 
-// Good: cache key is deterministic
-await data.get('strings', {
-  variants: { lang: 'es', form: 'formal' }
-});
+// Good: variants automatically discovered from data
+await data.get('strings');  // Uses lang: 'es', form: 'formal'
 
-// Avoid: custom variants should be allowed
-await data.get('strings', {
-  variants: { customVariant: 'value' }  // May cause cache misses
-});
+// For dynamic variants, include them in data
+const dynamicData = dotted({
+  lang: userLang,
+  form: userForm,
+  '.strings': 'db.loadIon("strings", ${lang}, ${form})'
+}, { resolvers });
 ```
 
 ---
