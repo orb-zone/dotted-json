@@ -133,16 +133,6 @@ export class DottedJson implements IDottedJson {
         ? options.fallback 
         : (options as any).default;
 
-      // Backward compatibility: support old 'ignoreCache' as 'fresh'
-      const fresh = options.fresh !== undefined 
-        ? options.fresh 
-        : (options as any).ignoreCache;
-      
-      // Backward compatibility: support old 'default' as 'fallback'
-      const fallback = options.fallback !== undefined 
-        ? options.fallback 
-        : (options as any).default;
-
       // Check if we need to evaluate any dot-prefixed expressions along the path
       await this.evaluateExpressionsInPath(resolvedPath, fresh);
 
@@ -413,9 +403,6 @@ export class DottedJson implements IDottedJson {
     const pathArray = targetPath
       ? targetPath.split('.').filter(Boolean)
       : [];
-
-    // Convert dot-separated path to array for context
-    const pathArray = targetPath.split('.');
 
     const evaluator = createExpressionEvaluator(
       this.data,
