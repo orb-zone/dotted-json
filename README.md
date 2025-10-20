@@ -241,7 +241,7 @@ Results cached until explicitly invalidated:
 
 await data.get('user.profile');  // Evaluates expression, caches result
 await data.get('user.profile');  // Returns cached value
-await data.get('user.profile', { ignoreCache: true });  // Force re-evaluation
+await data.get('user.profile', { fresh: true });  // Force re-evaluation and update cache
 ```
 
 ## Security
@@ -312,8 +312,8 @@ await data.set('user.id', 456);
 // Check existence
 const exists = await data.has('user.profile');
 
-// Force re-evaluation
-await data.get('user.profile', { ignoreCache: true });
+// Force re-evaluation (updates cache with new value)
+await data.get('user.profile', { fresh: true });
 ```
 
 ### Constructor Options
