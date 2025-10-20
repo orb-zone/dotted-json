@@ -71,8 +71,13 @@ export class DottedJson implements IDottedJson {
         ? options.fallback 
         : (options as any).default;
 
+      // Check if this path contains a fresh expression that should be re-evaluated
+      const escapedPath = resolvedPath.startsWith('.') ? `\\${resolvedPath}` : `\\.${resolvedPath}`;
+      const expression = dotGet(this.data, escapedPath);
+      const hasFreshCalls = typeof expression === 'string' && /fresh\s*\(/.test(expression);
+
       // Check if we need to evaluate any dot-prefixed expressions along the path
-      await this.evaluateExpressionsInPath(resolvedPath, fresh);
+      await this.evaluateExpressionsInPath(resolvedPath, fresh || hasFreshCalls);
 
       // Handle leading dot (expression prefix) - actual data is stored without the dot
       const actualPath = resolvedPath.startsWith('.') ? resolvedPath.substring(1) : resolvedPath;
@@ -236,23 +241,22 @@ export class DottedJson implements IDottedJson {
     }
 
     // Walk through each segment and check if we need to evaluate expressions
-    for (let i = 0; i < pathSegments.length; i++) {
-      const partialPath = pathSegments.slice(0, i + 1).join('.');
-      const parentPath = pathSegments.slice(0, i).join('.');
-      const currentSegment = pathSegments[i];
+    // Skip this loop if we already handled the entire path as an expression
+    if (!isExpression || pathSegments.length > 1) {
+      for (let i = 0; i < pathSegments.length; i++) {
+        const partialPath = pathSegments.slice(0, i + 1).join('.');
+        const parentPath = pathSegments.slice(0, i).join('.');
+        const currentSegment = pathSegments[i];
 
-      // Check if there's a dot-prefixed expression that would populate this segment
-      const escapedExpressionPath = parentPath ? `${parentPath}.\\.${currentSegment}` : `\\.${currentSegment}`;
+        // Check if there's a dot-prefixed expression that would populate this segment
+        const escapedExpressionPath = parentPath ? `${parentPath}.\\.${currentSegment}` : `\\.${currentSegment}`;
 
-       // Resolve variant for this expression key within parent context
-
-
-
-      // If the expression exists and hasn't been evaluated yet (or we want fresh evaluation)
-      if (dotHas(this.data, escapedExpressionPath)) {
-        const cachedResult = dotGet(this.data, partialPath);
-        if (cachedResult === undefined || fresh) {
-          await this.evaluateExpression(escapedExpressionPath, partialPath, fresh);
+        // If the expression exists and hasn't been evaluated yet (or we want fresh evaluation)
+        if (dotHas(this.data, escapedExpressionPath)) {
+          const cachedResult = dotGet(this.data, partialPath);
+          if (cachedResult === undefined || fresh) {
+            await this.evaluateExpression(escapedExpressionPath, partialPath, fresh);
+          }
         }
       }
     }
@@ -288,8 +292,10 @@ export class DottedJson implements IDottedJson {
 
       const result = await this.evaluateExpressionString(expression, targetPath);
 
-      // Cache the result
-      this.cache.set(expressionPath, result);
+      // Don't cache expressions that contain fresh() calls
+      if (!/fresh\s*\(/.test(expression)) {
+        this.cache.set(expressionPath, result);
+      }
 
       // Set the evaluated result in the data
       dotSet(this.data, targetPath, result);
@@ -322,7 +328,8 @@ export class DottedJson implements IDottedJson {
       this.options.resolvers,
       pathArray,
       this.options,  // Pass full options for error handling
-      targetPath  // Pass full path for error reporting
+      targetPath,
+      this  // Pass DottedJson instance for live re-evaluation
     );
 
     return await evaluator.evaluate(expression);
@@ -398,6 +405,11 @@ export class DottedJson implements IDottedJson {
     for (const match of variableMatches) {
       const expr = match.slice(2, -1).trim(); // Remove ${ and }
       if (!expr) continue;
+
+      // Skip live re-evaluation references (${@path}) - they will be evaluated when accessed
+      if (expr.startsWith('@')) {
+        continue;
+      }
 
       const varNames = expr.match(VARIABLE_REFERENCE_PATTERN) || [];
 

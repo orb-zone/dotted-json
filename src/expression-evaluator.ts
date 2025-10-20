@@ -24,7 +24,7 @@ export class ExpressionEvaluator {
 
     // Simple template literal (only ${} interpolation, no function calls)
     if (hasTemplateLiterals && !hasFunctionCalls) {
-      return this.evaluateTemplateLiteral(expression);
+      return await this.evaluateTemplateLiteral(expression);
     } else {
       // Function calls (with or without template literals)
       const interpolatedExpression = this.interpolateVariables(expression);
@@ -188,17 +188,17 @@ export class ExpressionEvaluator {
     };
   }
 
-  private evaluateTemplateLiteral(expression: string): any {
+  private async evaluateTemplateLiteral(expression: string): Promise<any> {
     // Check if expression is a single variable reference (e.g., "${counter}" or "${.foo}")
     // In this case, return the value directly without string conversion to preserve type
     const singleVarMatch = expression.trim().match(/^\$\{([^}]+)\}$/);
     if (singleVarMatch && singleVarMatch[1]) {
       const varPath = singleVarMatch[1].trim();
 
-      // Check for pronoun placeholder
-      if (isPronounPlaceholder(varPath)) {
-        return this.resolvePronounPlaceholder(varPath);
-      }
+       // Check for pronoun placeholder
+       if (isPronounPlaceholder(varPath)) {
+         return this.resolvePronounPlaceholder(varPath);
+       }
 
       if (!SIMPLE_PATH_PATTERN.test(varPath)) {
         return this.executeTemplateExpression(expression);
@@ -388,6 +388,9 @@ export class ExpressionEvaluator {
     // Replace ${path} with actual values from the data context
     return expression.replace(/\$\{([^}]+)\}/g, (_match, pathStr) => {
       const trimmedPath = pathStr.trim();
+
+      // No special @ syntax - live evaluation handled by fresh() resolver
+
       const value = this.resolveScopedValue(trimmedPath);
 
       if (value === undefined || value === null) {
@@ -473,6 +476,13 @@ export class ExpressionEvaluator {
     // These are always available in expression evaluation contexts
     Object.assign(context, typeCoercionHelpers);
 
+    // Add fresh re-evaluation resolver if DottedJson instance is available
+    if (this.context.dottedInstance) {
+      context.fresh = async (path: string) => {
+        return await this.context.dottedInstance.get(path, { fresh: true });
+      };
+    }
+
     // Flatten resolver hierarchy for direct access
     this.flattenResolvers(this.context.resolvers, context);
 
@@ -519,13 +529,15 @@ export function createExpressionEvaluator(
   resolvers: ResolverContext,
   path: string[] = [],
   options?: any,
-  fullPath?: string
+  fullPath?: string,
+  dottedInstance?: any
 ): ExpressionEvaluator {
   return new ExpressionEvaluator({
     data,
     resolvers,
     path,
     fullPath,
-    options
+    options,
+    dottedInstance
   });
 }

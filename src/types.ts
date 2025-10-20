@@ -258,4 +258,5 @@ export interface ExpressionContext {
   fullPath?: string;  // Full path including the property being evaluated (for error reporting)
   error?: Error; // Available in .errorDefault expressions
   options?: DottedOptions;  // Options for error handling and other configuration
+  dottedInstance?: any;  // Reference to DottedJson instance for live re-evaluation
 }
