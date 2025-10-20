@@ -1,5 +1,149 @@
 # Changelog
 
+## 0.13.0
+
+### Minor Changes
+
+- 82cee1c: Implement v0.13 API improvements with property access materialization, deep proxy wrapping, and clearer options API
+
+  **New Features:**
+
+  - **Deep Proxy Wrapping**: Nested objects now have full `.get()`, `.set()`, and `.has()` methods at every level
+  - **Scoped Property Access**: Expressions in nested contexts resolve variables relative to their parent scope
+  - **Type Preservation**: Single variable expressions like `${counter}` preserve their original type (number, boolean, etc.)
+  - **Dependency Invalidation**: Changing static values automatically invalidates dependent materialized expressions
+  - **Function Fallbacks**: Fallback values can now be functions for lazy/dynamic default values
+
+  **API Improvements (with backward compatibility):**
+
+  - **Renamed Options**:
+    - `ignoreCache` → `fresh` (clearer intent: "get me a fresh value")
+    - `default` + `errorDefault` → `fallback` (single unified fallback for all failure modes)
+  - **Simplified Error Handling**:
+    - `onError(error, path)` returns `'throw' | 'fallback' | any`
+    - Removed `context` parameter (use closures instead)
+    - Clearer contract: return `'throw'` to re-throw, `'fallback'` to use fallback, or any value
+  - **All old options still work** via backward compatibility layer
+
+  **Improvements:**
+
+  - Expression evaluation with quoted strings (e.g., `'"${name}"'`) correctly evaluates as JavaScript strings
+  - Enhanced context scoping for nested data structures
+  - Materialized values properly cleared when dependencies change
+  - Better TypeScript types with explicit function fallback support
+
+  **Migration Guide:**
+
+  ```typescript
+  // Old API (still works via backward compatibility)
+  const data = dotted(schema, {
+    default: null,
+    errorDefault: 'error',
+    onError: (error, path, context) => { ... }
+  });
+  await data.get('path', { ignoreCache: true, default: 'fallback' });
+
+  // New API (recommended)
+  const data = dotted(schema, {
+    fallback: null,  // Single fallback for missing values AND errors
+    onError: (error, path) => 'fallback'  // Return 'throw' | 'fallback' | value
+  });
+  await data.get('path', { fresh: true, fallback: 'override' });
+  ```
+
+  **Test Coverage:**
+
+  - 285/288 tests passing (99%)
+  - 30/34 new API contract tests passing
+  - Full backward compatibility with v0.12.x maintained
+
+  **Deferred Features (v0.14+):**
+
+  - Advanced cache semantics with `${.foo}` live references
+  - Cache bypass without write (`fresh` always writes to cache)
+  - Edge case: direct `.get('.expression')` method calls
+
+- 82cee1c: **v0.13 Foundation: Property Access, Type Coercion, and Error Handling**
+
+  This release adds powerful new API features while maintaining backward compatibility (23/34 tests passing, 68% complete).
+
+  ## New Features
+
+  ### 🎯 Property Access & Materialization
+
+  - **Direct property access**: Access static values via `data.foo` instead of `await data.get('foo')`
+  - **Expression materialization**: After evaluating `.greeting` with `.get('greeting')`, access result via `data.greeting`
+  - **Cache invalidation**: Setting a new expression key (`.foo`) clears the materialized value
+  - **Proxy-based implementation**: Transparent property access using ES6 Proxy
+
+  ### 🔢 Type Coercion Helpers
+
+  - **`int(value)`**: Parse integers with proper base-10 handling
+  - **`float(value)`**: Parse floating-point numbers
+  - **`bool(value)`**: Smart boolean conversion (handles "true"/"false", "yes"/"no", "on"/"off", etc.)
+  - **`json(value)`**: Safe JSON parsing with error handling
+  - All helpers available in expression context
+
+  ### ⚠️ Error Handling
+
+  - **Custom handlers**: Configure via `options.onError(error, path, context)` for graceful error handling
+  - **Default behavior**: Throw errors (backward compatible)
+  - **Context support**: Pass arbitrary context for environment-based logic (dev vs prod)
+  - **Path tracking**: Error messages include the path where evaluation failed
+
+  ### 🔒 Reserved Key Protection
+
+  - **Reserved keys**: `get`, `set`, `has`, `delete`, `clear`, `keys`
+  - **Validation**: Prevents setting reserved keys that would conflict with API methods
+  - **Clear errors**: Helpful error messages when attempting to use reserved keys
+
+  ## Breaking Changes
+
+  None - all changes are additive and backward compatible.
+
+  ## Implementation Details
+
+  - **23/34 tests passing** (68% of new API features)
+  - **607 lines** of API contract tests
+  - **249 lines** of type coercion tests
+  - **164 lines** of type coercion helper implementation
+  - **Proxy wrapper** for seamless property access
+
+  ## Remaining Work for v0.13
+
+  - **Phase 2E**: Deep Proxy Wrapping (6 tests) - recursive proxy for `data.user.name`
+  - **Phase 2F**: Cache Semantics (4 tests) - `${foo}` vs `${.foo}` behavior
+  - **1 nested test** from Phase 2D requiring deep proxies
+
+  ## Migration Guide
+
+  No migration needed - all features are opt-in and backward compatible. Existing code continues to work unchanged.
+
+  To use new features:
+
+  ```typescript
+  // Property access (instead of .get())
+  const data = dotted({ name: "Alice", age: 30 });
+  console.log(data.name); // "Alice"
+
+  // Type coercion in expressions
+  const data = dotted({
+    count: "4",
+    ".computed": "int(${count}) + 1",
+  });
+  console.log(await data.get("computed")); // 5
+
+  // Custom error handling
+  const data = dotted(schema, {
+    onError: (error, path, context) => {
+      if (context.env === "development") throw error;
+      logger.error(`Failed at ${path}`, error);
+      return null;
+    },
+    context: { env: "production" },
+  });
+  ```
+
 ## 0.12.3
 
 ### Patch Changes
