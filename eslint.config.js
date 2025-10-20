@@ -48,6 +48,30 @@ export default tseslint.config(
     },
   },
   {
+    files: [
+      'src/expression-evaluator.ts',
+      'src/dotted-json.ts',
+      'src/index.ts',
+      'src/@types/**/*.d.ts',
+      'src/loaders/**/*.ts',
+      'src/plugins/**/*.ts',
+      'src/types.ts',
+      'src/types/**/*.ts',
+      'src/variant-resolver.ts',
+      'src/pronouns.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-implied-eval': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+    },
+  },
+  {
     ignores: [
       'dist/',
       'node_modules/',

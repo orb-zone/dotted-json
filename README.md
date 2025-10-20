@@ -2,7 +2,8 @@
 
 > Spreadsheet formulas for JSON - dynamic data expansion with lazy evaluation and intelligent caching
 
-[![npm version](https://img.shields.io/npm/v/@orb-zone/dotted-json.svg)](https://www.npmjs.com/package/@orb-zone/dotted-json)
+[![JSR](https://jsr.io/badges/@orb-zone/dotted-json)](https://jsr.io/@orb-zone/dotted-json)
+[![JSR Score](https://jsr.io/badges/@orb-zone/dotted-json/score)](https://jsr.io/@orb-zone/dotted-json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Why dotted-json?
@@ -50,15 +51,17 @@ await data.get('.profile');   // Automatic caching
 ## Installation
 
 ```bash
-
 # Using bun (recommended)
 bun add @orb-zone/dotted-json
 
-# Using npm
-npm install @orb-zone/dotted-json
+# Using Deno
+deno add jsr:@orb-zone/dotted-json
 
-# Using yarn
-yarn add @orb-zone/dotted-json
+# Using npm (via JSR)
+npx jsr add @orb-zone/dotted-json
+
+# Using pnpm (via JSR)
+pnpm dlx jsr add @orb-zone/dotted-json
 ```
 
 ## Quick Start
@@ -238,7 +241,7 @@ Results cached until explicitly invalidated:
 
 await data.get('user.profile');  // Evaluates expression, caches result
 await data.get('user.profile');  // Returns cached value
-await data.get('user.profile', { ignoreCache: true });  // Force re-evaluation
+await data.get('user.profile', { fresh: true });  // Force re-evaluation and update cache
 ```
 
 ## Security
@@ -309,8 +312,8 @@ await data.set('user.id', 456);
 // Check existence
 const exists = await data.has('user.profile');
 
-// Force re-evaluation
-await data.get('user.profile', { ignoreCache: true });
+// Force re-evaluation (updates cache with new value)
+await data.get('user.profile', { fresh: true });
 ```
 
 ### Constructor Options
@@ -377,9 +380,11 @@ Advanced caching with stale-while-revalidate
 Generate translated variant files using local Ollama (privacy-friendly, no external APIs):
 
 ```bash
+# Install globally from JSR
+bun install -g jsr:@orb-zone/dotted-json
 
-# Install globally
-bun install -g @orb-zone/dotted-json
+# Or install from GitHub source
+bun install -g github:orb-zone/dotted-json
 
 # Translate to Spanish
 dotted-translate strings.jsön --to es
@@ -465,6 +470,5 @@ MIT © [orb.zone](https://orb.zone)
 ## Links
 
 - **[GitHub Repository](https://github.com/orb-zone/dotted-json)**
-
+- **[JSR Package](https://jsr.io/@orb-zone/dotted-json)**
 - **[Issue Tracker](https://github.com/orb-zone/dotted-json/issues)**
-- **[NPM Package](https://www.npmjs.com/package/@orb-zone/dotted-json)**

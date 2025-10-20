@@ -54,7 +54,7 @@ describe('dotted-json core', () => {
       expect(await data.get('.fullName')).toBe('John Doe');
     });
 
-    test.skip('evaluates nested expressions', async () => {
+    test('evaluates nested expressions', async () => {
       const data = dotted({
         a: 1,
         b: 2,

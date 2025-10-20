@@ -51,8 +51,8 @@ await data.get('user.profile');
 // Second call: returns cached result
 await data.get('user.profile');
 
-// Force refresh
-await data.get('user.profile', { ignoreCache: true });
+// Force refresh (re-evaluates and updates cache)
+await data.get('user.profile', { fresh: true });
 ```
 
 **Framework-Agnostic**
@@ -95,11 +95,14 @@ const data = dotted<UserSchema>(schema);
 # Using bun (recommended - fastest)
 bun add @orb-zone/dotted-json
 
-# Using npm
-npm install @orb-zone/dotted-json
+# Using Deno
+deno add jsr:@orb-zone/dotted-json
 
-# Using yarn
-yarn add @orb-zone/dotted-json
+# Using npm (via JSR)
+npx jsr add @orb-zone/dotted-json
+
+# Using pnpm (via JSR)
+pnpm dlx jsr add @orb-zone/dotted-json
 ```
 
 ### Minimal Working Example
@@ -657,13 +660,13 @@ const profile1 = await data.get('user.profile');  // API call happens
 // Second access: returns cached result
 const profile2 = await data.get('user.profile');  // No API call!
 
-// Force re-evaluation
-const fresh = await data.get('user.profile', { ignoreCache: true });  // API call again
+// Force re-evaluation (updates cache with new value)
+const fresh = await data.get('user.profile', { fresh: true });  // API call again
 ```
 
 **Cache invalidation**:
 
-- Use `ignoreCache: true` option to bypass cache
+- Use `fresh: true` option to re-evaluate and update cache
 - Cache clears when you `.set()` a dependency
 - External plugins (Pinia Colada, SurrealDB) provide advanced cache strategies
 

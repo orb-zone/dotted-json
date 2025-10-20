@@ -22,18 +22,14 @@ export class ExpressionEvaluator {
       return expression;
     }
 
-    try {
-      // Simple template literal (only ${} interpolation, no function calls)
-      if (hasTemplateLiterals && !hasFunctionCalls) {
-        return this.evaluateTemplateLiteral(expression);
-      } else {
-        // Function calls (with or without template literals)
-        const interpolatedExpression = this.interpolateVariables(expression);
-        const pathStr = this.context.path.join('.');
-        return await this.executeExpression(interpolatedExpression, pathStr);
-      }
-    } catch (_error) {
-      throw _error;
+    // Simple template literal (only ${} interpolation, no function calls)
+    if (hasTemplateLiterals && !hasFunctionCalls) {
+      return this.evaluateTemplateLiteral(expression);
+    } else {
+      // Function calls (with or without template literals)
+      const interpolatedExpression = this.interpolateVariables(expression);
+      const pathStr = this.context.path.join('.');
+      return await this.executeExpression(interpolatedExpression, pathStr);
     }
   }
 
