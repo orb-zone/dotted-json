@@ -1,23 +1,21 @@
 <!--
-Sync Impact Report (Version 1.1.0)
+Sync Impact Report (Version 1.2.0)
 ================================================
-Version Change: 1.0.0 → 1.1.0
+Version Change: 1.1.0 → 1.2.0
 Ratification Date: 2025-10-05
-Last Amendment: 2025-10-17
+Last Amendment: 2025-10-19
 
-Modified Principles: Development Workflow section expanded
-Added Sections:
-  - Release Automation (Changesets)
-  - JSR Publishing Standards
-  - CI/CD Best Practices
+Modified Principles: Core bundle size limit increased
+Added Sections: N/A
 
 Removed Sections: N/A
 
 Amendment Rationale:
-  - Codify changesets workflow (v0.11.0+)
-  - Document JSR-first publishing strategy (v0.10.0+)
-  - Establish CI/CD standards (Lefthook, branch protection)
-  - Formalize automated version synchronization
+  - Increase bundle size limit from 20 kB to 50 kB
+  - Accommodate v0.13 features: deep proxy wrapping, scoped resolution, 
+    dependency invalidation, enhanced error handling
+  - Provide buffer for future growth (hierarchical context, parent references)
+  - Current size: ~25 kB (50% of new limit)
 
 Templates Requiring Updates:
   ✅ plan-template.md - Constitution Check section references constitution
@@ -37,7 +35,7 @@ Follow-up TODOs: None
 The core library MUST remain lightweight and dependency-free (except essential utilities
 like dot-prop). All framework integrations (Zod, SurrealDB, TanStack, Pinia Colada,
 Vue/React) MUST be implemented as optional peer dependencies that users explicitly
-install. The core library MUST NOT exceed 20 kB minified bundle size.
+install. The core library MUST NOT exceed 50 kB minified bundle size.
 
 **Core features** (included in bundle limit):
 - Expression evaluation with lazy loading
@@ -48,8 +46,9 @@ install. The core library MUST NOT exceed 20 kB minified bundle size.
 
 **Rationale**: Users adopting dotted-json should not pay the bundle cost for features
 they don't use. A minimal core ensures maximum flexibility and broad adoption across
-different tech stacks. The 20 kB limit accommodates essential i18n/variant features
-while remaining lightweight.
+different tech stacks. The 50 kB limit accommodates essential i18n/variant features,
+property access materialization, and scoped expression evaluation while remaining
+lightweight.
 
 ### II. Security Through Transparency (NON-NEGOTIABLE)
 
@@ -173,7 +172,7 @@ without bloating the core.
    - [ ] Tests added for new functionality
    - [ ] Breaking changes documented in CHANGELOG.md
    - [ ] Security implications reviewed (if touching expression evaluator)
-   - [ ] Bundle size impact checked (core must stay under 20 kB)
+   - [ ] Bundle size impact checked (core must stay under 50 kB)
    - [ ] TypeScript types updated (no `any` without justification)
 
 ### Release Process
@@ -468,7 +467,7 @@ When status is "Implemented", MUST include:
 1. **Pre-PR Self-Check**: Contributors MUST verify compliance with Core Principles
    before submitting PR
 2. **Automated Checks**: CI pipeline MUST enforce:
-   - Bundle size limits (core < 15 kB)
+   - Bundle size limits (core < 50 kB)
    - Test pass rate (100%)
    - TypeScript compilation (zero errors)
 3. **Quarterly Review**: Maintainers review constitution relevance and update based
@@ -484,4 +483,4 @@ migration path to compliance.
 agent-specific development guidance (e.g., CLAUDE.md, GEMINI.md). Agent files MUST NOT
 contradict constitution principles but MAY provide additional context.
 
-**Version**: 1.0.0 | **Ratified**: 2025-10-05 | **Last Amended**: 2025-10-05
+**Version**: 1.2.0 | **Ratified**: 2025-10-05 | **Last Amended**: 2025-10-19
