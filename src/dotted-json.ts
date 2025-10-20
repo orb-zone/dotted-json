@@ -6,8 +6,11 @@ import type {
   GetOptions,
   SetOptions,
   HasOptions,
+  VariantContext,
   DottedJson as IDottedJson,
 } from './types.js';
+
+const VARIABLE_REFERENCE_PATTERN = /(?:\.{1,}[a-zA-Z_$][a-zA-Z0-9_$.]*|[a-zA-Z_$][a-zA-Z0-9_$.]*)(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*/g;
 
 const DEFAULT_MAX_DEPTH = 100;
 
@@ -56,10 +59,69 @@ export class DottedJson implements IDottedJson {
     this.availablePaths = getAvailablePaths(this.data);
   }
 
+  private async collectPathContexts(path: string, options: { includeLeaf?: boolean } = {}): Promise<VariantContext> {
+    const segments = path.split('.').filter(Boolean);
+    const includeLeaf = options.includeLeaf ?? false;
+
+    let mergedContext: VariantContext = { ...this.options.variants };
+
+    const rootContext = await this.resolveContextAtSegments([], mergedContext);
+    if (rootContext) {
+      mergedContext = { ...mergedContext, ...rootContext };
+    }
+
+    const limit = includeLeaf ? segments.length : Math.max(segments.length - 1, 0);
+
+    for (let i = 0; i < limit; i++) {
+      const partialSegments = segments.slice(0, i + 1);
+      const contextValue = await this.resolveContextAtSegments(partialSegments, mergedContext);
+      if (contextValue) {
+        mergedContext = { ...mergedContext, ...contextValue };
+      }
+    }
+
+    return mergedContext;
+  }
+
+  private isValidContextValue(value: unknown): value is Record<string, string | undefined> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private async resolveContextAtSegments(
+    ownerSegments: string[],
+    currentContext: VariantContext
+  ): Promise<VariantContext | undefined> {
+    const contextKey = '\\.context';
+    const contextPath = ownerSegments.length > 0
+      ? `${ownerSegments.join('.')}.${contextKey}`
+      : contextKey;
+
+    if (!dotHas(this.data, contextPath)) {
+      return undefined;
+    }
+
+    const rawValue = dotGet(this.data, contextPath);
+    let resolvedValue: unknown = rawValue;
+
+    if (typeof rawValue === 'string') {
+      resolvedValue = await this.evaluateExpressionString(
+        rawValue,
+        ownerSegments.join('.'),
+        currentContext
+      );
+    }
+
+    if (!this.isValidContextValue(resolvedValue)) {
+      return undefined;
+    }
+
+    return { ...resolvedValue };
+  }
+
   async get(path: string, options: GetOptions = {}): Promise<any> {
     try {
       // Resolve variant path based on context (e.g., .bio → .bio:es:f)
-      const resolvedPath = this.resolveVariant(path);
+      const resolvedPath = await this.resolveVariant(path);
 
       // Backward compatibility: support old 'ignoreCache' as 'fresh'
       const fresh = options.fresh !== undefined 
@@ -260,9 +322,10 @@ export class DottedJson implements IDottedJson {
         .filter(p => p.startsWith(fullPathPrefix))
         .map(p => p.substring(fullPathPrefix.length));
 
+      const variantContext = await this.collectPathContexts(partialPath);
       const resolvedExpressionKey = resolveVariantPath(
         baseExpressionKey,
-        this.options.variants,
+        variantContext,
         contextPaths
       );
 
@@ -310,7 +373,8 @@ export class DottedJson implements IDottedJson {
       this.evaluationStack.add(expressionPath);
       this.evaluationDepth++;
 
-      const result = await this.evaluateExpressionString(expression, targetPath);
+      const pathContext = await this.collectPathContexts(targetPath);
+      const result = await this.evaluateExpressionString(expression, targetPath, pathContext);
 
       // Cache the result
       this.cache.set(expressionPath, result);
@@ -327,18 +391,24 @@ export class DottedJson implements IDottedJson {
     }
   }
 
-  private async evaluateExpressionString(expression: string, targetPath: string): Promise<any> {
+  private async evaluateExpressionString(
+    expression: string,
+    targetPath: string,
+    variantsOverride?: VariantContext
+  ): Promise<any> {
     // Check if expression has dependencies that need to be resolved first
-    await this.resolveDependencies(expression);
+    await this.resolveDependencies(expression, targetPath);
 
     // Convert dot-separated path to array for context
-    const pathArray = targetPath.split('.');
+    const pathArray = targetPath
+      ? targetPath.split('.').filter(Boolean)
+      : [];
 
     const evaluator = createExpressionEvaluator(
       this.data,
       this.options.resolvers,
       pathArray,
-      this.options.variants,
+      variantsOverride ?? this.options.variants,
       this.options  // Pass full options for error handling
     );
 
@@ -353,8 +423,8 @@ export class DottedJson implements IDottedJson {
    * resolveVariant('.bio')
    * // → '.bio:es:f' (if exists), or '.bio:es', or '.bio'
    */
-  private resolveVariant(path: string): string {
-    const context = this.options.variants;
+  private async resolveVariant(path: string): Promise<string> {
+    const context = await this.collectPathContexts(path);
     if (!context || Object.keys(context).length === 0) {
       return path;  // No variant context
     }
@@ -362,23 +432,57 @@ export class DottedJson implements IDottedJson {
     return resolveVariantPath(path, context, this.availablePaths);
   }
 
-  private async resolveDependencies(expression: string): Promise<void> {
+  private async resolveDependencies(expression: string, currentPath: string): Promise<void> {
     // Extract variable references from the expression
     const variableMatches = expression.match(/\$\{([^}]+)\}/g);
     if (!variableMatches) return;
 
+    const currentSegments = currentPath
+      ? currentPath.split('.').filter(Boolean)
+      : [];
+
     for (const match of variableMatches) {
       const expr = match.slice(2, -1).trim(); // Remove ${ and }
+      if (!expr) continue;
 
-      // Extract individual variable names from the expression (not the whole expression)
-      // Handle paths like "a", "user.name", ".sum", etc.
-      const varNames = expr.match(/\.?[a-zA-Z_$][a-zA-Z0-9_$.]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*(?![a-zA-Z0-9_$])/g) || [];
+      const varNames = expr.match(VARIABLE_REFERENCE_PATTERN) || [];
 
       for (const varName of varNames) {
+        const leadingDots = varName.match(/^\.+/)?.[0].length ?? 0;
+
+        if (leadingDots > 1) {
+          const targetPath = this.computeParentReferencePath(varName, leadingDots, currentSegments);
+          if (targetPath) {
+            await this.evaluateExpressionsInPath(targetPath, false);
+          }
+          continue;
+        }
+
         // Recursively evaluate dependencies for each variable
         await this.evaluateExpressionsInPath(varName, false);
       }
     }
+  }
+
+  private computeParentReferencePath(varPath: string, leadingDots: number, currentSegments: string[]): string {
+    const currentPathStr = currentSegments.length > 0 ? currentSegments.join('.') : '(root)';
+    const parentSegments = currentSegments.slice(0, -1);
+    const parentLevels = leadingDots - 1;
+    const availableLevels = parentSegments.length;
+
+    if (availableLevels < parentLevels) {
+      throw new Error(
+        `Parent reference '${varPath}' at '${currentPathStr}' goes beyond root (requires ${parentLevels} parent levels, only ${availableLevels} available)`
+      );
+    }
+
+    const baseSegments = parentLevels > 0
+      ? parentSegments.slice(0, availableLevels - parentLevels)
+      : parentSegments;
+    const propertyPath = varPath.substring(leadingDots);
+    const propertySegments = propertyPath ? propertyPath.split('.') : [];
+    const targetSegments = [...baseSegments, ...propertySegments];
+    return targetSegments.join('.');
   }
 
   /**

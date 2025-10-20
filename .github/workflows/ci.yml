@@ -10,6 +10,7 @@ jobs:
   test:
     name: Test & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -56,6 +57,7 @@ jobs:
   constitution-check:
     name: Constitution Compliance
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
