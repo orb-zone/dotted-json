@@ -321,12 +321,109 @@ await data.get('user.profile', { fresh: true });
 ```typescript
 
 interface DottedOptions {
-  initial?: object;                 // Initial data to merge
-  default?: any;                    // Default for missing values
-  errorDefault?: any;               // Default for failed evaluations
-  resolvers?: Record<string, any>;  // Function registry
-  variants?: VariantContext;        // Variant context (lang, gender, form, custom)
-  maxEvaluationDepth?: number;      // Max depth (default: 100)
+  /**
+   * Initial data to merge with schema
+   */
+  initial?: Record<string, any>;
+
+  /**
+   * Fallback value for missing paths or expression errors
+   *
+   * Can be a static value or a function (for lazy evaluation).
+   * Functions are called each time a fallback is needed.
+   *
+   * Used when:
+   * - A path doesn't exist in the data
+   * - An expression evaluation fails and onError returns 'fallback'
+   *
+   * @example
+   * ```typescript
+   * // Static fallback
+   * const data = dotted(schema, {
+   *   fallback: null  // Return null for missing/failed values
+   * });
+   *
+   * // Dynamic fallback (called on each miss)
+   * const data = dotted(schema, {
+   *   fallback: () => ({ timestamp: Date.now() })
+   * });
+   * ```
+   */
+  fallback?: any | (() => any) | (() => Promise<any>);
+
+  /**
+   * Function registry for expression resolvers
+   */
+  resolvers?: Record<string, any>;
+
+  /**
+   * Maximum evaluation depth to prevent infinite recursion (default: 100)
+   */
+  maxEvaluationDepth?: number;
+
+  /**
+   * Variant context for localization and conditional content
+   *
+   * Well-known variants: lang, gender
+   * Custom variants: any string dimension (dialect, source, tone, etc.)
+   *
+   * @example
+   * ```typescript
+   * variants: {
+   *   lang: 'es',
+   *   gender: 'f',
+   *   register: 'formal'
+   * }
+   * ```
+   */
+  variants?: VariantContext;
+
+  /**
+   * Validation options for runtime type checking
+   * Provided by plugins like @orb-zone/dotted-json/plugins/zod
+   *
+   * @example
+   * ```typescript
+   * import { withZod } from '@orb-zone/dotted-json/plugins/zod'
+   *
+   * const data = dotted(schema, {
+   *   ...withZod({ schemas, mode: 'strict' })
+   * })
+   * ```
+   */
+  validation?: ValidationOptions;
+
+  /**
+   * Custom error handler for expression evaluation failures
+   *
+   * Return values:
+   * - `'throw'` - Re-throw the error (fail-fast)
+   * - `'fallback'` - Use the fallback value
+   * - Any other value - Use that value as the result
+   *
+   * @param error - The error that occurred
+   * @param path - The path where the error occurred
+   * @returns 'throw' | 'fallback' | any custom value
+   *
+   * @example
+   * ```typescript
+   * // Fail-fast in development, graceful in production
+   * onError: (error, path) => {
+   *   if (process.env.NODE_ENV === 'development') {
+   *     return 'throw';  // Re-throw error
+   *   }
+   *   logger.error(`Failed to evaluate ${path}`, error);
+   *   return 'fallback';  // Use fallback value
+   * }
+   *
+   * // Return custom fallback per path
+   * onError: (error, path) => {
+   *   if (path.startsWith('user.')) return { name: 'Guest' };
+   *   return 'fallback';
+   * }
+   * ```
+   */
+  onError?: (error: Error, path: string) => 'throw' | 'fallback' | any;
 }
 ```
 

@@ -989,7 +989,7 @@ const data = dotted({
 const data = dotted({
   '.risky': 'mightFail()'
 }, {
-  errorDefault: 'fallback value',
+  fallback: 'fallback value',
   resolvers: { mightFail: () => { throw new Error('oops'); } }
 });
 ```

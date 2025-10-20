@@ -85,22 +85,7 @@ export interface DottedOptions {
    */
   maxEvaluationDepth?: number;
 
-  /**
-   * Variant context for localization and conditional content
-   *
-   * Well-known variants: lang, gender
-   * Custom variants: any string dimension (dialect, source, tone, etc.)
-   *
-   * @example
-   * ```typescript
-   * variants: {
-   *   lang: 'es',
-   *   gender: 'f',
-   *   register: 'formal'
-   * }
-   * ```
-   */
-  variants?: VariantContext;
+
 
   /**
    * Validation options for runtime type checking
@@ -269,8 +254,8 @@ export interface ResolverContext {
 export interface ExpressionContext {
   data: Record<string, any>;
   resolvers: ResolverContext;
-  path: string[];
-  variants?: VariantContext;  // Variant context for pronoun resolution
+  path: string[];  // Path to the object containing the expression
+  fullPath?: string;  // Full path including the property being evaluated (for error reporting)
   error?: Error; // Available in .errorDefault expressions
   options?: DottedOptions;  // Options for error handling and other configuration
 }

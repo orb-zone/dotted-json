@@ -5,24 +5,23 @@
 import { describe, test, expect } from 'bun:test';
 import { dotted } from '../../src/index.js';
 
-describe('Integration: hierarchical context with parent references', () => {
-  test('per-user pronouns merge with company metadata via parent refs', async () => {
+describe('Integration: tree-walking variants with parent references', () => {
+  test('per-user pronouns use tree-walking with company metadata via parent refs', async () => {
     const data = dotted({
-      '.context': { lang: 'en' },
+      lang: 'en',
       company: {
         name: 'Orbital Zone',
-        region: 'us-east',
-        '.context': { region: 'us-east' }
+        region: 'us-east'
       },
       users: {
         alice: {
-          '.context': { gender: 'f' },
+          gender: 'f',
           role: 'Engineer',
           '.profile': '${:subject} works at ${...company.name} (${...company.region})',
           '.greeting': 'Hello, I am ${:subject}'
         },
         bob: {
-          '.context': { gender: 'm' },
+          gender: 'm',
           role: 'Designer',
           '.profile': '${:subject} works at ${...company.name} (${...company.region})',
           '.greeting': 'Hello, I am ${:subject}'
@@ -36,28 +35,31 @@ describe('Integration: hierarchical context with parent references', () => {
     expect(await data.get('users.bob.profile')).toBe('he works at Orbital Zone (us-east)');
   });
 
-  test('multi-tenant contexts inherit and drive parent-aware expressions', async () => {
+  test('multi-tenant tree-walking variants with parent-aware expressions', async () => {
     const config = dotted({
-      '.context': { env: 'production', region: 'us-east' },
+      env: 'production',
+      region: 'us-east',
       limits: {
         acme: { users: 5000 },
         startup: { users: 100 }
       },
       tenants: {
         acme: {
-          '.context': { tenant: 'acme', tier: 'enterprise' },
-          '.welcome': 'Welcome ${...companyName} (${tier})',
+          tenant: 'acme',
+          tier: 'enterprise',
+          '.welcome': 'Welcome ${...companyName} (${.tier})',
           features: {
             '.maxUsers': '${....limits.acme.users}',
-            '.storage': '${..tier === "enterprise" ? "unlimited" : "1TB"}'
+            '.storage': '${.tier === "enterprise" ? "unlimited" : "1TB"}'
           }
         },
         startup: {
-          '.context': { tenant: 'startup', tier: 'basic' },
-          '.welcome': 'Welcome ${...companyName} (${tier})',
+          tenant: 'startup',
+          tier: 'basic',
+          '.welcome': 'Welcome ${...companyName} (${.tier})',
           features: {
             '.maxUsers': '${....limits.startup.users}',
-            '.storage': '${..tier === "enterprise" ? "unlimited" : "1TB"}'
+            '.storage': '${.tier === "enterprise" ? "unlimited" : "1TB"}'
           }
         }
       },

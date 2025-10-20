@@ -1,5 +1,5 @@
 import { getProperty as dotGet, setProperty as dotSet, hasProperty as dotHas } from 'dot-prop';
-import { createExpressionEvaluator } from './expression-evaluator.js';
+import { ExpressionEvaluator, createExpressionEvaluator } from './expression-evaluator.js';
 import { resolveVariantPath, getAvailablePaths } from './variant-resolver.js';
 import type {
   DottedOptions,
@@ -38,7 +38,6 @@ export class DottedJson implements IDottedJson {
       fallback,
       resolvers: options.resolvers || {},
       maxEvaluationDepth: options.maxEvaluationDepth ?? DEFAULT_MAX_DEPTH,
-      variants: options.variants || {},
       validation: options.validation,
       onError: options.onError
     } as any;
@@ -58,64 +57,7 @@ export class DottedJson implements IDottedJson {
     this.availablePaths = getAvailablePaths(this.data);
   }
 
-  private async collectPathContexts(path: string, options: { includeLeaf?: boolean } = {}): Promise<VariantContext> {
-    const segments = path.split('.').filter(Boolean);
-    const includeLeaf = options.includeLeaf ?? false;
 
-    let mergedContext: VariantContext = { ...this.options.variants };
-
-    const rootContext = await this.resolveContextAtSegments([], mergedContext);
-    if (rootContext) {
-      mergedContext = { ...mergedContext, ...rootContext };
-    }
-
-    const limit = includeLeaf ? segments.length : Math.max(segments.length - 1, 0);
-
-    for (let i = 0; i < limit; i++) {
-      const partialSegments = segments.slice(0, i + 1);
-      const contextValue = await this.resolveContextAtSegments(partialSegments, mergedContext);
-      if (contextValue) {
-        mergedContext = { ...mergedContext, ...contextValue };
-      }
-    }
-
-    return mergedContext;
-  }
-
-  private isValidContextValue(value: unknown): value is Record<string, string | undefined> {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
-  }
-
-  private async resolveContextAtSegments(
-    ownerSegments: string[],
-    currentContext: VariantContext
-  ): Promise<VariantContext | undefined> {
-    const contextKey = '\\.context';
-    const contextPath = ownerSegments.length > 0
-      ? `${ownerSegments.join('.')}.${contextKey}`
-      : contextKey;
-
-    if (!dotHas(this.data, contextPath)) {
-      return undefined;
-    }
-
-    const rawValue = dotGet(this.data, contextPath);
-    let resolvedValue: unknown = rawValue;
-
-    if (typeof rawValue === 'string') {
-      resolvedValue = await this.evaluateExpressionString(
-        rawValue,
-        ownerSegments.join('.'),
-        currentContext
-      );
-    }
-
-    if (!this.isValidContextValue(resolvedValue)) {
-      return undefined;
-    }
-
-    return { ...resolvedValue };
-  }
 
   async get(path: string, options: GetOptions = {}): Promise<any> {
     try {
@@ -300,29 +242,11 @@ export class DottedJson implements IDottedJson {
       const currentSegment = pathSegments[i];
 
       // Check if there's a dot-prefixed expression that would populate this segment
-      let escapedExpressionPath = parentPath ? `${parentPath}.\\.${currentSegment}` : `\\.${currentSegment}`;
+      const escapedExpressionPath = parentPath ? `${parentPath}.\\.${currentSegment}` : `\\.${currentSegment}`;
 
-      // Resolve variant for this expression key within parent context
-      const baseExpressionKey = `.${currentSegment}`;
-      const fullPathPrefix = parentPath ? `${parentPath}.` : '';
+       // Resolve variant for this expression key within parent context
 
-      // Filter available paths to those matching the current parent context
-      const contextPaths = this.availablePaths
-        .filter(p => p.startsWith(fullPathPrefix))
-        .map(p => p.substring(fullPathPrefix.length));
 
-      const variantContext = await this.collectPathContexts(partialPath);
-      const resolvedExpressionKey = resolveVariantPath(
-        baseExpressionKey,
-        variantContext,
-        contextPaths
-      );
-
-      // If variant resolution changed the key, update the escaped expression path
-      if (resolvedExpressionKey !== baseExpressionKey) {
-        const resolvedSegment = resolvedExpressionKey.substring(1); // Remove leading dot
-        escapedExpressionPath = parentPath ? `${parentPath}.\\.${resolvedSegment}` : `\\.${resolvedSegment}`;
-      }
 
       // If the expression exists and hasn't been evaluated yet (or we want fresh evaluation)
       if (dotHas(this.data, escapedExpressionPath)) {
@@ -362,8 +286,7 @@ export class DottedJson implements IDottedJson {
       this.evaluationStack.add(expressionPath);
       this.evaluationDepth++;
 
-      const pathContext = await this.collectPathContexts(targetPath);
-      const result = await this.evaluateExpressionString(expression, targetPath, pathContext);
+      const result = await this.evaluateExpressionString(expression, targetPath);
 
       // Cache the result
       this.cache.set(expressionPath, result);
@@ -380,43 +303,87 @@ export class DottedJson implements IDottedJson {
 
   private async evaluateExpressionString(
     expression: string,
-    targetPath: string,
-    variantsOverride?: VariantContext
+    targetPath: string
   ): Promise<any> {
     // Check if expression has dependencies that need to be resolved first
     await this.resolveDependencies(expression, targetPath);
 
     // Convert dot-separated path to array for context
+    // The context path should be the path to the object containing the expression,
+    // not including the property being evaluated
     const pathArray = targetPath
-      ? targetPath.split('.').filter(Boolean)
+      ? targetPath.split('.').filter(Boolean).slice(0, -1)  // Remove the last segment (property name)
       : [];
+
+
 
     const evaluator = createExpressionEvaluator(
       this.data,
       this.options.resolvers,
       pathArray,
-      variantsOverride ?? this.options.variants,
-      this.options  // Pass full options for error handling
+      this.options,  // Pass full options for error handling
+      targetPath  // Pass full path for error reporting
     );
 
     return await evaluator.evaluate(expression);
   }
 
   /**
-   * Resolve variant path based on context
+   * Resolve variant path by reading variant values from data hierarchy
+   * Uses tree-walking to find variant properties and build context
    *
    * @example
-   * // With variants: { lang: 'es', gender: 'f' }
+   * // With data containing: { lang: 'es', gender: 'f' }
    * resolveVariant('.bio')
    * // → '.bio:es:f' (if exists), or '.bio:es', or '.bio'
+   *
+   * @example
+   * // With data containing: { style: 'pirate' }
+   * resolveVariant('.action')
+   * // → '.action:pirate' (if exists), or '.action'
    */
   private async resolveVariant(path: string): Promise<string> {
-    const context = await this.collectPathContexts(path);
-    if (!context || Object.keys(context).length === 0) {
-      return path;  // No variant context
+    // Create a temporary expression evaluator to access tree-walking
+    const evaluator = new ExpressionEvaluator({
+      data: this.data,
+      path: [], // Start from root for variant resolution
+      resolvers: this.options.resolvers || {},
+      options: this.options
+    });
+
+    // Build variant context from tree-walked values
+    const variants: VariantContext = {};
+
+    // Well-known variant dimensions
+    const lang = evaluator.resolveTreeWalkingValue('lang');
+    const form = evaluator.resolveTreeWalkingValue('form');
+    const gender = evaluator.resolveTreeWalkingValue('gender');
+
+    if (lang !== undefined && typeof lang === 'string') variants.lang = lang;
+    if (form !== undefined && typeof form === 'string') variants.form = form;
+    if (gender !== undefined && typeof gender === 'string' && ['m', 'f', 'x'].includes(gender)) {
+      variants.gender = gender as 'm' | 'f' | 'x';
     }
 
-    return resolveVariantPath(path, context, this.availablePaths);
+    // Custom variant dimensions - any property value becomes a potential variant
+    // Look for properties that could represent variant dimensions
+    const potentialVariants = ['region', 'theme', 'platform', 'device', 'style', 'context', 'environment', 'tone', 'dialect', 'source'];
+    for (const prop of potentialVariants) {
+      const value = evaluator.resolveTreeWalkingValue(prop);
+      if (value !== undefined && typeof value === 'string') {
+        // For custom variants, the property value becomes the variant name
+        // e.g., style: 'pirate' creates variant { pirate: 'pirate' }
+        variants[value] = value;
+      }
+    }
+
+    // If no variants found, return original path
+    if (Object.keys(variants).length === 0) {
+      return path;
+    }
+
+    // Use existing variant resolution logic
+    return resolveVariantPath(path, variants, this.availablePaths);
   }
 
   private async resolveDependencies(expression: string, currentPath: string): Promise<void> {

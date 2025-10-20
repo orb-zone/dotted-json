@@ -4,8 +4,120 @@ How to migrate to `@orb-zone/dotted-json` from other solutions.
 
 ---
 
+## Breaking Changes in v1.1.0
+
+### Variant System Migration: Restored Automatic Variant Resolution
+
+**What Changed:** The variant system has been restored to use automatic resolution with `:variant` modifiers. Instead of complex tree-walking expressions, you can now use clean variant syntax (`.key:lang:gender`) and variants are automatically resolved from data properties using tree-walking.
+
+**Why This Change:** The tree-walking approach introduced in v1.1.0 was too verbose and complex. The restored system maintains the clean `:variant` syntax while using tree-walking internally to automatically discover variant context from data properties.
+
+#### Before (v1.1.0 tree-walking)
+
+```typescript
+// Complex expressions with tree-walking
+const data = dotted({
+  lang: 'es',
+  form: 'formal',
+  '.greeting': '${.lang === "es" && .form === "formal" ? "Buenos días" : .lang === "es" ? "Hola" : "Hello"}'
+});
+
+const bio = dotted({
+  gender: 'f',
+  '.bio': '${.gender === "f" ? "She is known for her work" : .gender === "m" ? "He is known for his work" : "They are known for their work"}'
+});
+
+await data.get('.greeting'); // → 'Buenos días'
+await bio.get('.bio'); // → 'She is known for her work'
+```
+
+#### After (v1.1.0 restored automatic resolution)
+
+```typescript
+// Clean variant syntax with automatic resolution
+const data = dotted({
+  lang: 'es',
+  form: 'formal',
+  '.greeting': 'Hello',
+  '.greeting:es': 'Hola',
+  '.greeting:es:formal': 'Buenos días'
+});
+
+const bio = dotted({
+  gender: 'f',
+  '.bio': 'The author is known',
+  '.bio:f': 'She is known for her work',
+  '.bio:m': 'He is known for his work'
+});
+
+await data.get('.greeting'); // → 'Buenos días'
+await bio.get('.bio'); // → 'She is known for her work'
+```
+
+#### Migration Steps
+
+1. **Remove complex tree-walking expressions**
+   ```typescript
+   // ❌ Old (complex expressions)
+   {
+     '.greeting': '${.lang === "es" && .form === "formal" ? "Buenos días" : .lang === "es" ? "Hola" : "Hello"}'
+   }
+
+   // ✅ New (clean variant syntax)
+   {
+     '.greeting': 'Hello',
+     '.greeting:es': 'Hola',
+     '.greeting:es:formal': 'Buenos días'
+   }
+   ```
+
+2. **Convert gender-aware expressions to variants**
+   ```typescript
+   // ❌ Old (complex gender expressions)
+   {
+     '.bio': '${.gender === "f" ? "She is known" : .gender === "m" ? "He is known" : "They are known"}'
+   }
+
+   // ✅ New (gender variants)
+   {
+     '.bio': 'They are known',
+     '.bio:f': 'She is known',
+     '.bio:m': 'He is known'
+   }
+   ```
+
+3. **Keep variant properties as data**
+   ```typescript
+   // ✅ Both approaches work - variant properties stay in data
+   const data = dotted({
+     lang: 'es',      // ← Variant context from data
+     gender: 'f',     // ← Variant context from data
+     '.greeting:es': 'Hola',
+     '.bio:f': 'She is known'
+   });
+   ```
+
+4. **Use pronouns in expressions**
+   ```typescript
+   // Tree-walking enables natural pronoun usage
+   {
+     gender: 'f',
+     '.message': '${:subject} completed ${:possessive} task'
+   }
+   // → 'She completed her task'
+   ```
+
+**Benefits of Tree-Walking:**
+- ✅ Variants feel like regular data
+- ✅ Expressions can reference any variant from any ancestor
+- ✅ No more confusing control-plane/data-plane separation
+- ✅ More intuitive and powerful
+
+---
+
 ## Table of Contents
 
+- [Breaking Changes in v1.1.0](#breaking-changes-in-v110)
 - [From i18next](#from-i18next)
 - [From react-intl](#from-react-intl)
 - [From vue-i18n](#from-vue-i18n)

@@ -2,219 +2,232 @@
  * Variant System Examples
  *
  * Demonstrates language variants, gender-aware pronouns, and multi-dimensional
- * content adaptation using the dotted-json variant system.
+ * content adaptation using the dotted-json tree-walking variant system.
  */
 
 import { dotted } from '../src/index.js';
 
 console.log('═══════════════════════════════════════════════════════════');
-console.log('  Variant System Examples - @orb-zone/dotted-json v0.2.0');
+console.log('  Variant System Examples - @orb-zone/dotted-json v1.1.0');
 console.log('═══════════════════════════════════════════════════════════\n');
 
 // ============================================================================
-// Example 1: Basic Language Variants
+// Example 1: Basic Language Variants with Automatic Resolution
 // ============================================================================
-console.log('Example 1: Basic Language Variants\n');
+console.log('Example 1: Basic Language Variants with Automatic Resolution\n');
 
+// Store language as a regular data property, variants are resolved automatically
 const greetings = dotted({
+  lang: 'en', // Language stored as regular data
   '.greeting': 'Hello, World!',
   '.greeting:es': '¡Hola, Mundo!',
   '.greeting:fr': 'Bonjour, le Monde!',
   '.greeting:de': 'Hallo, Welt!'
 });
 
-console.log('English (default):', await greetings.get('.greeting'));
+console.log('English:', await greetings.get('.greeting'));
 
-const greetingsES = dotted(
-  {
-    '.greeting': 'Hello, World!',
-    '.greeting:es': '¡Hola, Mundo!',
-    '.greeting:fr': 'Bonjour, le Monde!',
-    '.greeting:de': 'Hallo, Welt!'
-  },
-  { variants: { lang: 'es' } }
-);
+// Spanish version - just change the lang property
+const greetingsES = dotted({
+  lang: 'es',
+  '.greeting': 'Hello, World!',
+  '.greeting:es': '¡Hola, Mundo!',
+  '.greeting:fr': 'Bonjour, le Monde!',
+  '.greeting:de': 'Hallo, Welt!'
+});
 
 console.log('Spanish:', await greetingsES.get('.greeting'));
 
-const greetingsFR = dotted(
-  {
-    '.greeting': 'Hello, World!',
-    '.greeting:es': '¡Hola, Mundo!',
-    '.greeting:fr': 'Bonjour, le Monde!',
-    '.greeting:de': 'Hallo, Welt!'
-  },
-  { variants: { lang: 'fr' } }
-);
+// French version
+const greetingsFR = dotted({
+  lang: 'fr',
+  '.greeting': 'Hello, World!',
+  '.greeting:es': '¡Hola, Mundo!',
+  '.greeting:fr': 'Bonjour, le Monde!',
+  '.greeting:de': 'Hallo, Welt!'
+});
 
 console.log('French:', await greetingsFR.get('.greeting'));
 
 // ============================================================================
-// Example 2: Gender-Aware Pronouns
+// Example 2: Gender-Aware Pronouns with Automatic Resolution
 // ============================================================================
-console.log('\n\nExample 2: Gender-Aware Pronouns\n');
+console.log('\n\nExample 2: Gender-Aware Pronouns with Automatic Resolution\n');
 
+// Store gender as regular data property, variants resolved automatically
 const profiles = {
+  gender: 'm', // Default gender at root level
   '.bio': '${name} is a ${role}. ${:subject} loves coding and ${:possessive} work is excellent.',
+  '.bio:f': '${name} is a ${role}. ${:subject} loves coding and ${:possessive} work is excellent.',
   name: 'Alex',
-  role: 'developer'
+  role: 'developer',
+  users: {
+    alice: {
+      gender: 'f', // Overrides root gender for this user
+      '.bio': '${name} is a ${role}. ${:subject} loves coding and ${:possessive} work is excellent.',
+      '.bio:f': '${name} is a ${role}. ${:subject} loves coding and ${:possessive} work is excellent.',
+      name: 'Alice',
+      role: 'engineer'
+    },
+    bob: {
+      gender: 'm', // Same as root, but explicit
+      '.bio': '${name} is a ${role}. ${:subject} loves coding and ${:possessive} work is excellent.',
+      '.bio:f': '${name} is a ${role}. ${:subject} loves coding and ${:possessive} work is excellent.',
+      name: 'Bob',
+      role: 'designer'
+    }
+  }
 };
 
-const bioMale = dotted(profiles, { variants: { gender: 'm' } });
-console.log('Male pronouns:', await bioMale.get('.bio'));
+const bioDefault = dotted(profiles);
+console.log('Default (male) pronouns:', await bioDefault.get('.bio'));
 
-const bioFemale = dotted(profiles, { variants: { gender: 'f' } });
-console.log('Female pronouns:', await bioFemale.get('.bio'));
+const bioAlice = dotted(profiles);
+console.log('Alice (female) pronouns:', await bioAlice.get('users.alice.bio'));
 
-const bioNeutral = dotted(profiles, { variants: { gender: 'x' } });
-console.log('Neutral pronouns:', await bioNeutral.get('.bio'));
+const bioBob = dotted(profiles);
+console.log('Bob (male) pronouns:', await bioBob.get('users.bob.bio'));
 
 // ============================================================================
-// Example 3: Combined Language + Gender Variants
+// Example 3: Combined Language + Gender Variants with Automatic Resolution
 // ============================================================================
-console.log('\n\nExample 3: Combined Language + Gender Variants\n');
+console.log('\n\nExample 3: Combined Language + Gender Variants with Automatic Resolution\n');
 
-const authorTitles = dotted(
-  {
-    '.title': 'Author',
-    '.title:es': 'Autor',
-    '.title:es:f': 'Autora',
-    '.title:es:m': 'Autor',
-    '.title:fr': 'Auteur',
-    '.title:fr:f': 'Auteure',
-    '.title:de': 'Autor',
-    '.title:de:f': 'Autorin'
-  },
-  { variants: { lang: 'es', gender: 'f' } }
-);
+// Store language and gender as regular data properties, variants resolved automatically
+const authorTitles = dotted({
+  lang: 'es',
+  gender: 'f',
+  '.title': 'Author',
+  '.title:es': 'Autor',
+  '.title:es:f': 'Autora',
+  '.title:fr': 'Auteur',
+  '.title:fr:f': 'Auteure',
+  '.title:de': 'Autor',
+  '.title:de:f': 'Autorin'
+});
 
 console.log('Spanish Female:', await authorTitles.get('.title'));
 
-const authorTitlesFR = dotted(
-  {
-    '.title': 'Author',
-    '.title:es': 'Autor',
-    '.title:es:f': 'Autora',
-    '.title:fr': 'Auteur',
-    '.title:fr:f': 'Auteure'
-  },
-  { variants: { lang: 'fr', gender: 'f' } }
-);
+const authorTitlesFR = dotted({
+  lang: 'fr',
+  gender: 'f',
+  '.title': 'Author',
+  '.title:es': 'Autor',
+  '.title:es:f': 'Autora',
+  '.title:fr': 'Auteur',
+  '.title:fr:f': 'Auteure',
+  '.title:de': 'Autor',
+  '.title:de:f': 'Autorin'
+});
 
 console.log('French Female:', await authorTitlesFR.get('.title'));
 
 // ============================================================================
-// Example 4: Multi-Dimensional Variants (Language + Custom Dimension)
+// Example 4: Multi-Dimensional Variants with Automatic Resolution
 // ============================================================================
-console.log('\n\nExample 4: Multi-Dimensional Variants\n');
+console.log('\n\nExample 4: Multi-Dimensional Variants with Automatic Resolution\n');
 
-const contextualGreetings = dotted(
-  {
-    '.greeting': 'Hello',
-    '.greeting:es': 'Hola',
-    '.greeting:es:surfer': '¡Buenas olas!',
-    '.greeting:fr': 'Bonjour',
-    '.greeting:fr:formal': 'Bonjour, comment allez-vous?',
-    '.greeting:fr:casual': 'Salut!'
-  },
-  { variants: { lang: 'es', surfer: 'surfer' } }
-);
+// Multiple dimensions stored as regular properties, variants resolved automatically
+const contextualGreetings = dotted({
+  lang: 'es',
+  context: 'surfer',
+  '.greeting': 'Hello',
+  '.greeting:es': 'Hola',
+  '.greeting:es:surfer': '¡Buenas olas!',
+  '.greeting:fr': 'Bonjour',
+  '.greeting:fr:formal': 'Bonjour, comment allez-vous?',
+  '.greeting:fr:casual': 'Salut!'
+});
 
 console.log('Spanish Surfer:', await contextualGreetings.get('.greeting'));
 
-const greetingsFormal = dotted(
-  {
-    '.greeting': 'Hello',
-    '.greeting:es': 'Hola',
-    '.greeting:es:formal': 'Buenos días',
-    '.greeting:es:casual': '¿Qué tal?'
-  },
-  { variants: { lang: 'es', formal: 'formal' } }
-);
+const greetingsFormal = dotted({
+  lang: 'es',
+  formality: 'formal',
+  '.greeting': 'Hello',
+  '.greeting:es': 'Hola',
+  '.greeting:es:formal': 'Buenos días',
+  '.greeting:es:casual': '¿Qué tal?'
+});
 
 console.log('Spanish Formal:', await greetingsFormal.get('.greeting'));
 
 // ============================================================================
-// Example 5: Custom Dimension - Cloud Provider Messages
+// Example 5: Custom Dimension with Automatic Resolution (Cloud Provider)
 // ============================================================================
-console.log('\n\nExample 5: Custom Dimension (Cloud Provider)\n');
+console.log('\n\nExample 5: Custom Dimension with Automatic Resolution (Cloud Provider)\n');
 
-const errorMessages = dotted(
-  {
-    '.error': 'Service unavailable',
-    '.error:aws': 'AWS Lambda timeout - check CloudWatch logs',
-    '.error:gcp': 'GCP Cloud Functions error - check Stackdriver',
-    '.error:azure': 'Azure Functions error - check Application Insights'
-  },
-  { variants: { aws: 'aws' } }
-);
+// Cloud provider stored as regular data property, variants resolved automatically
+const errorMessages = dotted({
+  provider: 'aws',
+  '.error': 'Service unavailable',
+  '.error:aws': 'AWS Lambda timeout - check CloudWatch logs',
+  '.error:gcp': 'GCP Cloud Functions error - check Stackdriver',
+  '.error:azure': 'Azure Functions error - check Application Insights'
+});
 
 console.log('AWS Error:', await errorMessages.get('.error'));
 
-const errorGCP = dotted(
-  {
-    '.error': 'Service unavailable',
-    '.error:aws': 'AWS Lambda timeout - check CloudWatch logs',
-    '.error:gcp': 'GCP Cloud Functions error - check Stackdriver',
-    '.error:azure': 'Azure Functions error - check Application Insights'
-  },
-  { variants: { gcp: 'gcp' } }
-);
+const errorGCP = dotted({
+  provider: 'gcp',
+  '.error': 'Service unavailable',
+  '.error:aws': 'AWS Lambda timeout - check CloudWatch logs',
+  '.error:gcp': 'GCP Cloud Functions error - check Stackdriver',
+  '.error:azure': 'Azure Functions error - check Application Insights'
+});
 
 console.log('GCP Error:', await errorGCP.get('.error'));
 
 // ============================================================================
-// Example 6: Order-Independent Variant Syntax
+// Example 6: Automatic Resolution Makes Order Irrelevant
 // ============================================================================
-console.log('\n\nExample 6: Order-Independent Variant Syntax\n');
+console.log('\n\nExample 6: Automatic Resolution Makes Order Irrelevant\n');
 
-const orderTest = dotted(
-  {
-    '.bio': 'Default bio',
-    '.bio:es:f': 'Bio en español para mujer',
-    '.bio:f:es': 'This variant should match the same as :es:f'
+// With automatic resolution, order doesn't matter - just reference the properties
+const orderTest = dotted({
+  lang: 'es',
+  gender: 'f',
+  '.bio': 'Default bio',
+  '.bio:es:f': 'Bio en español para mujer'
+});
+
+console.log('Automatic resolution (no order dependency):', await orderTest.get('.bio'));
+
+// ============================================================================
+// Example 7: Real-World Blog Post with Automatic Resolution
+// ============================================================================
+console.log('\n\nExample 7: Real-World Blog Post with Automatic Resolution\n');
+
+// Automatic resolution allows variants to be resolved from any ancestor
+const blogPost = dotted({
+  lang: 'es',
+  author: {
+    name: 'María García',
+    gender: 'f',
+    '.title': 'Author',
+    '.title:es:f': 'Autora',
+    '.bio': '${author.name} is a writer. ${:subject} has published ${bookCount} books.',
+    '.bio:es': '${author.name} es escritora. ${:subject} ha publicado ${bookCount} libros.',
+    '.bio:es:f': '${author.name} es una escritora destacada. ${:subject} ha publicado ${bookCount} libros y ${:possessive} trabajo es reconocido internacionalmente.'
   },
-  { variants: { lang: 'es', gender: 'f' } }
-);
-
-console.log('Order test (:es:f vs :f:es):', await orderTest.get('.bio'));
-
-// ============================================================================
-// Example 7: Real-World Blog Post
-// ============================================================================
-console.log('\n\nExample 7: Real-World Blog Post Example\n');
-
-const blogPost = dotted(
-  {
-    author: {
-      name: 'María García',
-      '.title': 'Author',
-      '.title:es:f': 'Autora',
-      '.bio': '${author.name} is a writer. ${:subject} has published ${bookCount} books.',
-      '.bio:es': '${author.name} es escritora. ${:subject} ha publicado ${bookCount} libros.',
-      '.bio:es:f': '${author.name} es una escritora destacada. ${:subject} ha publicado ${bookCount} libros y ${:possessive} trabajo es reconocido internacionalmente.'
-    },
-    bookCount: 12
-  },
-  { variants: { lang: 'es', gender: 'f' } }
-);
+  bookCount: 12
+});
 
 console.log('Title:', await blogPost.get('author.title'));
 console.log('Bio:', await blogPost.get('author.bio'));
 
 // ============================================================================
-// Example 8: Fallback Behavior
+// Example 8: Fallback Behavior with Automatic Resolution
 // ============================================================================
-console.log('\n\nExample 8: Fallback Behavior\n');
+console.log('\n\nExample 8: Fallback Behavior with Automatic Resolution\n');
 
-const fallbackTest = dotted(
-  {
-    '.message': 'Default message',
-    '.message:es': 'Mensaje en español',
-    '.message:fr': 'Message en français'
-  },
-  { variants: { lang: 'de' } } // German not available
-);
+// Automatic resolution provides fallback logic automatically
+const fallbackTest = dotted({
+  lang: 'de', // German not available
+  '.message': 'Default message',
+  '.message:es': 'Mensaje en español',
+  '.message:fr': 'Message en français'
+});
 
 console.log('German not available, falls back to default:', await fallbackTest.get('.message'));
 
