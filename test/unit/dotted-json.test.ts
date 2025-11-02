@@ -324,4 +324,201 @@ describe('dotted-json core', () => {
       expect(await data.get('missing')).toBe('N/A');
     });
   });
+
+  describe('Parent references (..)', () => {
+    test('accesses parent property with .. notation', async () => {
+      const data = dotted({
+        x: 10,
+        nested: {
+          '.value': '${..x}',
+        },
+      });
+      expect(await data.get('nested.value')).toBe(10);
+    });
+
+    test('accesses grandparent property with multiple .. levels', async () => {
+      const data = dotted({
+        root: 'ROOT',
+        level1: {
+          level2: {
+            '.value': '${...root}',
+          },
+        },
+      });
+      expect(await data.get('level1.level2.value')).toBe('ROOT');
+    });
+
+    test('parent reference in array access', async () => {
+      const data = dotted({
+        items: [1, 2, 3],
+        nested: {
+          '.first': '${..items[0]}',
+        },
+      });
+      expect(await data.get('nested.first')).toBe(1);
+    });
+  });
+
+  describe('Array operations', () => {
+    test('array indexing in expressions', async () => {
+      const data = dotted({
+        '.numbers': '[1, 2, 3, 4, 5]',
+        '.third': '${.numbers[2]}',
+      });
+      expect(await data.get('.third')).toBe(3);
+    });
+
+    test('array spread operator', async () => {
+      const data = dotted({
+        '.original': '[1, 2, 3]',
+        '.spread': '[0, ...${.original}, 4]',
+      });
+      expect(await data.get('.spread')).toEqual([0, 1, 2, 3, 4]);
+    });
+
+    test('chained array methods', async () => {
+      const data = dotted({
+        '.ids': '"12345"',
+        '.sorted': '[...String(${.ids}).split("").sort()]',
+      });
+      const result = await data.get('.sorted');
+      expect(result).toEqual(['1', '2', '3', '4', '5']);
+    });
+
+    test('array negative indexing', async () => {
+      const data = dotted({
+        '.arr': '[1, 2, 3, 4, 5]',
+        '.last': '${.arr[.arr.length - 1]}',
+      });
+      expect(await data.get('.last')).toBe(5);
+    });
+  });
+
+  describe('Complex template literals', () => {
+    test('backtick templates with multiple interpolations', async () => {
+      const data = dotted({
+        x: 10,
+        y: 20,
+        '.path': '`M${x} ${y} L${x + 5} ${y + 5}`',
+      });
+      expect(await data.get('.path')).toBe('M10 20 L15 25');
+    });
+
+    test('nested template interpolations', async () => {
+      const data = dotted({
+        '.id': '42',
+        '.nested': '`value-${`id-${.id}`}`',
+      });
+      expect(await data.get('.nested')).toBe('value-id-42');
+    });
+
+    test('template with parent reference', async () => {
+      const data = dotted({
+        value: 5,
+        paths: {
+          '.dynamic': '`M12 ${..value} L14 ${..value + 2}`',
+        },
+      });
+      expect(await data.get('paths.dynamic')).toBe('M12 5 L14 7');
+    });
+  });
+
+  describe('Method chaining', () => {
+    test('chains array methods on expression results', async () => {
+      const data = dotted({
+        '.text': '"hello"',
+        '.transformed': '${.text}.toUpperCase().split("").reverse().join("")',
+      });
+      expect(await data.get('.transformed')).toBe('OLLEH');
+    });
+
+    test('chains with intermediate computations', async () => {
+      const data = dotted({
+        '.num': '123',
+        '.result': 'String(${.num}).split("").map(x => Number(x) * 2).join("")',
+      });
+      expect(await data.get('.result')).toBe('246');
+    });
+  });
+
+  describe('Built-in resolvers', () => {
+    test('Date.now() resolver', async () => {
+      const data = dotted(
+        {
+          '.timestamp': 'Date.now()',
+        },
+        {
+          resolvers: {
+            Date: {
+              now: () => 1234567890,
+            },
+          },
+        }
+      );
+      expect(await data.get('.timestamp')).toBe(1234567890);
+    });
+
+    test('Math resolvers', async () => {
+      const data = dotted(
+        {
+          '.random': 'Math.floor(Math.random() * 100)',
+        },
+        {
+          resolvers: {
+            Math: {
+              floor: Math.floor,
+              random: () => 0.5, // Mock for deterministic testing
+            },
+          },
+        }
+      );
+      expect(await data.get('.random')).toBe(50);
+    });
+  });
+
+  describe('Complex real-world patterns', () => {
+    test('combines parent refs, array access, and templates', async () => {
+      const data = dotted({
+        '.id': '12345',
+        '.dateDesc': '[...String(${.id}).split("").sort()]',
+        paths: {
+          star: 'M12 2 L15 10',
+          '.starArm': '`M12 ${..dateDesc[1]} L14 12`',
+        },
+      });
+
+      expect(await data.get('.dateDesc')).toEqual(['1', '2', '3', '4', '5']);
+      expect(await data.get('paths.starArm')).toBe('M12 2 L14 12');
+    });
+
+    test('nested computed properties with mixed access', async () => {
+      const data = dotted({
+        config: {
+          base: 10,
+          '.computed': '${..config.base} * 2',
+        },
+      });
+      expect(await data.get('config.computed')).toBe(20);
+    });
+  });
+
+  describe('Advanced error handling', () => {
+    test('throws on undefined parent reference', async () => {
+      const data = dotted({
+        nested: {
+          '.invalid': '${..nonexistent}',
+        },
+      });
+      await expect(data.get('nested.invalid')).rejects.toThrow();
+    });
+
+    test('handles array out of bounds gracefully', async () => {
+      const data = dotted({
+        '.arr': '[1, 2, 3]',
+        '.outOfBounds': '${.arr[10]}',
+      });
+      const result = await data.get('.outOfBounds');
+      expect(result).toBeUndefined();
+    });
+  });
 });
