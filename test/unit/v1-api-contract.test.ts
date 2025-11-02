@@ -578,7 +578,13 @@ describe('API Contract', () => {
       });
 
       const result = await data.get('parsed');
-      expect(result).toEqual({ name: 'Alice', age: 30 });
+
+      // Result is proxy-wrapped, access properties directly
+      expect(result.name).toBe('Alice');
+      expect(result.age).toBe(30);
+
+      // Can also use .get() on the result
+      expect(await result.get('name')).toBe('Alice');
     });
 
     test('prevents "4" + 1 = "41" bugs', async () => {
@@ -609,6 +615,231 @@ describe('API Contract', () => {
 
       const result = await data.get('total');
       expect(result).toBeCloseTo(47.25, 2); // 5 * 10.50 * 0.9
+    });
+  });
+
+  describe('Proxy-Wrapped .get() Results', () => {
+    test('.get() returns proxy-wrapped objects with .get() method', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice',
+          age: 30
+        }
+      });
+
+      // Get object via .get() method
+      const user = await data.get('user');
+
+      // Should have .get() method
+      expect(typeof user.get).toBe('function');
+
+      // Should be able to call .get() on returned object
+      const name = await user.get('name');
+      expect(name).toBe('Alice');
+    });
+
+    test('.get() returns proxy-wrapped objects with .set() method', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice'
+        }
+      });
+
+      const user = await data.get('user');
+
+      // Should have .set() method
+      expect(typeof user.set).toBe('function');
+
+      // Should be able to call .set() on returned object
+      user.set('age', 30);
+
+      // Change should be reflected in root
+      expect(await data.get('user.age')).toBe(30);
+    });
+
+    test('.get() returns proxy-wrapped objects with .has() method', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice'
+        }
+      });
+
+      const user = await data.get('user');
+
+      // Should have .has() method
+      expect(typeof user.has).toBe('function');
+
+      // Should be able to check properties
+      expect(await user.has('name')).toBe(true);
+      expect(await user.has('age')).toBe(false);
+    });
+
+    test('nested .get() calls work: (await data.get("user")).get("name")', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice',
+          '.greeting': 'Hello, ${name}!'
+        }
+      });
+
+      // Nested .get() calls
+      const greeting = await (await data.get('user')).get('greeting');
+
+      expect(greeting).toBe('Hello, Alice!');
+    });
+
+    test('property access and .get() method return equivalent proxies', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice',
+          '.greeting': 'Hello, ${name}!'
+        }
+      });
+
+      // Get via property access
+      const user1 = data.user;
+      const greeting1 = await user1.get('greeting');
+
+      // Get via .get() method
+      const user2 = await data.get('user');
+      const greeting2 = await user2.get('greeting');
+
+      // Both should work identically
+      expect(greeting1).toBe('Hello, Alice!');
+      expect(greeting2).toBe('Hello, Alice!');
+
+      // Both should have same methods
+      expect(typeof user1.get).toBe('function');
+      expect(typeof user2.get).toBe('function');
+      expect(typeof user1.set).toBe('function');
+      expect(typeof user2.set).toBe('function');
+    });
+
+    test('deeply nested .get() calls preserve binding to root', async () => {
+      const data = dotted({
+        family: {
+          father: {
+            name: 'Bob',
+            '.greeting': 'Hello from ${name}'
+          }
+        }
+      });
+
+      // Deep nesting via .get()
+      const family = await data.get('family');
+      const father = await family.get('father');
+      const greeting = await father.get('greeting');
+
+      expect(greeting).toBe('Hello from Bob');
+
+      // Changes should reflect in root
+      father.set('age', 45);
+      expect(await data.get('family.father.age')).toBe(45);
+    });
+
+    test('.get() returned proxy can access static properties directly', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice',
+          age: 30
+        }
+      });
+
+      const user = await data.get('user');
+
+      // Direct property access should work on proxy-wrapped result
+      expect(user.name).toBe('Alice');
+      expect(user.age).toBe(30);
+    });
+
+    test('.get() returned proxy shows undefined for unevaluated expressions', async () => {
+      const data = dotted({
+        user: {
+          name: 'Alice',
+          '.greeting': 'Hello, ${name}!'
+        }
+      });
+
+      const user = await data.get('user');
+
+      // Expression not evaluated yet
+      expect(user.greeting).toBeUndefined();
+
+      // After evaluation
+      await user.get('greeting');
+      expect(user.greeting).toBe('Hello, Alice!');
+    });
+
+    test('.get() returned proxy allows materialization through nested access', async () => {
+      const data = dotted({
+        user: {
+          firstName: 'John',
+          lastName: 'Doe',
+          '.fullName': '${firstName} ${lastName}'
+        }
+      });
+
+      const user = await data.get('user');
+
+      // Before evaluation
+      expect(user.fullName).toBeUndefined();
+
+      // Evaluate
+      await user.get('fullName');
+
+      // Now materialized
+      expect(user.fullName).toBe('John Doe');
+
+      // Also accessible from root
+      expect(data.user.fullName).toBe('John Doe');
+    });
+
+    test('.get() with non-object values returns primitive directly', async () => {
+      const data = dotted({
+        name: 'Alice',
+        age: 30,
+        active: true
+      });
+
+      // Primitives should not be wrapped
+      const name = await data.get('name');
+      const age = await data.get('age');
+      const active = await data.get('active');
+
+      expect(name).toBe('Alice');
+      expect(age).toBe(30);
+      expect(active).toBe(true);
+
+      // Should not have .get() method
+      expect(typeof (name as any).get).toBe('undefined');
+      expect(typeof (age as any).get).toBe('undefined');
+    });
+
+    test('.get() with arrays returns proxy-wrapped array', async () => {
+      const data = dotted({
+        items: [1, 2, 3],
+        nested: {
+          list: ['a', 'b', 'c']
+        }
+      });
+
+      const items = await data.get('items');
+
+      // Arrays are also wrapped in proxies
+      expect(typeof items.get).toBe('function');
+      expect(typeof items.set).toBe('function');
+
+      // Can still access array elements normally
+      expect(items[0]).toBe(1);
+      expect(items[1]).toBe(2);
+      expect(items[2]).toBe(3);
+
+      // Can use .get() to access nested properties
+      const nested = await data.get('nested');
+      expect(typeof nested.get).toBe('function');
+
+      const list = await nested.get('list');
+      expect(list[0]).toBe('a');
     });
   });
 });

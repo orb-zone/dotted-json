@@ -128,7 +128,9 @@ describe('dotted-json core', () => {
       );
 
       const user = await data.get('.user');
-      expect(user).toEqual({ id: 123, name: 'User123' });
+      // Result is proxy-wrapped, access properties directly
+      expect(user.id).toBe(123);
+      expect(user.name).toBe('User123');
     });
 
     test('supports nested resolver namespaces', async () => {
@@ -147,7 +149,10 @@ describe('dotted-json core', () => {
         }
       );
 
-      expect(await data.get('.data')).toEqual({ id: 1, name: 'Alice' });
+      const result = await data.get('.data');
+      // Result is proxy-wrapped, access properties directly
+      expect(result.id).toBe(1);
+      expect(result.name).toBe('Alice');
     });
 
     test('passes multiple arguments to resolvers', async () => {
