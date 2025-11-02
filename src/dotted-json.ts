@@ -1,6 +1,7 @@
 import { getProperty as dotGet, setProperty as dotSet, hasProperty as dotHas } from 'dot-prop';
 import { ExpressionEvaluator, createExpressionEvaluator } from './expression-evaluator.js';
 import { resolveVariantPath, getAvailablePaths } from './variant-resolver.js';
+import { createScopedProxy } from './scoped-proxy.js';
 import type {
   DottedOptions,
   GetOptions,
@@ -91,6 +92,14 @@ export class DottedJson implements IDottedJson {
         if (this.options.validation?.enabled) {
           result = this.options.validation.validate(path, result);
         }
+
+        // Wrap objects (including arrays) in scoped proxy to provide .get(), .set(), .has() methods
+        // This makes .get() return values consistent with property access behavior
+        if (result !== null && typeof result === 'object') {
+          const pathArray = actualPath.split('.').filter(Boolean);
+          return createScopedProxy(this, pathArray);
+        }
+
         return result;
       }
 
