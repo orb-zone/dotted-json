@@ -1,36 +1,27 @@
 # dotted-json (jsön) - Product Roadmap
 
-**Current Version**: v0.11.0
-**Last Updated**: 2025-10-16
-**Status**: Pre-release - Production-ready, ready for publication
+**Current Version**: v1.1.0
+**Last Updated**: November 15, 2025
+**Status**: Stable - Production-ready with enhanced security and testing infrastructure
 
 ---
 
-## 📍 Current State (v0.11.0)
+## 📍 Current State (v1.1.0)
 
-### ✅ AEON/ION Architecture Design Complete
+### ✅ Latest Improvements (v1.1.0)
 
-#### Design Documents (2 comprehensive specs)
+#### Security & Quality Enhancements ✅
 
-- [x] **aeon-entity-hierarchy.md** - Complete A-H layer taxonomy (935 lines)
-  - Layer definitions (ION, ART, BIO, COG, DOT, ECO, FAD, GEN, HUB)
-  - Graph edge patterns and reusability
-  - Subdomain architecture (DNS → entity mapping)
-  - Inheritance queries and anti-patterns
-  - Multi-tenant SaaS use cases
+- [x] **Runtime Schema Validation** - `validateSchema()` with bounds checking, prevents DoS via deep nesting/circular refs
+- [x] **Structured Logging** - Configurable logger with production suppression, replaces scattered console.warn/error
+- [x] **Performance Benchmarks** - Baseline regression tests for expression evaluation, caching, and variant resolution
+- [x] **Enhanced Documentation** - Updated README with API docs/Examples links, security policy, CONTRIBUTING guide
 
-- [x] **aeonic-vision.md** - Framework vision and ecosystem (830 lines)
-  - AEON/ION nomenclature and core concepts
-  - Web-craft ecosystem (dotted-json → surrounded → aeonic)
-  - Full-stack ION flow examples
-  - Package relationship diagrams
-  - Design principles across all layers
-
-**Status**: Foundation design complete, ready for v2.0.0 monorepo implementation
+**Status**: Core library stabilized, ready for v2.0 architectural improvements
 
 ---
 
-### ✅ Phase 6 Implementation Complete (v0.6.0 - v0.9.5)
+### ✅ Phase 6 Implementation Complete (v0.6.0 - v1.1.0)
 
 #### Core Features ✅
 
@@ -38,16 +29,16 @@
 - [x] **SurrealDB Storage** (v0.7.0) - Array Record IDs (10-100x faster), variant-aware resolution, all auth types, ION naming
 - [x] **Real-time Integration** (v0.8.0) - LIVE SELECT queries, auto-cache invalidation, withSurrealDBPinia plugin
 - [x] **Production Polish** (v0.9.0) - Connection retry logic, enhanced error messages, performance metrics
+- [x] **Security & Testing** (v1.1.0) - Runtime validation, structured logging, performance regression tests
 
 #### Documentation ✅
 
-- [x] **v0.9.1** - i18n Translation Editor, integration test utilities, performance guide
-- [x] **v0.9.2** - API reference, migration guides (i18next/react-intl/vue-i18n/LaunchDarkly/Unleash), feature flags example
-- [x] **v0.9.3** - Feature Flags Guide (500+ lines), Enhanced Examples README (540+ lines), Vue 3 computed fixes
-- [x] **v0.9.4** - Getting Started Guide (400+ lines), README restructure (860→459 lines), file naming standardization
-- [x] **v0.9.5** - Markdown linting compliance (MD022/MD031/MD040/MD032), constitutional documentation standards
+- [x] **v0.9.1-0.9.5** - i18n Translation Editor, integration tests, performance guide, API reference, migration guides
+- [x] **v1.0.0** - Stable release, comprehensive API documentation
+- [x] **v1.1.0** - Enhanced security documentation, development workflow guides, code contribution standards
 
 #### TypeScript Codegen (v0.7.0) ✅
+```
 
 - [x] **surql-to-ts CLI** - Generate types from schemas
 - [x] **Type Mapping** - SurrealDB → TypeScript conversion

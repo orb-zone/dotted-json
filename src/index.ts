@@ -28,6 +28,30 @@ export {
 } from './pronouns.js';
 
 export type {
+  ValidationResult,
+  ValidationConfig
+} from './schema-validator.js';
+
+export {
+  validateSchema,
+  assertValidSchema
+} from './schema-validator.js';
+
+export type {
+  LogLevel,
+  LogEntry,
+  LoggerConfig
+} from './logger.js';
+
+export {
+  getLogger,
+  logWarn,
+  logError,
+  logDebug,
+  logInfo
+} from './logger.js';
+
+export type {
   StorageProvider,
   SaveOptions,
   DocumentInfo,

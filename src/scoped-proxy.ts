@@ -59,7 +59,7 @@ export function createScopedProxy(instance: DottedJson, path: string[] = [], dat
       // For arrays, handle numeric indices and array properties/methods
       if (Array.isArray(actualData)) {
         const isNumericIndex = typeof prop === 'string' && /^\d+$/.test(prop);
-        const isArrayProperty = ['length', 'forEach', 'map', 'filter', 'reduce', 'find', 'includes', 'indexOf', 'join', 'slice', 'concat', 'push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'every', 'some'].includes(prop as string);
+        const isArrayProperty = ['length', 'forEach', 'map', 'filter', 'reduce', 'find', 'includes', 'indexOf', 'join', 'slice', 'concat', 'push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'every', 'some'].includes(prop);
 
         if (isNumericIndex || isArrayProperty) {
           const value = actualData[prop as any];

@@ -5,12 +5,18 @@
  *
  * Builds the library using Bun's native bundler with TypeScript support.
  * Outputs ESM modules with type definitions to dist/
+ * 
+ * Generates both unminified and minified versions for bundle analysis.
  */
 
 import { build } from 'bun';
 import { rm, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { createReadStream } from 'node:fs';
+import { createGzip } from 'node:zlib';
+import { pipeline } from 'node:stream/promises';
+import { createWriteStream } from 'node:fs';
 
 const outdir = './dist';
 const clidir = './dist/cli';
@@ -24,7 +30,7 @@ await mkdir(clidir, { recursive: true });
 
 console.log('🏗️  Building dotted-json...\n');
 
-// Core library
+// Core library (unminified for development)
 await build({
   entrypoints: ['./src/index.ts'],
   outdir,
@@ -32,6 +38,20 @@ await build({
   format: 'esm',
   minify: false,
   sourcemap: 'external',
+  splitting: true,
+  external: ['dot-prop'],
+});
+
+// Core library (minified for production)
+const minifiedDir = join(outdir, 'min');
+await mkdir(minifiedDir, { recursive: true });
+await build({
+  entrypoints: ['./src/index.ts'],
+  outdir: minifiedDir,
+  target: 'browser',
+  format: 'esm',
+  minify: true,
+  sourcemap: false,
   splitting: true,
   external: ['dot-prop'],
 });
@@ -120,16 +140,43 @@ for (const tool of cliTools) {
 
 console.log('\n✅ Build complete!');
 console.log(`📦 Output: ${outdir}/`);
+console.log(`📦 Minified: ${minifiedDir}/`);
 
-// Show bundle sizes
-const { size } = await Bun.file(`${outdir}/index.js`).stat();
-const sizeKB = (size / 1024).toFixed(2);
-console.log(`📊 Core bundle size: ${sizeKB} kB`);
+// Bundle size analysis
+const stat = await Bun.file(`${outdir}/index.js`).stat();
+const minStat = await Bun.file(`${minifiedDir}/index.js`).stat();
 
-// Constitution check: core must be < 50 kB (updated 2025-10-19 for v0.13 features)
-if (size > 50 * 1024) {
+const sizeKB = (stat.size / 1024).toFixed(2);
+const minSizeKB = (minStat.size / 1024).toFixed(2);
+
+console.log(`\n📊 Bundle Sizes:`);
+console.log(`   Unminified: ${sizeKB} kB`);
+console.log(`   Minified:   ${minSizeKB} kB`);
+
+// Calculate gzip size for minified bundle
+try {
+  const gzipPath = `${minifiedDir}/index.js.gz`;
+  await pipeline(
+    createReadStream(`${minifiedDir}/index.js`),
+    createGzip(),
+    createWriteStream(gzipPath)
+  );
+  
+  const gzipStat = await Bun.file(gzipPath).stat();
+  const gzipSizeKB = (gzipStat.size / 1024).toFixed(2);
+  console.log(`   Minified (gzip): ${gzipSizeKB} kB`);
+  
+  // Calculate compression ratio
+  const ratio = ((1 - gzipStat.size / minStat.size) * 100).toFixed(1);
+  console.log(`   Compression: ${ratio}%`);
+} catch (error) {
+  console.warn('⚠️  Could not calculate gzip size:', error instanceof Error ? error.message : error);
+}
+
+// Constitution check: core must be < 50 kB (updated 2025-11-15 for v1.1 features)
+if (stat.size > 50 * 1024) {
   console.error(`\n❌ CONSTITUTION VIOLATION: Core bundle (${sizeKB} kB) exceeds 50 kB limit`);
   process.exit(1);
 }
 
-console.log('✅ Constitution check passed: Core bundle within 50 kB limit');
+console.log('\n✅ Constitution check passed: Core bundle within 50 kB limit');

@@ -6,6 +6,21 @@
 [![JSR Score](https://jsr.io/badges/@orb-zone/dotted-json/score)](https://jsr.io/@orb-zone/dotted-json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+---
+
+## ⚠️ **EXPERIMENTAL - USE AT YOUR OWN RISK**
+
+**This project has been largely "vibe-coded" during development.** While the core functionality is tested and production-ready, some design patterns and architectural decisions are experimental. The API may change between releases, and certain edge cases may not be fully handled.
+
+**Before using in production:**
+- Review the [Security Policy](SECURITY.md) and [Constitution](AGENTS.md#agent-constitutional-alignment)
+- Run the full test suite: `bun test`
+- Test thoroughly with your specific use cases
+- Validate schemas using `validateSchema()` before processing untrusted data
+- Enable structured logging for production monitoring
+
+---
+
 ## Why dotted-json?
 
 **The Problem**: Modern applications need dynamic data that adapts to user context (language, permissions, feature flags), but traditional approaches create messy code:
@@ -98,6 +113,22 @@ await data.get('user.greeting');  // "Hello, Alice!"
 ```
 
 **[👉 Continue with the Getting Started Guide](docs/getting-started.md)**
+
+## Documentation
+
+- **[API Reference](docs/API.md)** - Complete API documentation
+- **[Getting Started Guide](docs/getting-started.md)** - Step-by-step tutorials
+- **[Examples](examples/README.md)** - 10+ working examples covering all major features
+- **[Performance Guide](docs/performance.md)** - Caching strategies and optimization tips
+- **[Feature Flags](docs/feature-flags.md)** - Runtime feature toggling with variants
+- **[Migration Guide](docs/migration.md)** - Upgrading from previous versions
+
+## Development & Contributing
+
+- **[Contributing Guidelines](CONTRIBUTING.md)** - How to contribute code and report issues
+- **[Security Policy](SECURITY.md)** - Security information and vulnerability reporting
+- **[Agent Guidelines](AGENTS.md)** - Developer workflow and agent system
+- **[Code of Conduct](.specify/memory/constitution.md)** - Project principles and constraints
 
 ## Real-World Use Cases
 

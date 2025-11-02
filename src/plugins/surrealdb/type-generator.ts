@@ -7,6 +7,7 @@
  */
 
 import type { FunctionMetadata } from './function-discovery.js';
+import { logWarn } from '../../logger.js';
 
 /**
  * Type generation options
@@ -140,7 +141,7 @@ export function surqlTypeToTS(surqlType: string): string {
 
     // Default: treat as any
     default:
-      console.warn(`[type-generator] Unknown SurrealDB type: ${type}, using 'any'`);
+      logWarn(`[type-generator] Unknown SurrealDB type: ${type}, using 'any'`);
       return 'any';
   }
 }

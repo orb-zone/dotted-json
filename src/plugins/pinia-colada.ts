@@ -32,6 +32,8 @@
  * ```
  */
 
+import { logWarn } from '../logger.js';
+
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -259,7 +261,7 @@ function createQueryResolver(
       const retry = queryDef.retry ?? defaults?.retry ?? 3;
       if (typeof retry === 'number' && retry > 0) {
         // Simple retry logic (can be enhanced)
-        console.warn(`[dotted-json/pinia-colada] Query ${name} failed, will retry`);
+        logWarn(`[dotted-json/pinia-colada] Query ${name} failed, will retry`);
       }
       throw _error;
     }
