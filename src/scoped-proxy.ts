@@ -39,13 +39,33 @@ import { getProperty as dotGet, setProperty as dotSet } from 'dot-prop';
  * await user2.get('name');  // 'Alice'
  * ```
  */
-export function createScopedProxy(instance: DottedJson, path: string[] = []): any {
+export function createScopedProxy(instance: DottedJson, path: string[] = [], data?: any): any {
+  // Get the actual data at this path to determine the proxy target type
+  const currentPath = path.length > 0 ? path.join('.') : '';
+  const actualData = data ?? (currentPath ? dotGet(instance.data, currentPath) : instance.data);
+
+  // Use the actual data as the proxy target
+  // This ensures proxy invariants are satisfied (e.g., property descriptors match the target)
+  const target = actualData;
+
   // Create a proxy that intercepts property access
-  return new Proxy({}, {
+  return new Proxy(target, {
     get(_target: any, prop: string | symbol) {
       // Handle symbols and special properties
       if (typeof prop === 'symbol' || prop === 'constructor' || prop === 'then') {
         return undefined;
+      }
+
+      // For arrays, handle numeric indices and array properties/methods
+      if (Array.isArray(actualData)) {
+        const isNumericIndex = typeof prop === 'string' && /^\d+$/.test(prop);
+        const isArrayProperty = ['length', 'forEach', 'map', 'filter', 'reduce', 'find', 'includes', 'indexOf', 'join', 'slice', 'concat', 'push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'every', 'some'].includes(prop as string);
+
+        if (isNumericIndex || isArrayProperty) {
+          const value = actualData[prop as any];
+          // Bind array methods to actualData
+          return typeof value === 'function' ? value.bind(actualData) : value;
+        }
       }
 
       // If property is a DottedJson method, create a scoped version
@@ -62,20 +82,18 @@ export function createScopedProxy(instance: DottedJson, path: string[] = []): an
         };
       }
 
-      // Get the current data value at this path
-      const currentPath = path.length > 0 ? path.join('.') : '';
-      const currentData = currentPath ? dotGet(instance.data, currentPath) : instance.data;
-
-      if (!currentData || typeof currentData !== 'object') {
+      // Use the actualData which was already resolved (either passed in or fetched)
+      // This ensures we work with the correct object even when path is empty
+      if (!actualData || typeof actualData !== 'object') {
         return undefined;
       }
 
       // Get the value of this property
-      const value = currentData[prop];
+      const value = actualData[prop];
 
       // If value is an object (including arrays), wrap it in a scoped proxy
       if (value !== null && typeof value === 'object') {
-        return createScopedProxy(instance, [...path, prop]);
+        return createScopedProxy(instance, [...path, prop], value);
       }
 
       return value;
@@ -90,6 +108,9 @@ export function createScopedProxy(instance: DottedJson, path: string[] = []): an
         return true;
       }
       return false;
-    }
+    },
+
+    // No need for ownKeys or getOwnPropertyDescriptor traps
+    // since we're using actualData as the target
   });
 }

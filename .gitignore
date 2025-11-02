@@ -72,3 +72,6 @@ credentials/
 
 # Claude Code
 .claude_history
+
+# Archive folder (personal reference only)
+.archive/

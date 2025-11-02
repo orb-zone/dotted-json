@@ -6,6 +6,11 @@
 pre-commit:
   parallel: true
   commands:
+    # Lint check - fail on errors, allow warnings
+    lint:
+      glob: "*.{js,ts,tsx}"
+      run: bun run lint
+
     # Ensure all tests pass before committing
     tests:
       glob: "*.{js,ts,tsx}"
@@ -63,6 +68,10 @@ commit-msg:
 # Pre-push hooks
 pre-push:
   commands:
+    # Lint check before push
+    lint:
+      run: bun run lint
+
     # Ensure all tests pass before pushing
     tests:
       run: bun test

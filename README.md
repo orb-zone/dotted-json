@@ -51,6 +51,8 @@ await data.get('.profile');   // Automatic caching
 
 ## Installation
 
+### Library
+
 ```bash
 # Using bun (recommended)
 bun add @orb-zone/dotted-json
@@ -63,6 +65,18 @@ npx jsr add @orb-zone/dotted-json
 
 # Using pnpm (via JSR)
 pnpm dlx jsr add @orb-zone/dotted-json
+```
+
+### CLI Tools
+
+```bash
+# Install translation and code generation CLIs globally via npm
+npm install -g @orb-zone/dotted-json
+
+# Or with your preferred package manager
+bun add -g @orb-zone/dotted-json  # bun
+pnpm add -g @orb-zone/dotted-json  # pnpm
+yarn add --global @orb-zone/dotted-json  # yarn
 ```
 
 ## Quick Start
@@ -478,22 +492,50 @@ Advanced caching with stale-while-revalidate
 Generate translated variant files using local Ollama (privacy-friendly, no external APIs):
 
 ```bash
-# Install globally from JSR
-bun install -g jsr:@orb-zone/dotted-json
+# Install CLI tools globally
+npm install -g @orb-zone/dotted-json
 
-# Or install from GitHub source
-bun install -g github:orb-zone/dotted-json
+# Verify installation
+dotted-translate --help
 
 # Translate to Spanish
 dotted-translate strings.jsön --to es
 
 # Translate to Japanese polite (keigo)
 dotted-translate strings.jsön --to ja --form polite
+
+# Check Ollama health before translating
+dotted-translate --check
 ```
+
+**Requires**: [Ollama](https://ollama.ai/) running locally (privacy-friendly, no external APIs).
 
 All translations happen **locally** on your machine. No data sent to external services.
 
 **[📖 Translation CLI guide](docs/getting-started.md#translation-cli)**
+
+## Code Generation CLI
+
+Generate TypeScript types and resolvers from SurrealDB schemas:
+
+```bash
+# If not installed globally yet
+npm install -g @orb-zone/dotted-json
+
+# Generate TypeScript from schema file
+surql-to-ts --schema schema.surql --output db.generated.ts
+
+# Watch mode for live updates
+surql-to-ts --schema schema.surql --output db.generated.ts --watch
+
+# Generate with Zod schemas
+surql-to-ts --schema schema.surql --output db.generated.ts --include-zod
+
+# Load from running database
+surql-to-ts --url ws://localhost:8000/rpc --ns app --db main --output db.generated.ts
+```
+
+**[📖 Code Generation guide](docs/getting-started.md#code-generation-cli)**
 
 ## Documentation
 

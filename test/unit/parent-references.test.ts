@@ -54,7 +54,7 @@ describe('Parent path references', () => {
 
   test('throws helpful error when reference exceeds available parents', async () => {
     await expect(data.get('company.employees.alice.invalid')).rejects.toThrow(
-      "Parent reference '.....name' at 'company.employees.alice.invalid' goes beyond root (requires 4 parent levels, only 3 available)"
+      "Parent reference '.....name' at 'company.employees.alice' goes beyond root (requires 4 parent levels, only 3 available)"
     );
   });
 

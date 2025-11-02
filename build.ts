@@ -8,16 +8,19 @@
  */
 
 import { build } from 'bun';
-import { rm, mkdir } from 'node:fs/promises';
+import { rm, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 const outdir = './dist';
+const clidir = './dist/cli';
 
 // Clean dist directory
 if (existsSync(outdir)) {
   await rm(outdir, { recursive: true });
 }
 await mkdir(outdir, { recursive: true });
+await mkdir(clidir, { recursive: true });
 
 console.log('🏗️  Building dotted-json...\n');
 
@@ -71,6 +74,49 @@ const tsc = Bun.spawn(['bunx', 'tsc', '--emitDeclarationOnly'], {
 });
 
 await tsc.exited;
+
+console.log('\n📦 Building CLI tools...');
+
+// Build CLI tools (for npm publishing)
+const cliTools = [
+  {
+    name: 'translate',
+    entry: './tools/translate/index.ts',
+    output: 'translate.js'
+  },
+  {
+    name: 'surql-to-ts',
+    entry: './tools/surql-to-ts/index.ts',
+    output: 'surql-to-ts.js'
+  }
+];
+
+for (const tool of cliTools) {
+  try {
+    await build({
+      entrypoints: [tool.entry],
+      outdir: clidir,
+      target: 'node',
+      format: 'esm',
+      minify: false,
+      sourcemap: 'external',
+      naming: tool.output,
+      external: ['dotenv']
+    });
+
+    // Add shebang to make it executable
+    const filePath = join(clidir, tool.output);
+    const content = await readFile(filePath, 'utf-8');
+    if (!content.startsWith('#!/usr/bin/env node')) {
+      await writeFile(filePath, `#!/usr/bin/env node\n${content}`);
+    }
+
+    console.log(`   ✅ Built ${tool.name}`);
+  } catch (error) {
+    console.error(`   ❌ Failed to build ${tool.name}:`, error);
+    process.exit(1);
+  }
+}
 
 console.log('\n✅ Build complete!');
 console.log(`📦 Output: ${outdir}/`);
