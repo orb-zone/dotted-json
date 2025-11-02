@@ -86,7 +86,7 @@ export class ExpressionEvaluator {
       // This is safer than eval() and allows us to evaluate in a controlled context
       const func = new Function(`return (${expression})`);
       return func();
-    } catch (error) {
+    } catch (_error) {
       // If evaluation fails, return the expression as-is
       return expression;
     }
@@ -272,7 +272,7 @@ export class ExpressionEvaluator {
       /[+\-*/()[\]<>!=&|?:]\s*\$\{[^}]+\}/.test(sanitizedExpression);
 
     // Also check if expression is wrapped in array/object literal syntax
-    const isWrappedInLiteral = /^\s*[\[{]/.test(sanitizedExpression) && /[\]}]\s*$/.test(sanitizedExpression);
+    const isWrappedInLiteral = /^\s*[[{]/.test(sanitizedExpression) && /[\]}]\s*$/.test(sanitizedExpression);
 
     // If quoted or has operators or is wrapped in literal syntax, use full expression evaluation
     if (isQuotedString || hasOperatorsInside || hasOperatorsOutside || isWrappedInLiteral) {
@@ -389,7 +389,7 @@ export class ExpressionEvaluator {
 
         // Check if the expression is an array or object literal with template interpolation
         // e.g., '[0, ...${.original}, 4]' or '{key: ${.value}}'
-        const isArrayOrObjectLiteral = /^\s*[\[{]/.test(processedExpression.trim()) && /[\]}]\s*$/.test(processedExpression.trim());
+        const isArrayOrObjectLiteral = /^\s*[[{]/.test(processedExpression.trim()) && /[\]}]\s*$/.test(processedExpression.trim());
 
         let templateResult;
         if (isQuotedExpression) {
