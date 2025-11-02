@@ -3,8 +3,12 @@ import { resolvePronoun, isPronounPlaceholder, extractPronounForm, type Gender }
 import { typeCoercionHelpers } from './helpers/type-coercion.js';
 import type { ExpressionContext, ResolverContext } from './types.js';
 
+// VARIABLE_REFERENCE_PATTERN: Extracts variable names for resolution, WITHOUT bracket notation
+// Brackets stay in the expression for JavaScript evaluation
 const VARIABLE_REFERENCE_PATTERN = /(?:\.{1,}[a-zA-Z_$][a-zA-Z0-9_$.]*|[a-zA-Z_$][a-zA-Z0-9_$.]*)(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)*/g;
-const SIMPLE_PATH_PATTERN = /^\.{0,}[a-zA-Z_$][a-zA-Z0-9_$.]*$/;
+
+// SIMPLE_PATH_PATTERN: Matches paths that can be resolved with dot-prop (including literal numeric brackets)
+const SIMPLE_PATH_PATTERN = /^\.{0,}[a-zA-Z_$][a-zA-Z0-9_$.]*(\[\d+\])*$/;
 
 export class ExpressionEvaluator {
   private context: ExpressionContext;
@@ -14,12 +18,28 @@ export class ExpressionEvaluator {
   }
 
   async evaluate(expression: string): Promise<any> {
+    // Check for backtick template literal syntax
+    const isBacktickTemplate = expression.startsWith('`') && expression.endsWith('`');
+    if (isBacktickTemplate) {
+      // Strip backticks and evaluate as template literal
+      const innerExpression = expression.slice(1, -1);
+      return await this.evaluateTemplateLiteral(innerExpression);
+    }
+
     const hasTemplateLiterals = this.hasTemplateLiterals(expression);
     const hasFunctionCalls = this.hasFunctionCalls(expression);
 
+    // Check if it's a JavaScript literal (array, object, string, number, boolean)
+    const isJavaScriptLiteral = this.isJavaScriptLiteral(expression);
+
     // If it's just a plain string with no special syntax, return it as-is
-    if (!hasTemplateLiterals && !hasFunctionCalls) {
+    if (!hasTemplateLiterals && !hasFunctionCalls && !isJavaScriptLiteral) {
       return expression;
+    }
+
+    // If it's a JavaScript literal, evaluate it
+    if (!hasTemplateLiterals && !hasFunctionCalls && isJavaScriptLiteral) {
+      return this.evaluateJavaScriptLiteral(expression);
     }
 
     // Simple template literal (only ${} interpolation, no function calls)
@@ -42,6 +62,34 @@ export class ExpressionEvaluator {
   private hasFunctionCalls(expression: string): boolean {
     // Check if this looks like a function call
     return /[a-zA-Z_$][a-zA-Z0-9_$.]*\s*\(/.test(expression);
+  }
+
+  private isJavaScriptLiteral(expression: string): boolean {
+    // Check if it's an array literal [...]
+    if (expression.trim().startsWith('[') && expression.trim().endsWith(']')) {
+      return true;
+    }
+    // Check if it's an object literal {...}
+    if (expression.trim().startsWith('{') && expression.trim().endsWith('}')) {
+      return true;
+    }
+    // Check if it's a quoted string literal
+    if (/^["'].*["']$/.test(expression.trim())) {
+      return true;
+    }
+    return false;
+  }
+
+  private evaluateJavaScriptLiteral(expression: string): any {
+    try {
+      // Use Function constructor to safely evaluate the literal
+      // This is safer than eval() and allows us to evaluate in a controlled context
+      const func = new Function(`return (${expression})`);
+      return func();
+    } catch (error) {
+      // If evaluation fails, return the expression as-is
+      return expression;
+    }
   }
 
   /**
@@ -160,9 +208,11 @@ export class ExpressionEvaluator {
       ? currentPathSegments.join('.')
       : '(root)';
 
+    // Context path excludes the property being evaluated (e.g., for level1.level2.value, context is ['level1', 'level2'])
+    // Parent segments point to the parent of the container object
     const parentSegments = currentPathSegments.slice(0, -1);
     const parentLevels = leadingDots - 1;
-    const availableLevels = currentPathSegments.length;
+    const availableLevels = currentPathSegments.length;  // We can go up currentPathSegments.length times to reach root
 
     if (availableLevels < parentLevels) {
       throw new Error(
@@ -221,8 +271,11 @@ export class ExpressionEvaluator {
     const hasOperatorsOutside = /\$\{[^}]+\}\s*[+\-*/()[\]<>!=&|?:]/.test(sanitizedExpression) ||
       /[+\-*/()[\]<>!=&|?:]\s*\$\{[^}]+\}/.test(sanitizedExpression);
 
-    // If quoted or has operators, use full expression evaluation
-    if (isQuotedString || hasOperatorsInside || hasOperatorsOutside) {
+    // Also check if expression is wrapped in array/object literal syntax
+    const isWrappedInLiteral = /^\s*[\[{]/.test(sanitizedExpression) && /[\]}]\s*$/.test(sanitizedExpression);
+
+    // If quoted or has operators or is wrapped in literal syntax, use full expression evaluation
+    if (isQuotedString || hasOperatorsInside || hasOperatorsOutside || isWrappedInLiteral) {
       // Use full expression evaluation for JS expressions (pass original expression)
       return this.executeTemplateExpression(expression);
     }
@@ -333,13 +386,23 @@ export class ExpressionEvaluator {
         // Check if the original expression is wrapped in quotes (JavaScript string literal with template)
         // e.g., '"${firstName} ${lastName}"' should be evaluated as a JS string, not wrapped in backticks
         const isQuotedExpression = /^["'].*["']$/.test(expression.trim());
-        
+
+        // Check if the expression is an array or object literal with template interpolation
+        // e.g., '[0, ...${.original}, 4]' or '{key: ${.value}}'
+        const isArrayOrObjectLiteral = /^\s*[\[{]/.test(processedExpression.trim()) && /[\]}]\s*$/.test(processedExpression.trim());
+
         let templateResult;
         if (isQuotedExpression) {
           // The expression is a quoted string with ${} inside
           // Convert it to a template literal by replacing the outer quotes with backticks
           const asTemplateLiteral = safeExpression.replace(/^["']/, '`').replace(/["']$/, '`');
           const func = new Function(...Object.keys(safeVariables), 'return ' + asTemplateLiteral);
+          templateResult = func(...Object.values(safeVariables));
+        } else if (isArrayOrObjectLiteral) {
+          // Evaluate as JavaScript directly (array/object literals should not be wrapped in backticks)
+          // Replace ${varName} with just varName so spread operator works correctly
+          const asJavaScript = safeExpression.replace(/\$\{([^}]+)\}/g, '$1');
+          const func = new Function(...Object.keys(safeVariables), 'return (' + asJavaScript + ')');
           templateResult = func(...Object.values(safeVariables));
         } else {
           // Evaluate as template literal (allows ${} interpolation with JavaScript expressions)

@@ -96,8 +96,10 @@ export class DottedJson implements IDottedJson {
         // Wrap objects (including arrays) in scoped proxy to provide .get(), .set(), .has() methods
         // This makes .get() return values consistent with property access behavior
         if (result !== null && typeof result === 'object') {
+          // For proxy wrapping, use the full path (including the property)
+          // This ensures scoped methods like .set() and .get() work correctly
           const pathArray = actualPath.split('.').filter(Boolean);
-          return createScopedProxy(this, pathArray);
+          return createScopedProxy(this, pathArray, result);
         }
 
         return result;
@@ -327,7 +329,7 @@ export class DottedJson implements IDottedJson {
     // The context path should be the path to the object containing the expression,
     // not including the property being evaluated
     const pathArray = targetPath
-      ? targetPath.split('.').filter(Boolean).slice(0, -1)  // Remove the last segment (property name)
+      ? targetPath.split('.').filter(Boolean).slice(0, -1)
       : [];
 
 
@@ -443,7 +445,7 @@ export class DottedJson implements IDottedJson {
     const currentPathStr = currentSegments.length > 0 ? currentSegments.join('.') : '(root)';
     const parentSegments = currentSegments.slice(0, -1);
     const parentLevels = leadingDots - 1;
-    const availableLevels = parentSegments.length;
+    const availableLevels = currentSegments.length;  // We can go up currentSegments.length times to reach root
 
     if (availableLevels < parentLevels) {
       throw new Error(
@@ -452,7 +454,7 @@ export class DottedJson implements IDottedJson {
     }
 
     const baseSegments = parentLevels > 0
-      ? parentSegments.slice(0, availableLevels - parentLevels)
+      ? parentSegments.slice(0, parentSegments.length - parentLevels)
       : parentSegments;
     const propertyPath = varPath.substring(leadingDots);
     const propertySegments = propertyPath ? propertyPath.split('.') : [];
