@@ -35,7 +35,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          # Note: Do NOT set registry-url for OIDC trusted publishing
+          # OIDC uses id-token permission, not NODE_AUTH_TOKEN
 
       - name: Create Release Pull Request or Publish
         id: changesets
@@ -49,6 +50,7 @@ jobs:
           publish: bun run publish
           commit: "chore: version packages"
           title: "chore: version packages"
+          createGithubReleases: true  # Create git tags and GitHub releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # NPM_TOKEN not needed - using OIDC trusted publishing instead
