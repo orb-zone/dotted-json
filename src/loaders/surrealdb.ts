@@ -17,6 +17,7 @@
 import type { VariantContext } from '../types.js';
 import type { StorageProvider, SaveOptions, DocumentInfo, ListFilter } from '../types/storage.js';
 import { scoreVariantMatch } from '../variant-resolver.js';
+import { logWarn } from '../logger.js';
 
 // SurrealDB types (will be properly typed if surrealdb is installed)
 type Surreal = any;
@@ -307,7 +308,7 @@ export class SurrealDBLoader implements StorageProvider {
 
         // Log retry attempt (if not last attempt)
         if (attempt < maxAttempts - 1) {
-          console.warn(
+          logWarn(
             `[SurrealDBLoader] Connection failed (attempt ${attempt + 1}/${maxAttempts}): ${error.message}. Retrying in ${delay}ms...`
           );
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -880,7 +881,7 @@ export class SurrealDBLoader implements StorageProvider {
           await this.db.kill(queryUUID);
         } catch (error) {
           // Ignore errors when killing queries
-          console.warn('Error killing LIVE query:', error);
+          logWarn('Error killing LIVE query:', { error: String(error) });
         }
       }
       this.liveQueries.clear();

@@ -7,6 +7,8 @@
  * @module @orb-zone/dotted-json/plugins/surrealdb/function-discovery
  */
 
+import { logWarn, logError } from '../../logger.js';
+
 /**
  * Function parameter metadata
  */
@@ -118,14 +120,14 @@ export async function discoverFunctions(db: any): Promise<FunctionMetadata[]> {
         const metadata = parseFunctionDefinition(fnName, fnDef as string);
         functions.push(metadata);
       } catch (error) {
-        console.warn(`[surrealdb] Failed to parse function ${fnName}:`, error);
+        logWarn(`[surrealdb] Failed to parse function ${fnName}:`, { error: String(error) });
         // Continue with other functions
       }
     }
 
     return functions;
   } catch (error) {
-    console.error('[surrealdb] Failed to discover functions:', error);
+    logError('[surrealdb] Failed to discover functions:', { error: String(error) });
     return [];
   }
 }
@@ -328,7 +330,7 @@ export function parseFunctionsFromSchema(
         functions.push(metadata);
       }
     } catch (error) {
-      console.warn('[surrealdb] Failed to parse function from schema:', error);
+      logWarn('[surrealdb] Failed to parse function from schema:', { error: String(error) });
     }
   }
 
