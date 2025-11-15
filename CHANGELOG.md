@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.5
+
+### Patch Changes
+
+- 96c822f: Configure npm OIDC trusted publishing with provenance attestations. Updates Changesets config to enable provenance and documents npm trusted publisher requirements in deployment workflow.
+
 ## 1.4.4
 
 ### Patch Changes
