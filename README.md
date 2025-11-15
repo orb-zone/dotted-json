@@ -70,7 +70,7 @@ await data.get('.profile');   // Automatic caching
 
 ```bash
 # Using bun (recommended)
-bun add @orb-zone/dotted-json
+bunx jsr add @orb-zone/dotted-json
 
 # Using Deno
 deno add jsr:@orb-zone/dotted-json
