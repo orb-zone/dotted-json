@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.3
+
+### Patch Changes
+
+- 3878e8c: Fix npm publishing by adding publish script for Changesets Action
+
 ## 1.4.2
 
 ### Patch Changes
