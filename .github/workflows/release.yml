@@ -1,4 +1,15 @@
-name: Release
+name: Release (DEPRECATED - Use changesets-release.yml)
+
+# ⚠️ DEPRECATED WORKFLOW
+# This workflow is kept for historical reference only.
+# Active workflow: .github/workflows/changesets-release.yml
+#
+# For releases, use the Changesets workflow which:
+# - Automatically versions packages
+# - Publishes to both npm and JSR with OIDC
+# - Creates GitHub releases
+#
+# See .specify/memory/deployment-workflow.md for details
 
 on:
   push:
