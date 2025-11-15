@@ -41,6 +41,9 @@ jobs:
       - name: Upgrade npm to v11+ for OIDC support
         run: npm install -g npm@latest
 
+      - name: Build package
+        run: bun run build
+
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
