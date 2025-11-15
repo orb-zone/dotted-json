@@ -25,29 +25,38 @@ Feature Branch → PR (with changeset) → main → Auto "Version Packages" PR �
 
 ## Key Decisions
 
-### 1. JSR-First Publishing Strategy
+### 1. Dual Publishing Strategy (JSR + npm)
 
-**Decision**: Publish to JSR.io, defer NPM until v1.0
+**Decision**: Publish to both JSR.io and npm using OIDC trusted publishing
 
 **Rationale**:
-- JSR is designed for TypeScript-first packages
-- We publish source TypeScript (not transpiled dist)
-- OIDC authentication = zero secrets to manage
-- Better alignment with modern JS ecosystem
+- JSR is designed for TypeScript-first packages (source TypeScript publishing)
+- npm provides wider ecosystem compatibility
+- Both use OIDC authentication = zero secrets to manage
+- Changesets handles both registries automatically
 
-**When NPM?**: Re-enable after v1.0 when API is stable
+**Authentication**: Both registries use GitHub OIDC (no manual tokens needed)
 
-### 2. OIDC Authentication for JSR
+### 2. OIDC Authentication (JSR + npm)
 
-**Decision**: Use GitHub OIDC instead of manual tokens
+**Decision**: Use GitHub OIDC instead of manual tokens for both registries
 
 **Rationale**:
 - No secrets to rotate or leak
-- Automatic when package linked to GitHub repo
+- Automatic when packages linked to GitHub repo
 - Simpler workflow maintenance
 - Industry best practice (2024+)
 
-**Requirement**: Package must be linked on JSR.io to GitHub repository
+**Requirements**:
+- **JSR**: Package must be linked on JSR.io to GitHub repository
+- **npm**: Configure trusted publisher at npmjs.com/package/@orb-zone/dotted-json/access
+  - Provider: GitHub Actions
+  - Organization: `orb-zone`
+  - Repository: `dotted-json`
+  - Workflow: `changesets-release.yml` (⚠️ CRITICAL: Must match active workflow, not release.yml)
+  - Environment: (leave empty)
+- **npm CLI**: Requires v11.5.1+ for OIDC support (automatic in GitHub Actions)
+- **Changesets**: Set `"provenance": true` in `.changeset/config.json` (✅ configured)
 
 ### 3. PR-Only Workflow with Branch Protection
 
@@ -122,16 +131,18 @@ gh pr create --base main --head 004-feature-name
 #    - Consumes changesets
 
 # 6. Review & merge "Version Packages" PR
-#    - Triggers JSR publish
-#    - Creates GitHub release
-#    - Tags commit automatically
+#    - Triggers npm publish (via changesets with OIDC)
+#    - Triggers JSR publish (separate workflow)
+#    - Creates git tag automatically
 ```
 
 **Implementation details**: See `.changeset/WORKFLOW.md` for complete guide.
 
 ---
 
-## JSR Publishing Notes
+## Publishing Notes
+
+### JSR Publishing
 
 **One-time setup**:
 - Link package `@orb-zone/dotted-json` on JSR.io to GitHub repo
@@ -140,6 +151,21 @@ gh pr create --base main --head 004-feature-name
 **Configuration**: `jsr.json` defines package metadata and publish settings
 
 **Key insight**: JSR publishes TypeScript source, not transpiled JavaScript. This aligns with our TypeScript-first philosophy.
+
+### npm Publishing
+
+**One-time setup**:
+- Configure trusted publisher at https://www.npmjs.com/package/@orb-zone/dotted-json/access
+  - Provider: GitHub Actions
+  - Organization: `orb-zone`
+  - Repository: `dotted-json`
+  - Workflow: `changesets-release.yml`
+  - Environment: (leave empty)
+- Enable `"provenance": true` in `.changeset/config.json` (already configured)
+
+**Configuration**: `package.json` defines npm package metadata and publish settings
+
+**Key insight**: npm publishes transpiled JavaScript from `dist/` directory with type definitions.
 
 ---
 
@@ -151,9 +177,10 @@ gh pr create --base main --head 004-feature-name
 2. **Commit changeset with feature code**: Changeset lives in `.changeset/*.md`
 3. **Merge PR to main**: CI validates, changesets detected
 4. **Review "Version Packages" PR**: Auto-created by Changesets action
-5. **Merge "Version Packages" PR**: Triggers JSR publish automatically
+5. **Merge "Version Packages" PR**: Triggers npm + JSR publish automatically
 
 **Key Insight**: Version bumps happen via PR (reviewable), not direct commits.
+**Active Workflow**: `changesets-release.yml` handles both npm and JSR publishing.
 
 ### Handling CI Failures
 
@@ -175,7 +202,7 @@ gh pr create --base main --head 004-feature-name
 ## Strategic Roadmap
 
 ### v1.0 Milestone
-- [ ] Re-enable NPM publishing alongside JSR (update changesets workflow)
+- [x] Enable npm publishing alongside JSR (✅ configured with OIDC)
 - [x] Automated changelog generation (✅ via Changesets)
 - [x] Automated versioning (✅ via Changesets)
 - [ ] Bundle size monitoring in CI
@@ -204,5 +231,5 @@ gh pr create --base main --head 004-feature-name
 
 ---
 
-**Last Updated**: 2025-10-17 (v0.12.0 - Changesets v1 refactor, JSR version sync)
+**Last Updated**: 2025-11-15 (v1.4.4 - npm OIDC trusted publishing enabled)
 **Philosophy**: YAML configs are truth, this doc explains "why"

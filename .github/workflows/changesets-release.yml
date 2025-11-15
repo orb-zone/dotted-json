@@ -37,12 +37,16 @@ jobs:
         with:
           # This expects a script named "changeset:version" to bump versions
           version: bun run changeset:version
-          # This expects a script named "publish" to publish packages
+          # This expects a script named "publish" to publish packages to npm
+          # Uses OIDC trusted publishing (no NPM_TOKEN needed)
+          # Requires: npm trusted publisher configured with workflow "changesets-release.yml"
           publish: bun run publish
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # NPM_TOKEN not needed - using OIDC trusted publishing instead
-          # Note: When this PR is merged, the publish-jsr.yml workflow will trigger
-          # automatically to publish the new version to JSR using OIDC
+          # Requires trusted publisher configured at:
+          # https://www.npmjs.com/package/@orb-zone/dotted-json/access
+          #
+          # JSR publishing handled separately by publish-jsr.yml workflow
