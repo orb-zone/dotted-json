@@ -64,6 +64,7 @@
     "changeset:add": "changeset add",
     "changeset:version": "changeset version && bun tools/sync-jsr-version.ts && bun install --frozen-lockfile",
     "changeset:publish": "bun run build && changeset publish",
+    "publish": "changeset publish",
     "release": "bun run changeset:version && bun run changeset:publish",
     "release:jsr": "bun run build && bunx jsr publish --allow-dirty"
   },
