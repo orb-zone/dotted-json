@@ -2,4 +2,7 @@
 "@orb-zone/dotted-json": patch
 ---
 
-Add Node.js setup to ensure npm CLI v11.5.1+ is available for OIDC trusted publishing. This fixes the authentication error by providing the required npm CLI version for provenance-based publishing.
+Fix npm OIDC trusted publishing and restore automatic git tagging:
+- Add Node.js setup to ensure npm CLI v11.5.1+ is available
+- Remove registry-url from setup-node to allow pure OIDC authentication
+- Enable createGithubReleases to automatically create git tags and releases
