@@ -10,6 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
+  id-token: write  # Required for npm OIDC trusted publishing
 
 jobs:
   release:
@@ -30,15 +31,18 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Create Release Pull Request
+      - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
           # This expects a script named "changeset:version" to bump versions
           version: bun run changeset:version
+          # This expects a script named "publish" to publish packages
+          publish: bun run publish
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN not needed - using OIDC trusted publishing instead
           # Note: When this PR is merged, the publish-jsr.yml workflow will trigger
           # automatically to publish the new version to JSR using OIDC
