@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.7
+
+### Patch Changes
+
+- 78de9fb: Complete npm OIDC trusted publishing fix and restore git tagging:
+  - Remove registry-url from setup-node to prevent NODE_AUTH_TOKEN interference with OIDC
+  - Enable createGithubReleases to automatically create git tags and GitHub releases
+
 ## 1.4.6
 
 ### Patch Changes
