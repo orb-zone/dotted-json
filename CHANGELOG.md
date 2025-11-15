@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.4
+
+### Patch Changes
+
+- af0375f: Enable npm publishing in Changesets workflow by adding publish parameter
+
 ## 1.4.3
 
 ### Patch Changes
