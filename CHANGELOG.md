@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.9
+
+### Patch Changes
+
+- a930ea3: Fix CLI binaries failing with syntax error when installed globally via npm. Removed duplicate shebang lines that were causing Node.js to fail parsing the built CLI files.
+- 8d073ea: Fix npm publish workflow by adding explicit build step before Changesets publish action.
+
+  Previously, npm would fail during publish because it validates that bin files exist before running the `prepublishOnly` script. The workflow now explicitly runs `bun run build` before the Changesets action attempts to publish, ensuring all build artifacts (including `dist/cli/translate.js` and `dist/cli/surql-to-ts.js`) are present when npm performs its validation checks.
+
+  This complements the recent OIDC authentication fixes and ensures the complete publish workflow can succeed.
+
 ## 1.4.8
 
 ### Patch Changes
