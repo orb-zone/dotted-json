@@ -1,4 +1,3 @@
-#!/usr/bin/env bun
 /**
  * surql-to-ts CLI
  *
